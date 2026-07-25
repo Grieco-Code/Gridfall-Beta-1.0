@@ -703,9 +703,9 @@
         // drone shouldn't feel bad; Cyber/Hack stays its best (weak) counter.
         affinities: { cyber: WEAK, psionic: HARD_RESIST }
       },
-      // Grunt (was "Tiangong Pvt.", 2026-07-25) — organic bruiser; Suppressing Fire applies Weaken.
-      tiangongPvt: {
-        typeName: "Grunt", role: "Vossmark trooper",
+      // Vossmark Grunt (was "Tiangong Pvt.", 2026-07-25) — organic bruiser; Suppressing Fire applies Weaken.
+      vossmarkGrunt: {
+        typeName: "Vossmark Grunt", role: "trooper",
         nature: "organic", tier: "standard",
         baseStats: { hp: 60, en: 0, attack: 16, defense: 8, speed: 10 },
         skills: ["attack", "suppressingFire"],
@@ -721,10 +721,10 @@
         skills: ["attack", "rocketBarrage"],
         affinities: { kinetic: RESIST, shock: WEAK, cyber: 2.0, psionic: HARD_RESIST }  // 2.0 = doubly weak to hacking
       },
-      // Officer (was "Tiangong Lt.", originally "Squad Leader") — mini-boss:
-      // Command Strike + Mark Target (Sunder) + heal.
-      tiangongLt: {
-        typeName: "Officer", role: "Vossmark field officer",
+      // Vossmark Officer (was "Tiangong Lt.", originally "Squad Leader") —
+      // mini-boss: Command Strike + Mark Target (Sunder) + heal.
+      vossmarkOfficer: {
+        typeName: "Vossmark Officer", role: "field officer",
         nature: "organic", tier: "elite",
         baseStats: { hp: 100, en: 0, attack: 16, defense: 11, speed: 12 },
         skills: ["attack", "commandStrike", "markTarget", "repairProtocol"],
@@ -846,7 +846,7 @@
 
       // ---------- KHARON'S REACH (Phase H3 prologue, §5.2) ----------
       // Quota Enforcer — organic fodder; rank-and-file Vossmark enforcers.
-      colonyGuard: {
+      quotaEnforcer: {
         typeName: "Quota Enforcer", role: "Kharon's Reach enforcer",
         nature: "organic", tier: "fodder",
         baseStats: { hp: 32, en: 0, attack: 10, defense: 5, speed: 9 },
@@ -870,7 +870,7 @@
       // Overseer Voraxx — the colony's chief overseer, hand-tuned finale for a
       // level-1/2 DUO (not derived from Sector 1's depth/level-scaling curve,
       // same "unique fight, tuned directly" treatment as the Warden).
-      krell: {
+      voraxx: {
         typeName: "Overseer Voraxx", role: "Kharon's Reach chief overseer",
         nature: "organic", tier: "boss",
         baseStats: { hp: 140, en: 0, attack: 20, defense: 10, speed: 10 },
@@ -1080,8 +1080,8 @@
     // Re-add the talos* keys when a Talos-territory dungeon exists.
     const ENEMY_POOLS = {
       fodder:   ["spiderDrone", "hullRoach"],
-      standard: ["arcSentinel", "tiangongPvt"],
-      elite:    ["securityMech", "tiangongLt"]
+      standard: ["arcSentinel", "vossmarkGrunt"],
+      elite:    ["securityMech", "vossmarkOfficer"]
     };
 
     // UNKNOWN NODE OUTCOME TABLE (§5.4, Dungeons 4+): a `type:"unknown"` node's
@@ -1390,7 +1390,7 @@
         "................",
         "................"
       ],
-      // Humanoid grunt — Grunt, Quota Enforcer: bare-headed fodder/
+      // Humanoid grunt — Vossmark Grunt, Quota Enforcer: bare-headed fodder/
       // standard organic soldier, rifle-ish weapon hand, same visual recipe
       // as the hero humanoid shapes (outline + visible face + weapon color).
       humanoidGrunt: [
@@ -1419,7 +1419,7 @@
       // stun-baton (matches the Quota Enforcer's Baton Strike), right arm down in
       // a gauntlet. Modular accent zones for later-tier reskins: H = pauldron /
       // heavy-plate accent, V = glow accent (baton tip / a visor glow) — recolor
-      // for riot / heavy variants. Used by Quota Enforcer + Grunt.
+      // for riot / heavy variants. Used by Quota Enforcer + Vossmark Grunt.
       // Legend: O outline | P helmet G helmet-rim/gorget | S skin K skin-lt D brow/shadow
       //   W eye-white/teeth E eye-dark | C collar/belt | H pauldron B chest-armor
       //   A arm/plate-shadow X gauntlet | M baton-shaft V baton-glow
@@ -1458,7 +1458,7 @@
         "..OFFFO......OFFFO......",
         "........................"
       ],
-      // Humanoid officer — Officer, Talos Vanguard, Overseer Voraxx
+      // Humanoid officer — Vossmark Officer, Talos Vanguard, Overseer Voraxx
       // (boss — same shape, bigger via tier-based scale, own palette): a
       // bigger, more ornate humanoid for elite/boss-tier organic enemies.
       humanoidOfficer: [
@@ -1595,7 +1595,7 @@
       // Legend: O outline | P cap V gold-brim | S skin D jowl-shadow E eye M mustache
       //   C collar | B coat A coat-shadow/arm | R red sash | W whip-grip N whip-lash
       //   L coat-hem T pants F boot
-      krellFat: [
+      voraxxFat: [
         "...............NNN....",
         "......OPPPPPPPPO..N.N.",
         "......OPPPPPPPPO...N.N",
@@ -1718,9 +1718,9 @@
       arcSentinel:  { shape: "sentryBot",        palette: {
         O: "#14140a", V: "#fff27a", E: "#ffcc33", B: "#55524a", A: "#6b6a5e"
       } },
-      // Grunt — rank-and-file enforcer: drab khaki armor + olive helmet,
+      // Vossmark Grunt — rank-and-file enforcer: drab khaki armor + olive helmet,
       // faction-green stun-baton glow. The differentiated guardTrooper (§5.1).
-      tiangongPvt:  { shape: "guardTrooper",     palette: {
+      vossmarkGrunt:  { shape: "guardTrooper",     palette: {
         O: "#12140f", P: "#4d5140", G: "#6b7052",                 // helmet shell / rim + gorget
         S: "#c9a071", K: "#e0b98a", D: "#7a5f38", W: "#eef0ea", E: "#141414",  // skin / brow / teeth / eyes
         C: "#24241a", H: "#5a5f45",                               // collar+belt / pauldron accent
@@ -1733,8 +1733,8 @@
         O: "#0e1012", H: "#454b52", V: "#ffcc33", C: "#33383d", A: "#4a5158",
         B: "#5a6169", W: "#2b2f33", G: "#4a5158", K: "#b23a2e", L: "#454b52", F: "#262a2d"
       } },
-      // Officer — field officer: richer khaki + a red rank sash.
-      tiangongLt:   { shape: "humanoidOfficer",  palette: {
+      // Vossmark Officer — field officer: richer khaki + a red rank sash.
+      vossmarkOfficer:   { shape: "humanoidOfficer",  palette: {
         O: "#14140f", H: "#3f3f30", V: "#8a8f6a", S: "#c9a071", C: "#2e2e22",
         A: "#454533", B: "#565640", W: "#c9ccd1", G: "#c9a071", K: "#6b2b22", L: "#3d3d2c", F: "#1e1e15"
       } },
@@ -1765,8 +1765,8 @@
       // ---------- KHARON'S REACH (§5.2a) ----------
       // Quota Enforcer — rough militia enforcer: dull worn brown armor + tan
       // helmet, dull amber baton glow (scavenged colony gear, no faction color).
-      // Same guardTrooper shape as the Grunt, recolored (§5.2a).
-      colonyGuard:  { shape: "guardTrooper",     palette: {
+      // Same guardTrooper shape as the Vossmark Grunt, recolored (§5.2a).
+      quotaEnforcer:  { shape: "guardTrooper",     palette: {
         O: "#100d0a", P: "#5c4a34", G: "#7a6547",                 // helmet shell / rim + gorget
         S: "#c9a071", K: "#e0b98a", D: "#7a5330", W: "#c9c6be", E: "#141414",  // skin / brow / teeth / eyes
         C: "#2e2318", H: "#4a3c2a",                               // collar+belt / pauldron accent
@@ -1776,8 +1776,8 @@
       } },
       // Overseer Voraxx — chief overseer, boss scale: a fat, jowly tyrant in a
       // brown/gold officer coat with a deep-red sash, cracking a leather whip.
-      // Bespoke krellFat shape (§SPRITE_SHAPES).
-      krell:        { shape: "krellFat",         palette: {
+      // Bespoke voraxxFat shape (§SPRITE_SHAPES).
+      voraxx:        { shape: "voraxxFat",         palette: {
         O: "#0c0a08", P: "#2a2318", V: "#ffcf5c",                 // cap / gold brim
         S: "#d8a878", D: "#b07850", E: "#141414", M: "#3a2c1c",   // ruddy skin / jowls / beady eyes / mustache
         C: "#4a3520",                                             // collar

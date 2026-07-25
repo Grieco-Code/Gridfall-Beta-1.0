@@ -997,7 +997,7 @@
     // 24x32 HERO grid (e.g. guardTrooper = the Merc reskinned as a guard); at
     // the fodder/standard tier scale of 4 that would render huge, so pin them to
     // the hero battle scale so a humanoid guard reads the same size as a hero.
-    const SHAPE_SCALE_OVERRIDE = { guardTrooper: HERO_BATTLE_SCALE, krellFat: 5 };
+    const SHAPE_SCALE_OVERRIDE = { guardTrooper: HERO_BATTLE_SCALE, voraxxFat: 5 };
     const SPRITE_FLASH_MS = 150;        // hit-flash duration
     const spriteFlashUntil = {};        // combatant id -> timestamp, drives the flash
     let spriteAnimFrame = 0;            // 0 or 1, swapped on the idle-bob timer

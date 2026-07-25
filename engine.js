@@ -533,8 +533,8 @@
     // it's resolved by resolveRecruitNode() instead.
     function rollPrologueEncounter(node) {
       if (node.id === "p1") return [{ key: "spiderDrone", level: 1 }];
-      if (node.id === "p2") return [{ key: "colonyGuard", level: 1 }, { key: "colonyGuard", level: 1 }];
-      if (node.id === "p4") return [{ key: "krell", level: 1 }, { key: "riotEnforcer", level: 1 }];
+      if (node.id === "p2") return [{ key: "quotaEnforcer", level: 1 }, { key: "quotaEnforcer", level: 1 }];
+      if (node.id === "p4") return [{ key: "voraxx", level: 1 }, { key: "riotEnforcer", level: 1 }];
       return [];
     }
 
