@@ -971,21 +971,21 @@
       // Family affinities: weak Thermal, resist Kinetic/Psionic (see the
       // SKILLS comment above this roster for the full design rationale).
       poltergeist: {
-        typeName: "Poltergeist", role: "restless Helios echo",
+        typeName: "Void Poltergeist", role: "restless Helios echo",
         nature: "void", tier: "fodder",
         baseStats: { hp: 20, en: 0, attack: 12, defense: 3, speed: 15 },
         skills: ["restlessGrasp"],
         affinities: { thermal: WEAK, kinetic: RESIST }
       },
       shade: {
-        typeName: "Shade", role: "Helios wraith",
+        typeName: "Void Shade", role: "Helios wraith",
         nature: "void", tier: "standard",
         baseStats: { hp: 48, en: 0, attack: 15, defense: 7, speed: 13 },
         skills: ["umbralCut", "witherTouch"],
         affinities: { thermal: WEAK, kinetic: RESIST }
       },
       terror: {
-        typeName: "Terror", role: "Helios dread-caste",
+        typeName: "Void Terror", role: "Helios dread-caste",
         nature: "void", tier: "standard",
         baseStats: { hp: 50, en: 0, attack: 13, defense: 7, speed: 10 },
         skills: ["creepingDread", "hollowScream"],
@@ -1002,14 +1002,14 @@
         affinities: { thermal: 2.0, kinetic: RESIST }
       },
       demon: {
-        typeName: "Demon", role: "Helios burning horror",
+        typeName: "Void Demon", role: "Helios burning horror",
         nature: "void", tier: "elite",
         baseStats: { hp: 105, en: 0, attack: 17, defense: 12, speed: 9 },
         skills: ["clawRake", "hellbrand"],
         affinities: { thermal: WEAK, kinetic: RESIST, corrosive: RESIST }
       },
       devil: {
-        typeName: "Devil", role: "Helios tormentor caste",
+        typeName: "Void Devil", role: "Helios tormentor caste",
         nature: "void", tier: "elite",
         baseStats: { hp: 100, en: 0, attack: 15, defense: 12, speed: 11 },
         skills: ["tormentLash", "damnationDecree"],
@@ -2162,11 +2162,18 @@
           // resolveNodeVictory() unlock, not the dungeon's terminal clear
           // (engine.js renderEndbar's isBossClear now checks connectsTo.
           // length === 0). No rest node between the two fights — deliberate. ---
+          // Guards added 2026-07-25: two Void Shade escorts from the START of
+          // the fight (not a mid-fight reinforceWave — that's the Sun God's
+          // rhythm below). Gives the double boss two distinct shapes: the
+          // gatekeeper arrives with an entourage, the thing at the center
+          // doesn't need one until it's already hurting.
           bossSoul: { id: "bossSoul", type: "boss", depth: 6, connectsTo: ["bossSun"],
-                      bossEncounter: [{ key: "voidSoulEater", level: 7 }],
+                      bossEncounter: [
+                        { key: "voidSoulEater", level: 7 }, { key: "shade", level: 7 }, { key: "shade", level: 7 }
+                      ],
                       enterText: "The atrium floor isn't floor anymore, just an absence with a shape, " +
                         "and the shape is hungry. It has been waiting here longer than the station has " +
-                        "had a name." },
+                        "had a name. It hasn't been waiting alone." },
           bossSun:  { id: "bossSun", type: "boss", depth: 7, connectsTo: [],
                       bossEncounter: [{ key: "sunGod", level: 8 }],
                       enterText: "The dark clears in one instant, not gradually, the way night breaks " +
