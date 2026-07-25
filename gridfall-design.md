@@ -1348,6 +1348,41 @@ comp-viability tuning pass above; the deferred cross-dungeon damage-type rebalan
 full "map background changes too" ask; worth revisiting if it matters enough to justify the extra
 rendering work).
 
+**2026-07-25, SAME-DAY playtest fix — the map was actually badly broken, found by a real playthrough,
+not sim.** User reported "issues with the nodes" after playing; investigation (computing every D6
+node's actual on-screen `{x,y}` via the real `computeMapLayoutRadial`, not guessing) found several
+DIFFERENT nodes rendering at the exact same pixel — e.g. `s1`/`s2`, `u1`/`u2` were literally
+0.0px apart, stacked on top of each other. **Root cause:** the radial "dive to center" layout was
+designed and proven at D5's scale (10 nodes, 7 depths, 75° between rim depth-bands) — the original
+single `dungeon6` had 22 nodes across 18 depths, forcing the fixed 300° sweep down to a mere 20°
+between depth-bands. At that density, a 2-sibling branch's wedge offset could exactly cancel the
+angular step to the next depth, landing two unrelated nodes on identical coordinates.
+
+**Two fixes, one architectural, one defensive:**
+1. **Architectural (the real fix): split into `dungeon6` (zones 1-5, 17 nodes, standard ROW layout —
+   the same layout Sector 1/D4 already prove works fine at this scale, with no fixed-angle budget to
+   violate) + `dungeon6b` (zone 6, "the Core," 4 nodes, radial "dive to center" — the tight, climactic
+   shape radial was always actually good at, which is all D5 ever needed too).** `bossPhthora` is now
+   `dungeon6`'s own terminal boss; clearing him triggers a new `showDungeon6Epilogue` "go deeper" beat
+   (Phthora's fall, finding the passage down) into `dungeon6b`, exactly the "click go deeper to reach
+   the final map section" shape the user asked for. The old Chthon/Breach/ending-choice epilogue is
+   renamed `showDungeon6bEpilogue`, now dispatched off `dungeon6b`'s own terminal clear. `restD2` (the
+   old rest between Phthora and the Core) was dropped — the dungeon-boundary transition already fully
+   heals via `startDungeon()`, same as every other dungeon handoff, making the extra partial-rest
+   redundant.
+2. **Defensive (`computeMapLayoutRadial`, ui.js): the sibling branch wedge now auto-shrinks** to
+   guarantee it can never eat more than a safe margin out of the gap between adjacent rim depths,
+   regardless of how many depth-bands a future radial dungeon packs into the sweep. D5's own proven
+   5-depth shape is far under the clamp threshold and renders byte-for-byte identically; this only
+   activates for denser graphs, so it's a pure safety net, not a visual change to anything shipped.
+
+**Re-verified:** both new dungeons render with zero overlaps (computed via the real `ui.js` functions,
+not just re-derived math); the full `dungeon5 -> dungeon6 -> dungeon6b` chain plays end-to-end via real
+control flow; a statistical re-run shows the same balance shape as before the split (one squad's win
+rate ticked up slightly, 36%→46.5%, from the boundary's full-heal replacing the old partial rest —
+expected, not a regression). The pre-existing balance gaps for weaker squads are unchanged and remain
+explicitly deferred to the later battle-balance roadmap phase, same as before this fix.
+
 ---
 
 ## 6. Screens & state management (the "glue")

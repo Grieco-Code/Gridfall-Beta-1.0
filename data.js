@@ -2396,12 +2396,35 @@
       // Vossmark+Talos pools in the same encounters" intent, locked since
       // the original D4/5/6 differentiation pass, means real new content is
       // concentrated in Sexias, Phthora, and the Chthon double boss.
+      // Split into dungeon6 (zones 1-5) + dungeon6b (zone 6, the Core)
+      // 2026-07-25 after a real playtest found the map badly broken —
+      // several DIFFERENT nodes rendered at the exact same pixel position.
+      // Root cause: the radial "dive to center" layout (computeMapLayoutRadial,
+      // ui.js) was designed and proven at D5's scale (10 nodes, 7 depths) —
+      // stretched across the original single dungeon6's 22 nodes/18 depths,
+      // the fixed 300° sweep had to cram so many depth-bands together that a
+      // sibling branch's wedge offset could exactly cancel the angular step
+      // between depths (confirmed by literally computing every node's
+      // {x,y} and checking pairwise distance — several pairs came out at
+      // 0.0px apart). A wedge-auto-shrink safety fix was added to
+      // computeMapLayoutRadial regardless (see its comment in ui.js) — real
+      // improvement, but the ROOT fix is architectural: radial layout is
+      // only actually a good fit for a SHORT, tightly-converging sequence
+      // (which is all D5 ever was, and all the Core alone needs to be), not
+      // a long branching 17-node zone. So: zones 1-5 now use the STANDARD
+      // row layout (no `mapShape` override — same as Sector 1/D4, already
+      // proven at this scale, zero angular-budget constraint to violate),
+      // and the radial "dive to center" is reserved for the Core alone
+      // (dungeon6b, 4 nodes — exactly the tight scale it's good at). This
+      // also gave the user's own suggested fix a home: clearing Phthora now
+      // shows a real "go deeper" transition into a genuinely separate map,
+      // instead of one 22-node graph trying to be both a sprawling crawl
+      // and a climactic descent at once.
       dungeon6: {
         start: "s1",
         title: "THE CRADLE",
         region: "burntcity",   // dungeon-wide fallback (map screen); battlefield uses per-node region
-        mapShape: "radial",
-        nextDungeonKey: null,   // this IS the finale — no Dungeon 7
+        nextDungeonKey: "dungeon6b",   // the Core — a short, separate map (see comment above)
         foggy: true,
         pools: {
           // Zones 1-3: both Vossmark's expedition and what's left of Talos
@@ -2421,13 +2444,6 @@
             fodder:   ["talosWraith", "spliceHusk"],
             standard: ["vossmarkGrunt", "talosPhantom"],
             elite:    ["vossmarkOfficer", "talosVanguard", "chimeraSpecimen", "securityMech"]
-          },
-          // The Core (zone 6): human factions are behind you now, this is
-          // pure Void-touched territory — reuses D5's roster wholesale.
-          voidTouched: {
-            fodder:   ["poltergeist"],
-            standard: ["shade", "terror"],
-            elite:    ["voidHorror", "chimeraSpecimen"]
           }
         },
         nodes: {
@@ -2533,26 +2549,56 @@
           restD: { id: "restD", type: "rest", depth: 12, region: "descent", connectsTo: ["bossPhthora"] },
           // Phthora, the Fleshspring (§5.4c) — Talos's own leader, racing
           // the crew here, attempting to complete the lineage's founding
-          // transcendence at the source. Level is a first-pass placeholder,
-          // to be corrected against the real chain-arrival level via the
-          // established full-chain sim methodology before this is
-          // considered locked (see the §5.4c build-order — balance tuning
-          // is its own later roadmap phase, not skipped, just not final yet).
+          // transcendence at the source. NOW dungeon6's own terminal boss
+          // (connectsTo: [] — see the split comment above the dungeon6
+          // object): clearing him triggers a real "go deeper" transition
+          // into dungeon6b (the Core), exactly the same pattern every other
+          // dungeon boundary already uses (full heal via startDungeon(),
+          // no need for a redundant rest node after this). Level is a
+          // first-pass placeholder, sim-tuned once already (2026-07-25
+          // baseline pass) but not the final locked number — deep balance
+          // tuning is its own later roadmap phase.
           bossPhthora: { id: "bossPhthora", type: "boss", depth: 13, region: "descent",
-                         connectsTo: ["restD2"],
+                         connectsTo: [],
                          bossEncounter: [{ key: "phthora", level: 4 }],
                          enterText: "The tunnel opens into a cavern lit by something that used to be " +
                            "bioluminescence and is now just wrong. Phthora is already mid-ritual, and " +
-                           "whatever he's reaching for, he got here first." },
-          restD2: { id: "restD2", type: "rest", depth: 14, region: "descent", connectsTo: ["core1"] },
+                           "whatever he's reaching for, he got here first." }
+        }
+      },
 
-          // --- Zone 5: the Core — the Loom ---
-          core1: { id: "core1", type: "combat", depth: 15, levelDepth: 8, poolBranch: "voidTouched", region: "core",
+      // Dungeon 6b — the Core (§5.4c, split from the original dungeon6 —
+      // see the comment above that object). A short, tight, climactic
+      // sequence — exactly the shape the radial "dive to center" layout is
+      // actually good at (this is the shape D5's whole dungeon had). Starts
+      // fresh depths 1-4, independent of dungeon6's own numbering — `depth`
+      // here only drives THIS dungeon's own layout, never shared across a
+      // dungeon boundary. Party XP/level and roster carry over normally
+      // (same as every other dungeon-to-dungeon handoff); startDungeon()
+      // fully heals on entry, same as every prior boundary.
+      dungeon6b: {
+        start: "core1",
+        title: "THE CRADLE: THE CORE",
+        region: "core",
+        mapShape: "radial",
+        nextDungeonKey: null,   // this IS the finale — no Dungeon 7
+        foggy: true,
+        pools: {
+          // Human factions are behind you now — pure Void-touched
+          // territory, reuses D5's roster wholesale.
+          voidTouched: {
+            fodder:   ["poltergeist"],
+            standard: ["shade", "terror"],
+            elite:    ["voidHorror", "chimeraSpecimen"]
+          }
+        },
+        nodes: {
+          core1: { id: "core1", type: "combat", depth: 1, levelDepth: 8, poolBranch: "voidTouched",
                    connectsTo: ["restCore"],
                    enterText: "Human territory ends here, whatever's left of it. The walls stop " +
                      "pretending to be rock and start looking like something that was poured, once, " +
                      "by hands that weren't hands. The dark answers back." },
-          restCore: { id: "restCore", type: "rest", depth: 16, region: "core", connectsTo: ["bossCagedGod"] },
+          restCore: { id: "restCore", type: "rest", depth: 2, connectsTo: ["bossCagedGod"] },
           // The double-boss finale (§5.4c) — bossCagedGod connects onward to
           // bossChthon instead of connectsTo: [], same generalized pattern
           // D5's double boss already proved out (renderEndbar's isBossClear
@@ -2560,15 +2606,15 @@
           // through to a normal resolveNodeVictory() unlock, not the
           // dungeon's terminal clear). No rest between phases — the fusion
           // happens live, on-screen, not off-screen exposition. Levels are
-          // first-pass placeholders, same caveat as Phthora above.
-          bossCagedGod: { id: "bossCagedGod", type: "boss", depth: 17, region: "core",
+          // sim-tuned once already (2026-07-25 baseline pass), not final.
+          bossCagedGod: { id: "bossCagedGod", type: "boss", depth: 3,
                           connectsTo: ["bossChthon"],
                           bossEncounter: [{ key: "cagedGod", level: 6 }],
                           enterText: "Kredex is already here, and he's not alone — or rather, something " +
                             "is here WITH him, still mostly bound, straining against a rig that was " +
                             "never built to hold something that never agreed to be caged. \"You're " +
                             "too late,\" he says, and he isn't wrong, just not in the way he thinks." },
-          bossChthon: { id: "bossChthon", type: "boss", depth: 18, region: "core", connectsTo: [],
+          bossChthon: { id: "bossChthon", type: "boss", depth: 4, connectsTo: [],
                         bossEncounter: [{ key: "chthon", level: 7 }],
                         enterText: "Kredex stops screaming before the shape finishes changing, which " +
                           "is somehow worse than if he hadn't. Whatever answers to Chthon now was " +

@@ -478,6 +478,23 @@
       const diveDepths = Math.min(maxDepth - 1, dungeon.radialDiveDepths || 2);
       const arcDepths = Math.max(1, maxDepth - diveDepths);
 
+      // Safety fix (2026-07-25, found by a real playtest of Dungeon 6):
+      // a fixed branch wedge can eat into the gap between adjacent rim
+      // depths when many depth-bands are packed into the sweep — worst
+      // case, two sibling nodes in NEIGHBORING depth-bands both get pushed
+      // toward each other by up to half the wedge each, closing the gap by
+      // the full wedge. With enough depths (D6's original single-dungeon6
+      // had 16), that closure could exactly cancel the angular step between
+      // depths, landing two DIFFERENT nodes on the exact same pixel.
+      // Clamping the wedge to (step - minGap) guarantees at least minGap
+      // survives even in that worst case, regardless of graph size — D5's
+      // proven 5-depth shape never hit this (step=75°, comfortably under
+      // the clamp), so it's unaffected; a dense future radial dungeon won't
+      // silently regress the same way D6 did.
+      const stepAngle = arcDepths > 1 ? MAP_RADIAL_SWEEP / (arcDepths - 1) : MAP_RADIAL_SWEEP;
+      const MIN_GAP_RAD = 20 * Math.PI / 180;   // ~66px at this canvas's rOuter — clears a 64px hexcell
+      const wedge = Math.min(MAP_RADIAL_BRANCH_WEDGE, Math.max(8 * Math.PI / 180, stepAngle - MIN_GAP_RAD));
+
       const pos = {};
       let finalRimAngle = -Math.PI / 2;
       for (let d = 1; d <= maxDepth; d++) {
@@ -496,7 +513,7 @@
         ids.forEach(function (id, i) {
           const n = ids.length;
           const angle = n > 1
-            ? baseAngle + (i - (n - 1) / 2) * (MAP_RADIAL_BRANCH_WEDGE / Math.max(1, n - 1))
+            ? baseAngle + (i - (n - 1) / 2) * (wedge / Math.max(1, n - 1))
             : baseAngle;
           pos[id] = {
             x: r === 0 ? cx : cx + r * Math.cos(angle),

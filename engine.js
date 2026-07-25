@@ -819,15 +819,16 @@
           else if (currentDungeonKey === "erebus") clearLine = "The Broodmarshal collapses. The hive scatters!";
           else if (currentDungeonKey === "dungeon4") clearLine = "Proteus finally stops moving. Whatever it was becoming, it's over.";
           else if (currentDungeonKey === "dungeon5") clearLine = "The Sun God goes still. Helios finally goes dark.";
-          else if (currentDungeonKey === "dungeon6") clearLine = "Chthon goes still. Whatever it was wearing, it isn't anymore.";
+          else if (currentDungeonKey === "dungeon6") clearLine = "Phthora finally stops moving. The lineage's founding transcendence dies with him.";
+          else if (currentDungeonKey === "dungeon6b") clearLine = "Chthon goes still. Whatever it was wearing, it isn't anymore.";
           else clearLine = "Victory!";
           log(clearLine, true);
         } else if (clearedNode.type === "boss") {
           // The non-terminal half of a double boss (Dungeon 5's Void Soul
-          // Eater, Dungeon 6's caged god) — dungeon-specific flavor line,
+          // Eater, Dungeon 6b's caged god) — dungeon-specific flavor line,
           // generalized 2026-07-25 (was hardcoded to Void Soul Eater only).
           let midLine;
-          if (currentDungeonKey === "dungeon6") midLine = "The caged god tears free of the ritual holding it. Kredex is already screaming.";
+          if (currentDungeonKey === "dungeon6b") midLine = "The caged god tears free of the ritual holding it. Kredex is already screaming.";
           else midLine = "The Void Soul Eater unravels. Something colder is still waiting at the center of the station.";
           log(midLine, true);
         }
@@ -845,7 +846,8 @@
           else if (currentDungeonKey === "erebus") next.textContent = "Get off this rock →";
           else if (currentDungeonKey === "dungeon4") next.textContent = "Get out before more come →";
           else if (currentDungeonKey === "dungeon5") next.textContent = "Turn back toward the dark →";
-          else if (currentDungeonKey === "dungeon6") next.textContent = "Face what's left →";
+          else if (currentDungeonKey === "dungeon6") next.textContent = "Go deeper →";
+          else if (currentDungeonKey === "dungeon6b") next.textContent = "Face what's left →";
           else next.textContent = "Dungeon Clear! ✓";
         } else {
           next.textContent = "Continue →";
@@ -859,6 +861,7 @@
             else if (currentDungeonKey === "dungeon4") showDungeon4Epilogue(nextDungeonKey);
             else if (currentDungeonKey === "dungeon5") showDungeon5Epilogue(nextDungeonKey);
             else if (currentDungeonKey === "dungeon6") showDungeon6Epilogue(nextDungeonKey);
+            else if (currentDungeonKey === "dungeon6b") showDungeon6bEpilogue(nextDungeonKey);
             else returnToHub();
           } else {
             resolveNodeVictory();
@@ -1027,7 +1030,30 @@
       });
     }
 
-    // Dungeon 6 finale (§5.4c) — the game's first real branching ending.
+    // Dungeon 6 -> 6b handoff (§5.4c, split 2026-07-25 after a real playtest
+    // found the original single-dungeon6 map badly broken — see the data.js
+    // comment above the dungeon6 object for the full root-cause). Phthora's
+    // defeat is dungeon6's own terminal boss clear; this is the "go deeper"
+    // beat carrying the crew from the sprawling surface-to-crust crawl into
+    // the Core's short, tight, climactic sequence (dungeon6b).
+    function showDungeon6Epilogue(nextDungeonKey) {
+      showStoryScene([
+        "Phthora doesn't finish becoming anything. Whatever the ritual was reaching for collapses " +
+          "back into meat and failure, and the cavern goes quiet in the specific way only something " +
+          "that was trying very hard to stop being human can go quiet.",
+        "Past the wreckage of his rig, the rock stops pretending to be rock. A passage drops away " +
+          "into something too smooth, too deliberate, lit by a light that doesn't have a source — " +
+          "the kind of architecture that was never built by hands that needed to explain themselves " +
+          "to anyone.",
+        "This is the last door. Whatever's actually running this world's dead engine is down there, " +
+          "and Kredex already has a head start."
+      ], "Go deeper.", function () {
+        if (nextDungeonKey) currentDungeonKey = nextDungeonKey;
+        startDungeon(lastSquad, nextDungeonKey);
+      });
+    }
+
+    // Dungeon 6b finale (§5.4c) — the game's first real branching ending.
     // Chthon's defeat is the literal, on-screen CAUSE of the Helios seal
     // finally breaking (locked design decision, not a coincidental parallel
     // event) — that consequence plays FIRST, before the player ever sees the
@@ -1035,7 +1061,7 @@
     // own victory cost. The precursor Psionic lattice (§9.3 — already canon)
     // is the in-fiction reason the crew can feel/perceive something happening
     // at the Sun instantly from dead Earth.
-    function showDungeon6Epilogue(nextDungeonKey) {
+    function showDungeon6bEpilogue(nextDungeonKey) {
       showStoryScene([
         "Kredex doesn't finish dying so much as stop being separate from what killed him. Whatever " +
           "answered to Chthon a moment ago goes still, and the quiet that's left behind doesn't feel " +
