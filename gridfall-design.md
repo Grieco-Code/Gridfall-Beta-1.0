@@ -997,6 +997,28 @@ the user's own idea, not the diamond/gauntlet fork this section originally posed
   — ask-before-drawing per [[gridfall-sprite-workflow]]); the smart-autoplay balance pass above; the
   wormhole-crack beat is still narrative-only (no engine hook — that's Phase P3, endless portal).
 
+**2026-07-25, follow-up — radial layout rebuilt (real playtest feedback) + Sun God strengthened.**
+Two fixes from actual play, not sim-found:
+- **The circle wasn't a circle.** Root cause: the first `computeMapLayoutRadial` mapped every DEPTH to
+  its own radius, spreading nodes around a full ring only when several shared one depth — but this
+  graph's critical path is mostly one node per depth, and a lone node always landed at the same fixed
+  angle (top), so `h1 -> converge -> restFinal -> bossSoul -> bossSun` were all colinear: a straight
+  spoke dead through the center, not a circle. Rebuilt as two phases: a RIM phase (depths 1 through
+  `maxDepth - radialDiveDepths`) holds radius constant at the outer edge while angle sweeps ~300°
+  across depth, so walking the critical path reads as walking around the ring; a DIVE phase (the last
+  `dungeon.radialDiveDepths`, default 2 — the double boss) freezes the angle where the rim ended and
+  collapses radius straight to 0, i.e. exactly "do a circle, then aim the line into the center for the
+  last two bosses." `radialDiveDepths` is a per-dungeon field (defaults to 2), not hardcoded, so a
+  future radial dungeon can pick a different split. Re-verified headless: the 10-node layout now traces
+  top → right → bottom → left before diving in, all coordinates spread (not colinear).
+- **The Sun God strengthened + a new reinforceWave**, per direct request: hp 135→155, atk 20→21, def
+  13→14, and a new add — **Sol's Acolytes** (`ENEMIES.solAcolyte`, a genuine "reskinned Void" — its
+  own tier:"standard" entry, not a reused trash key, so it reads distinctly in the log), 2 of them at
+  50% HP, chanting self-Overclock and chipping in Psionic damage. **Balance signal (naive floor):** the
+  Sun God now LOSES to a naive-play FRESH party solo (was a naive win at 45% HP pre-buff) — the buff
+  landed hard. This makes the smart-autoplay tuning pass (already flagged as outstanding above) more
+  urgent, not less — flagging explicitly rather than assuming "a bit stronger" landed where intended.
+
 ---
 
 ## 6. Screens & state management (the "glue")

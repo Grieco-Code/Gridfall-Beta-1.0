@@ -405,6 +405,16 @@
     // via `mapShape: "radial"`; every other dungeon is unaffected.
     const MAP_RADIAL_SIZE = 460;   // virtual diameter (px) — square canvas
     const MAP_RADIAL_MARGIN = 40;  // keep the outermost ring's hexcells inside the frame
+    // How far around the rim the path sweeps before diving inward (2026-07-25
+    // rebuild — the first version mapped EVERY depth to its own radius, which
+    // reads fine when a depth has several simultaneous nodes, but this graph's
+    // critical path is mostly one node per depth, so those nodes all landed on
+    // the same angle (dead top) and the "circle" was actually a straight spoke
+    // to the center. Fixed shape: depths walk AROUND the rim at a constant
+    // radius (this sweep), then the last `radialDiveDepths` depths (the double
+    // boss) collapse straight to the center at a frozen angle.
+    const MAP_RADIAL_SWEEP = 2 * Math.PI * (300 / 360);   // 300° around the rim
+    const MAP_RADIAL_BRANCH_WEDGE = 2 * Math.PI * (40 / 360);  // spread for simultaneous nodes at one depth
 
     // Compute each node's (x, y) center in the virtual space: rows by depth,
     // evenly spread horizontally within a depth. Returns { id: {x, y, node} }.
@@ -441,15 +451,23 @@
     // Radial counterpart to computeMapLayout above: same input/output shape
     // (`{ pos, height, width }`, one stable {x,y} per node keyed by id) so
     // renderMap/fog-of-war/edge-drawing don't need to know which shape they're
-    // looking at — only the POSITIONING math differs. Depth still drives
-    // placement, just as radius instead of row: depth 1 sits on the outer
-    // rim, the deepest depth sits dead center (Dungeon 5's double boss).
-    // Nodes sharing a depth spread evenly around a full ring, starting at
-    // 12 o'clock, so the entry node reads as "arriving from above."
+    // looking at — only the POSITIONING math differs.
+    //
+    // Two phases (2026-07-25 rebuild, after the first version read as a
+    // straight line — see the MAP_RADIAL_SWEEP comment above):
+    //   1) RIM phase (depths 1..arcDepths): radius stays fixed at the outer
+    //      rim; angle sweeps around MAP_RADIAL_SWEEP as depth increases, so
+    //      walking the critical path reads as walking around a circle.
+    //      Nodes sharing a depth (a branch) spread across a small wedge
+    //      around that depth's angle, instead of scattering across the
+    //      whole ring.
+    //   2) DIVE phase (the last `dungeon.radialDiveDepths || 2` depths — the
+    //      double boss): angle freezes at wherever the rim phase ended, and
+    //      radius collapses straight to 0 — "aim the line into the center."
     function computeMapLayoutRadial(dungeon) {
       const size = MAP_RADIAL_SIZE;
       const cx = size / 2, cy = size / 2;
-      const rMax = size / 2 - MAP_RADIAL_MARGIN;
+      const rOuter = size / 2 - MAP_RADIAL_MARGIN;
       const byDepth = {};
       let maxDepth = 0;
       Object.keys(dungeon.nodes).forEach(function (id) {
@@ -457,12 +475,29 @@
         (byDepth[d] = byDepth[d] || []).push(id);
         if (d > maxDepth) maxDepth = d;
       });
+      const diveDepths = Math.min(maxDepth - 1, dungeon.radialDiveDepths || 2);
+      const arcDepths = Math.max(1, maxDepth - diveDepths);
+
       const pos = {};
+      let finalRimAngle = -Math.PI / 2;
       for (let d = 1; d <= maxDepth; d++) {
         const ids = byDepth[d] || [];
-        const r = maxDepth > 1 ? rMax * (maxDepth - d) / (maxDepth - 1) : 0;
+        let r, baseAngle;
+        if (d <= arcDepths) {
+          const progress = arcDepths > 1 ? (d - 1) / (arcDepths - 1) : 0;
+          baseAngle = -Math.PI / 2 + progress * MAP_RADIAL_SWEEP;
+          r = rOuter;
+          finalRimAngle = baseAngle;
+        } else {
+          const diveIndex = d - arcDepths;               // 1..diveDepths
+          r = rOuter * (1 - diveIndex / diveDepths);      // collapses to 0 at maxDepth
+          baseAngle = finalRimAngle;                      // frozen — "aim the line inward"
+        }
         ids.forEach(function (id, i) {
-          const angle = -Math.PI / 2 + (2 * Math.PI * i) / ids.length;
+          const n = ids.length;
+          const angle = n > 1
+            ? baseAngle + (i - (n - 1) / 2) * (MAP_RADIAL_BRANCH_WEDGE / Math.max(1, n - 1))
+            : baseAngle;
           pos[id] = {
             x: r === 0 ? cx : cx + r * Math.cos(angle),
             y: r === 0 ? cy : cy + r * Math.sin(angle),

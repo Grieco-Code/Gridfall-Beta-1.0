@@ -376,6 +376,18 @@
         damageType: "void", power: 0, message: "locks out the motor systems of",
         applies: [{ type: "disable", magnitude: 1, duration: 1 }]
       },
+      // --- Sol's Acolytes (2026-07-25) — the Sun God's reinforceWave add,
+      // a reskin (own ENEMIES entry, not a literal reused Void trash key) so
+      // it reads distinctly in the log/UI. ---
+      fanaticStrike: {   // basic — Psionic
+        name: "Fanatic Strike", enCost: 0, kind: "attack", target: "enemy",
+        damageType: "psionic", power: 2, message: "lashes out, chanting an oath to something that no longer answers, at"
+      },
+      devotedChant: {   // special — self-Overclock (fervor overtaking fear)
+        name: "Devoted Chant", enCost: 0, kind: "status", target: "self",
+        message: "chants louder, fervor overtaking fear",
+        applies: [{ type: "overclock", magnitude: 5, duration: 3 }]
+      },
 
       // --- The Warden (boss) — corrupted Tiangong station AI core, §5.1 ---
       turretVolley: {   // basic — Kinetic
@@ -1017,14 +1029,29 @@
         skills: ["soulRend", "devouringMaw", "witheringGaze"],
         affinities: { thermal: WEAK, kinetic: RESIST }
       },
+      // Sol's Acolyte — the Sun God's reinforceWave add (2026-07-25): a
+      // "reskinned Void" in the literal sense the name implies — a station
+      // pilgrim/worker consumed by devotion to the corrupted regulator,
+      // still moves with human momentum but none of the will. Modest stats
+      // (a fanatic swarm, not a second elite) — the threat is numbers +
+      // Overclock stacking, not raw individual damage.
+      solAcolyte: {
+        typeName: "Sol's Acolyte", role: "Helios cult-thrall",
+        nature: "void", tier: "standard",
+        baseStats: { hp: 40, en: 0, attack: 12, defense: 6, speed: 12 },
+        skills: ["fanaticStrike", "devotedChant"],
+        affinities: { thermal: WEAK, kinetic: RESIST }
+      },
       // The Sun God — Helios's own regulator core, corrupted; secretly a
       // machine wearing a god's face, not a literal deity (§5.4b). Fought
       // immediately after the Soul Eater with NO rest node between the two
       // — the double boss's real teeth is the attrition, not either fight
-      // alone. HP set a little below a fresh-fight boss norm (Chimera
-      // Specimen's lesson, §5.4a: an already-worn-down party needs a softer
-      // number than an isolated test would suggest) — first pass, sim-tune
-      // before locking, same discipline as every prior boss.
+      // alone. Strengthened 2026-07-25 (hp 135->155, atk 20->21, def 13->14)
+      // + given a reinforceWave (Sol's Acolytes x2 at 50% HP) per direct
+      // request — this DOES stack on top of an already-brutal chain fight
+      // (naive floor already wiped the party pre-buff, gameplay-direction
+      // memory), so treat this as even more explicitly first-pass/needs-the-
+      // smart-autoplay-tuning-pass than before, not a locked number.
       // nature: "synthetic" (not "void") is deliberate: it makes Confuse
       // fail on it for the right in-fiction reason (it was never organic),
       // and makes Hack's Cyber weakness below land as the mechanical/
@@ -1033,9 +1060,12 @@
       sunGod: {
         typeName: "The Sun God", role: "Helios regulator core, corrupted",
         nature: "synthetic", tier: "boss",
-        baseStats: { hp: 135, en: 0, attack: 20, defense: 13, speed: 11 },
+        baseStats: { hp: 155, en: 0, attack: 21, defense: 14, speed: 11 },
         skills: ["solarLash", "coronalFlare", "unmakingPulse", "eclipseProtocol"],
-        affinities: { cyber: 2.0, thermal: HARD_RESIST }
+        affinities: { cyber: 2.0, thermal: HARD_RESIST },
+        reinforceAt: 0.5,
+        reinforceWave: [{ key: "solAcolyte", count: 2 }],
+        reinforceMessage: "The Sun God's voice splits into a chorus. Sol's Acolytes answer the call."
       }
     };
 
