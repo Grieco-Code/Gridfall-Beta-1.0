@@ -3,18 +3,27 @@
 *A living document. We edit and extend this as we build. It supersedes the v1 kickoff
 and v2 plan as the single source of truth for direction; those remain as history.*
 
-**Last updated:** 2026-07-24 · **Current build:** v4 — a post-beta difficulty & content pass (§12,
+**Last updated:** 2026-07-25 · **Current build:** v4 — a post-beta difficulty & content pass (§12,
 2026-07-24): smart enemy targeting/statuses/boss adds (Phase 1a/1b/1d), global difficulty knobs (1c),
 **Dungeon 4 "Talos Bio-Foundry" shipped** (§5.4/§5.4a — fog of war, Unknown nodes, dead-end spurs,
 weighted loot, the Regen status, two faction-differentiated wings, boss Proteus; see the changelog for
 the full build + the two real bugs the sim-tuning process caught), and **Dungeon 5 "Helios Station"
-bones shipped** (§5.4b — a genuinely new map SHAPE: a circular/radial layout with a double boss dead
-center, not the depth-row diamond every prior dungeon used; a narrow Void/Entropy preview roster; two
-engine generalizations, a per-node boss-encounter override and non-terminal boss nodes, both reusable
-by Dungeon 6 or the endless portal later). **Remaining story content: Dungeon 6 (dead Earth finale)**,
-plus a balance/"smart autoplay" tuning pass on Dungeon 5 (structurally verified, zero crashes, but only
-naive-floor tested so far — see §5.4b) and a sprite-art pass for both Dungeon 4's and Dungeon 5's new
-rosters (currently generic-blob fallback — see [[gridfall-sprite-workflow]]). Everything below this line is
+bones shipped** (§5.4b — a circular/radial map shape with a double boss dead center, rebuilt 2026-07-25
+after a real playtest found the first version was actually a straight line to the center; a narrow
+Void/Entropy preview roster; two engine generalizations, a per-node boss-encounter override and
+non-terminal boss nodes, both reusable by Dungeon 6 or the endless portal later). **Also 2026-07-25:**
+the Void Soul Eater now fights with 2 guards from the start and the Sun God was strengthened + given a
+reinforceWave ("Sol's Acolytes") — naive-floor testing shows both halves of the double boss now losing
+solo, flagged as needing the smart-autoplay pass, not assumed fine; and an **Act I / Region-1 naming
+pass** (§9.2, §12) — Colony Guard → Quota Enforcer, Overseer Krell → Overseer Voraxx, Tiangong Pvt./Lt.
+→ Vossmark Grunt/Vossmark Officer, the Warden's role → "Penal Colony AI", and the corp itself,
+**Tiangong Heavy Industries → Vossmark Industries** — both the display text and the internal code
+identifiers (`ENEMIES.krell`→`voraxx`, `tiangongPvt`→`vossmarkGrunt`, `tiangongLt`→`vossmarkOfficer`,
+`colonyGuard`→`quotaEnforcer`) were updated and verified. **Remaining story content: Dungeon 6 (dead
+Earth finale)**, plus that smart-autoplay balance pass on Dungeon 5 (structurally verified, zero
+crashes, but only naive-floor tested — see §5.4b) and a sprite-art pass for Dungeon 4's AND Dungeon 5's
+new rosters (currently generic-blob fallback — see [[gridfall-sprite-workflow]] /
+[[gridfall-sprite-status]] for the full consolidated debt list). Everything below this line is
 the v3 changelog, kept as history. · **Prior build:** v3 — Phases A–G: the v2 combat core (damage types,
 statuses, tiered Tiangong roster, skill trees, equipment, leveling, Limit Break) plus a real scene
 manager and the **first mini-dungeon** (Tiangong Station Sector 1, 9 nodes, Talos Systems as a 2nd
