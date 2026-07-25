@@ -991,7 +991,7 @@
         "Proteus doesn't scream on the way down. Whatever was still human in there goes quiet " +
           "first, and the rest just stops a moment later, mid-transformation, like a sentence " +
           "that never finds its verb.",
-        "Six doesn't look away from it. \"That was supposed to be a mercy,\" they say, prying a " +
+        "Six doesn't look away from it. \"That was supposed to be a mercy,\" she says, prying a " +
           "data core loose from the ruin of the executive suite. \"Nobody gave it one.\"",
         "The core's fragment locks against the one pulled from the Broodmarshal's rig months ago, " +
           "two broken halves of the same key finally admitting they were always one piece. What " +

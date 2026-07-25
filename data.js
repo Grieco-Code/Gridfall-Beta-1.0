@@ -432,7 +432,7 @@
         name: "Psi Lash", enCost: 0, kind: "attack", target: "enemy",
         damageType: "psionic", power: 0, message: "floods a psionic shriek into"
       },
-      hiveShriek: {   // Erebus Shaman special — Psionic + Confuse (organic-only; Wren's synthetic
+      hiveShriek: {   // Erebus Shaman special — Psionic + Confuse (organic-only; Nyx's synthetic
                        // nature makes her immune, a deliberate synergy with the roster on hand)
         name: "Hive Shriek", enCost: 0, kind: "attack", target: "enemy",
         damageType: "psionic", power: 2, message: "screams straight into the mind of",
@@ -615,7 +615,7 @@
     };
 
     // Hero call-signs, assigned in pick order at deploy. Player-editable later.
-    const HERO_NAMES = ["Matteo", "Vito", "Nat", "Tupac", "Jaime", "Nero"];
+    const HERO_NAMES = ["Casimir Zaab", "Vito", "Nat", "Tupac", "Jaime", "Nero"];
 
     // CLASS TEMPLATES — the five playable classes.
     // NOTE: Guard/taunt (Dread Knight) and debuffs (Netrunner, Mentalist)
@@ -1008,7 +1008,7 @@
       },
       // Shaman — the hive-mind caste. Squishy caster body (weak Kinetic, a
       // "just hit it" glass cannon), hard-resists Psionic (its own domain).
-      // Hive Shriek's Confuse is organic-only (§ STATUSES) — Wren, the
+      // Hive Shriek's Confuse is organic-only (§ STATUSES) — Nyx, the
       // party's synthetic Netrunner, is immune by construction.
       erebusShaman: {
         typeName: "Erebus Shaman", role: "hive-mind caste",
@@ -1371,7 +1371,7 @@
         "....OFFFFFOOOOFFFFFO....",
         "........................"
       ],
-      // Netrunner (Wren) — REDRAWN 24x32 as a FEMALE synthetic/android. Female
+      // Netrunner (Nyx) — REDRAWN 24x32 as a FEMALE synthetic/android. Female
       // cues: long hair framing the face and falling to the shoulders, narrow
       // shoulders + a waist taper (hourglass), slim limbs. Synthetic cues kept:
       // glowing cyan eyes (both), cool pale skin, a cyan circuit line (V) down
@@ -1440,7 +1440,7 @@
         "..................",
         ".................."
       ],
-      // Mech Runner (Kade) — REDRAWN 24x32 as a HUMAN FACE + FULL MECH BODY
+      // Mech Runner (Torque von Bram) — REDRAWN 24x32 as a HUMAN FACE + FULL MECH BODY
       // (per user direction: "more mech than human body"). A small human head
       // sits atop a bulky mechanical exo-frame: wide angular shoulders, a
       // glowing amber power core (V) in the chest, an asymmetric build (right
@@ -1859,7 +1859,7 @@
         B: "#3a2226", L: "#4d2e33", A: "#241417",      // maroon underarmor
         C: "#16161a", U: "#34383e", F: "#1a1a1e"
       } },
-      // Mech Runner (Kade) — HUMAN FACE + FULL MECH BODY. Weathered human skin
+      // Mech Runner (Torque von Bram) — HUMAN FACE + FULL MECH BODY. Weathered human skin
       // on the face only; the body is gunmetal mech (M/P/N) with dark chest
       // panels (A), rust joints (R), a glowing amber power core (V), a mech
       // hand (X) and cannon arm (N). No cloth/pants — it's a machine.
@@ -2056,13 +2056,13 @@
           // recruit: a non-combat story beat, not drawn from ENEMY_POOLS —
           // resolved by resolveRecruitNode(), same treatment as Loot/Rest.
           p3: { id: "p3", type: "recruit", depth: 3, connectsTo: ["p4"],
-                recruitClass: "mechRunner", recruitName: "Kade", recruitButtonLabel: "Move out.",
+                recruitClass: "mechRunner", recruitName: "Torque von Bram", recruitButtonLabel: "Move out.",
                 recruitText: [
-                  "A side tunnel, half-collapsed. Kade is elbow-deep in a stalled loader rig, " +
+                  "A side tunnel, half-collapsed. Torque is elbow-deep in a stalled loader rig, " +
                     "muttering about Vossmark's maintenance budget.",
                   "They see the rifle in your hands and the alarm lights just starting to strobe " +
                     "red down the shaft, and they don't ask a single question.",
-                  "\"Hangar bay,\" Kade says, already pulling a salvaged mining laser off the " +
+                  "\"Hangar bay,\" Torque says, already pulling a salvaged mining laser off the " +
                     "loader's mount. \"I know a way through the drill line. Try to keep up.\""
                 ] },
           p4: { id: "p4", type: "boss", depth: 4, connectsTo: [],
@@ -2090,7 +2090,7 @@
         nodes: {
           // n1 stays the entry node (unchanged from Phase G); recruit1 (Phase
           // H4, §5.2a) sits right after it, so every playthrough fights the
-          // breach corridor alone first and meets Wren once it's clear,
+          // breach corridor alone first and meets Nyx once it's clear,
           // still before the branch point, so she's never missable. Every
           // OTHER node's RENDER depth shifted +1 to make room (n2/n3 2→3,
           // n4/n5 3→4, n6 4→5, n7 5→6, n8 6→7, boss 7→8) — the branch
@@ -2107,14 +2107,14 @@
           // hits. See §5.2b/§9 for the sim numbers.
           n1:   { id: "n1",   type: "combat", depth: 1, connectsTo: ["recruit1"] },
           recruit1: { id: "recruit1", type: "recruit", depth: 2, connectsTo: ["n2", "n3"],
-                      recruitClass: "netrunner", recruitName: "Wren", recruitButtonLabel: "Move in.",
+                      recruitClass: "netrunner", recruitName: "Nyx", recruitButtonLabel: "Move in.",
                       recruitText: [
                         "The corridor past the breach is quiet again, drones sparking on the deck " +
                           "plating where you left them. A side hatch hangs open a few meters " +
                           "ahead, forced from the inside.",
-                        "Wren steps out before you reach it, still holding a remote trigger in " +
+                        "Nyx steps out before you reach it, still holding a remote trigger in " +
                           "one hand. \"Wondering when Kharon's Reach would finally bite back,\" " +
-                          "they say. \"I've been bleeding this station's systems for months. Could " +
+                          "she says. \"I've been bleeding this station's systems for months. Could " +
                           "use some backup that isn't a badly written script.\"",
                         "Three operators against a station isn't great odds, but it beats the " +
                           "two you walked in with."
@@ -2229,9 +2229,9 @@
                   "A holding cell door hangs open at the end of a service corridor, its lock burned " +
                     "through from the inside. Whoever did it left a trail of scorched carpet and " +
                     "nothing else.",
-                  "You find them sitting very still in the dark, staring at their own hands like " +
-                    "they don't fully trust what those hands will do next. A specimen tag is still " +
-                    "fused to one wrist: SUBJECT SIX. They don't offer another name.",
+                  "You find her sitting very still in the dark, staring at her own hands like " +
+                    "she doesn't fully trust what those hands will do next. A specimen tag is still " +
+                    "fused to one wrist: SUBJECT SIX. She doesn't offer another name.",
                   "\"They were trying to teach it to listen,\" Six says, finally looking up. \"It " +
                     "listened to me instead. I can hear the ones still in the tanks — screaming " +
                     "without mouths. I want to make it stop. All of it.\""
@@ -2468,12 +2468,12 @@
                 enterText: "Below the ash line the city keeps going — service tunnels, flooded rail, " +
                   "the bones of a subway that never got its evacuation finished. Something down here " +
                   "has been surviving on worse than you for a long time." },
-          // Vincent's recruit gate (§5.4c) — initially reads as an obstacle,
+          // Moro's recruit gate (§5.4c) — initially reads as an obstacle,
           // not a rescue. Also carries the Talos-origin-on-Earth reveal
-          // (folded in here rather than a separate node/mechanic — Vincent,
+          // (folded in here rather than a separate node/mechanic — Moro,
           // a native descendant, is the one person who'd actually know it).
           u2: { id: "u2", type: "recruit", depth: 5, connectsTo: ["restU", "forestGate"],
-                recruitClass: "dreadKnight", recruitName: "Vincent",
+                recruitClass: "dreadKnight", recruitName: "Moro",
                 recruitButtonLabel: "Stand with him.",
                 recruitText: [
                   "The tunnel narrows into a chokepoint, and something already standing there doesn't " +
@@ -2490,7 +2490,7 @@
                     "off-world.\" He finally lowers the weapon. \"You're going to the center of this. " +
                     "So am I. Might as well be for the same reasons.\""
                 ] },
-          // Forest side-arm (§5.4c): a short detour off Vincent's node, not a
+          // Forest side-arm (§5.4c): a short detour off Moro's node, not a
           // full zone. Gates Sexias behind a fixed Vossmark loyalist fight
           // (type "boss" so the encounter is authored, not pool-rolled — a
           // real one-off "story fight" like the prologue's, same pattern the

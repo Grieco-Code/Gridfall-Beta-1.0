@@ -190,7 +190,7 @@
       const level = 1;
       return {
         id: nextId(),
-        name: displayName || t.className,   // call-sign (Matteo, Vito, …)
+        name: displayName || t.className,   // call-sign (Casimir Zaab, Vito, …)
         classKey: classKey,
         className: t.className,
         level: level,

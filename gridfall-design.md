@@ -1902,6 +1902,27 @@ pointer):**
 ---
 
 ## 13. Changelog
+- **2026-07-25** — **Dungeon 6 map fixed after a real playthrough surfaced broken node positions**
+  (same-day follow-up to the build below). Player report: "issues with the nodes." Verified by
+  computing `computeMapLayoutRadial`'s actual output — several unrelated nodes (`s1`/`s2`, `u1`/`u2`,
+  others) were rendering at literally identical (0.0px apart) coordinates, stacked on top of each
+  other. Root cause: the radial "dive to center" layout was built and proven at D5's scale (10 nodes /
+  7 depths, fixed 300° sweep); the original single 22-node/18-depth Dungeon 6 compressed that same
+  sweep to ~20° per depth-band, letting a sibling branch's angular offset exactly cancel the step to
+  the next depth — no wedge value could satisfy both "siblings need separation" and "adjacent depths
+  need clearance" at that density. **Fix, matching the player's own suggested shape**: split
+  `DUNGEONS.dungeon6` into two dungeons — `dungeon6` (zones 1-5, 17 nodes, standard row layout, the
+  same one Sector 1/D4 already use fine at this scale) ending at a now-terminal `bossPhthora`, and
+  `dungeon6b` ("the Core," 4 nodes) keeping the radial layout, which fits a short climactic sequence.
+  Beating Phthora now triggers a new "Go deeper →" epilogue (`showDungeon6Epilogue`, calls
+  `startDungeon` directly into `dungeon6b`) instead of one graph trying to be both a sprawling crawl
+  and a tight descent. Also hardened `computeMapLayoutRadial` itself with a defensive wedge-auto-shrink
+  so this class of bug can't silently recur in a future dungeon regardless of size (verified D5's
+  existing layout is byte-for-byte unaffected). Re-verified via full-chain sim: both maps render with
+  zero node overlaps, the complete dungeon5→dungeon6→dungeon6b chain plays end-to-end through real
+  control flow, and win rate ticked up slightly (36%→46.5% for the previously-weakest tested squad) —
+  expected from the new dungeon boundary's full-heal, not a balance regression. Deep D6 balance tuning
+  remains deferred to its own roadmap phase, unaffected by this fix.
 - **2026-07-25** — **Dungeon 6 "the Cradle" fully BUILT (same-day follow-up to the design session
   below) — the Sol story arc is now content-complete start to finish.** Authored the full 22-node
   graph (6 zones, radial layout, fog of war), Sexias's complete class kit, Phthora/the caged god/

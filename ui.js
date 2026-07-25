@@ -983,7 +983,7 @@
         "The Long Shot's sensors don't lie. Kharon's Reach answers to a station in high " +
           "orbit, Vossmark Station Sector 1. Every quota, every guard rotation, every debt " +
           "ledger on the colony runs through it.",
-        "Kade already knows the approach vectors. Running isn't enough anymore, not with " +
+        "Torque already knows the approach vectors. Running isn't enough anymore, not with " +
           "Dez's name still fresh, and if Vossmark wants a fight, this crew isn't going to " +
           "keep hiding from one.",
         "Sector 1 is bigger and better defended, and whatever's waiting up there won't be " +
