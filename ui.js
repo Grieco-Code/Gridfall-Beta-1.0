@@ -257,7 +257,7 @@
 
 
     /* ----------------------------------------------------------------
-       PROLOGUE INTRO (Phase H3, §5.2). Kharon's Reach — a Tiangong asteroid
+       PROLOGUE INTRO (Phase H3, §5.2). Kharon's Reach — a Vossmark asteroid
        mining colony. The hero's brother Dez is executed by Foreman Voss for
        sabotaging a haul-quota terminal; while Voss turns to radio it in, the
        hero kills him and takes his rifle. This is the literal opening of the
@@ -269,7 +269,7 @@
 
     function showIntroScene(hero) {
       showStoryScene([
-        "Kharon's Reach never had exits, only debts. You were born owing Tiangong before " +
+        "Kharon's Reach never had exits, only debts. You were born owing Vossmark before " +
           "you ever saw daylight, same as every serf on this rock, same as your brother Dez.",
         "Dez rerouted a haul-quota terminal today so the gang could get one rest shift " +
           "instead of another death march. Foreman Voss made an example of him for it, " +
@@ -278,7 +278,7 @@
           "the chance to finish; " + hero.name + " was already moving.",
         "The rifle is still warm in your hands, and somewhere above you the alarms are " +
           "starting up. The only way off Kharon's Reach runs through the hangar bay, and " +
-          "Overseer Krell has no intention of opening that door for you."
+          "Overseer Voraxx has no intention of opening that door for you."
       ], "Move.", function () {
         currentDungeonKey = "prologue";
         startDungeon([hero.id], "prologue");
@@ -964,10 +964,10 @@
       sector1BriefingShown = true;
       showStoryScene([
         "The Long Shot's sensors don't lie. Kharon's Reach answers to a station in high " +
-          "orbit, Tiangong Station Sector 1. Every quota, every guard rotation, every debt " +
+          "orbit, Vossmark Station Sector 1. Every quota, every guard rotation, every debt " +
           "ledger on the colony runs through it.",
         "Kade already knows the approach vectors. Running isn't enough anymore, not with " +
-          "Dez's name still fresh, and if Tiangong wants a fight, this crew isn't going to " +
+          "Dez's name still fresh, and if Vossmark wants a fight, this crew isn't going to " +
           "keep hiding from one.",
         "Sector 1 is bigger and better defended, and whatever's waiting up there won't be " +
           "the only thing that wants you dead. Time to gear up."

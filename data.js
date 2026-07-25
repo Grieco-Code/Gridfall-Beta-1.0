@@ -150,7 +150,7 @@
         damageType: "shock", power: 2, message: "discharges into",
         applies: [{ type: "disable", magnitude: 1, duration: 1 }]
       },
-      suppressingFire: {   // Tiangong Pvt special — Kinetic + Weaken
+      suppressingFire: {   // Grunt special — Kinetic + Weaken
         name: "Suppressing Fire", enCost: 0, kind: "attack", target: "enemy",
         damageType: "kinetic", power: 0, message: "lays down suppressing fire on",
         applies: [{ type: "weaken", magnitude: 5, duration: 2 }]
@@ -161,7 +161,7 @@
       },
 
       // --- Kharon's Reach colony (Phase H3 prologue, §5.2) ---
-      batonStrike: {   // Colony Guard special — Kinetic
+      batonStrike: {   // Quota Enforcer special — Kinetic
         name: "Baton Strike", enCost: 0, kind: "attack", target: "enemy",
         damageType: "kinetic", power: 3, message: "cracks a shock baton into"
       },
@@ -189,22 +189,22 @@
         damageType: "kinetic", power: 4, message: "jabs a stun baton into",
         applies: [{ type: "disable", magnitude: 1, duration: 1 }]
       },
-      ironDiscipline: {   // Overseer Krell special — Kinetic + Weaken
+      ironDiscipline: {   // Overseer Voraxx special — Kinetic + Weaken
         name: "Iron Discipline", enCost: 0, kind: "attack", target: "enemy",
         damageType: "kinetic", power: 8, message: "barks iron discipline at",
         applies: [{ type: "weaken", magnitude: 5, duration: 2 }]
       },
-      overseersLash: {   // Overseer Krell special — heavy single-target, partly armor-piercing
+      overseersLash: {   // Overseer Voraxx special — heavy single-target, partly armor-piercing
         name: "Overseer's Lash", enCost: 0, kind: "attack", target: "enemy",
         damageType: "kinetic", power: 22, pierce: 0.2, message: "lashes out at"
       },
-      overseersCrackdown: {   // Overseer Krell special — Kinetic AoE (a duo has no one to hide behind)
+      overseersCrackdown: {   // Overseer Voraxx special — Kinetic AoE (a duo has no one to hide behind)
         name: "Overseer's Crackdown", enCost: 0, kind: "attack", target: "allEnemies",
         damageType: "kinetic", power: 6, message: "cracks down on the whole squad, hitting"
       },
 
       // --- Talos Systems skills (Phase G, §5.1 — organic, Corrosive/Thermal, the
-      //     Mentalist's designated rival faction the way Netrunner is Tiangong's) ---
+      //     Mentalist's designated rival faction the way Netrunner is Vossmark's) ---
       venomClaws: {   // Talos Wraith basic — Corrosive
         name: "Venom Claws", enCost: 0, kind: "attack", target: "enemy",
         damageType: "corrosive", power: 0, message: "rakes with venomed claws at"
@@ -389,7 +389,7 @@
         applies: [{ type: "overclock", magnitude: 5, duration: 3 }]
       },
 
-      // --- The Warden (boss) — corrupted Tiangong station AI core, §5.1 ---
+      // --- The Warden (boss) — corrupted Vossmark station AI core, §5.1 ---
       turretVolley: {   // basic — Kinetic
         name: "Turret Volley", enCost: 0, kind: "attack", target: "enemy",
         damageType: "kinetic", power: 4, message: "opens fire with a turret volley on"
@@ -677,7 +677,7 @@
       // ---------- FODDER (weak, swarm — early nodes) ----------
       // Spider Drone — light synthetic; hits harder than v1, modest HP so AoE clears swarms.
       spiderDrone: {
-        typeName: "Spider Drone", role: "Tiangong security bot",
+        typeName: "Spider Drone", role: "Vossmark security bot",
         nature: "synthetic", tier: "fodder",
         baseStats: { hp: 40, en: 0, attack: 15, defense: 7, speed: 11 },
         skills: ["attack"],
@@ -695,7 +695,7 @@
       // ---------- STANDARD (one gimmick each — mid nodes) ----------
       // Arc Sentinel — synthetic Shock unit; can Disable a hero. Its Shock hurts the Netrunner.
       arcSentinel: {
-        typeName: "Arc Sentinel", role: "Tiangong arc drone",
+        typeName: "Arc Sentinel", role: "Vossmark arc drone",
         nature: "synthetic", tier: "standard",
         baseStats: { hp: 50, en: 0, attack: 14, defense: 9, speed: 12 },
         skills: ["arcBolt", "arcDischarge"],
@@ -703,9 +703,9 @@
         // drone shouldn't feel bad; Cyber/Hack stays its best (weak) counter.
         affinities: { cyber: WEAK, psionic: HARD_RESIST }
       },
-      // Tiangong Pvt. — organic bruiser; Suppressing Fire applies Weaken.
+      // Grunt (was "Tiangong Pvt.", 2026-07-25) — organic bruiser; Suppressing Fire applies Weaken.
       tiangongPvt: {
-        typeName: "Tiangong Pvt.", role: "Tiangong trooper",
+        typeName: "Grunt", role: "Vossmark trooper",
         nature: "organic", tier: "standard",
         baseStats: { hp: 60, en: 0, attack: 16, defense: 8, speed: 10 },
         skills: ["attack", "suppressingFire"],
@@ -715,15 +715,16 @@
       // ---------- ELITE (mini-boss — late nodes only) ----------
       // Security Mech — armored: shrugs off Kinetic, but Shock/Cyber wreck it.
       securityMech: {
-        typeName: "Security Mech", role: "Tiangong heavy unit",
+        typeName: "Security Mech", role: "Vossmark heavy unit",
         nature: "synthetic", tier: "elite",
         baseStats: { hp: 120, en: 0, attack: 17, defense: 15, speed: 7 },
         skills: ["attack", "rocketBarrage"],
         affinities: { kinetic: RESIST, shock: WEAK, cyber: 2.0, psionic: HARD_RESIST }  // 2.0 = doubly weak to hacking
       },
-      // Tiangong Lt. (was Squad Leader) — mini-boss: Command Strike + Mark Target (Sunder) + heal.
+      // Officer (was "Tiangong Lt.", originally "Squad Leader") — mini-boss:
+      // Command Strike + Mark Target (Sunder) + heal.
       tiangongLt: {
-        typeName: "Tiangong Lt.", role: "Tiangong field officer",
+        typeName: "Officer", role: "Vossmark field officer",
         nature: "organic", tier: "elite",
         baseStats: { hp: 100, en: 0, attack: 16, defense: 11, speed: 12 },
         skills: ["attack", "commandStrike", "markTarget", "repairProtocol"],
@@ -731,9 +732,9 @@
       },
 
       // ---------- TALOS SYSTEMS (Phase G, §5.1) ----------
-      // Deliberately the opposite of Tiangong: organic, bio-augmented, leaning
+      // Deliberately the opposite of Vossmark: organic, bio-augmented, leaning
       // Corrosive/Thermal, uniformly weak to Psionic — the Mentalist's rival
-      // faction the way the Netrunner is Tiangong's.
+      // faction the way the Netrunner is Vossmark's.
       // Talos Wraith — fast organic fodder, swarms.
       talosWraith: {
         typeName: "Talos Wraith", role: "Talos infiltrator",
@@ -794,12 +795,12 @@
       },
 
       // ---------- BOSS (Phase G, §5.1 — this dungeon's finale) ----------
-      // The Warden — a corrupted Tiangong station-defense AI core. Same
+      // The Warden — a corrupted Vossmark station-defense AI core. Same
       // affinity profile as Security Mech (a proven counter-able tank: resist
       // Kinetic, weak Shock, doubly weak Cyber via the Netrunner's Hack) but
       // scaled well past elite, with a wider single-phase kit.
       warden: {
-        typeName: "The Warden", role: "Station Security AI",
+        typeName: "The Warden", role: "Penal Colony AI",
         nature: "synthetic", tier: "boss",
         baseStats: { hp: 150, en: 0, attack: 18, defense: 14, speed: 9 },
         // No self-heal: sim testing showed a self-sustaining boss on top of
@@ -844,43 +845,43 @@
       },
 
       // ---------- KHARON'S REACH (Phase H3 prologue, §5.2) ----------
-      // Colony Guard — organic fodder; rank-and-file Tiangong enforcers.
+      // Quota Enforcer — organic fodder; rank-and-file Vossmark enforcers.
       colonyGuard: {
-        typeName: "Colony Guard", role: "Kharon's Reach enforcer",
+        typeName: "Quota Enforcer", role: "Kharon's Reach enforcer",
         nature: "organic", tier: "fodder",
         baseStats: { hp: 32, en: 0, attack: 10, defense: 5, speed: 9 },
         skills: ["attack", "batonStrike"],
-        affinities: { psionic: 1.25 }   // consistent with other Tiangong organics
+        affinities: { psionic: 1.25 }   // consistent with other Vossmark organics
       },
       // ---------- KRELL BOSS-SUPPORT ADD (2026-07-24) ----------
       // Riot Enforcer — tanky organic; braces (self-Guard) and stuns heroes with
-      // a shock baton. The heavier cousin of the Colony Guard (guardTrooper shape
+      // a shock baton. The heavier cousin of the Quota Enforcer (guardTrooper shape
       // recolored, per the planned Riot Enforcer tier-variant).
       riotEnforcer: {
         typeName: "Riot Enforcer", role: "Kharon's Reach riot squad",
         nature: "organic", tier: "standard",
-        // Tuned to sit at Krell's side in the L1 duo opener without walling a
+        // Tuned to sit at Voraxx's side in the L1 duo opener without walling a
         // brand-new player (naive ~75% win / smart ~71% HP) — a beefier guard
         // that braces (self-Guard) and stuns, not a mini-boss.
         baseStats: { hp: 38, en: 0, attack: 10, defense: 8, speed: 8 },
         skills: ["attack", "stunBaton", "braceUp"],
         affinities: { psionic: 1.25 }
       },
-      // Overseer Krell — the colony's chief overseer, hand-tuned finale for a
+      // Overseer Voraxx — the colony's chief overseer, hand-tuned finale for a
       // level-1/2 DUO (not derived from Sector 1's depth/level-scaling curve,
       // same "unique fight, tuned directly" treatment as the Warden).
       krell: {
-        typeName: "Overseer Krell", role: "Kharon's Reach chief overseer",
+        typeName: "Overseer Voraxx", role: "Kharon's Reach chief overseer",
         nature: "organic", tier: "boss",
         baseStats: { hp: 140, en: 0, attack: 20, defense: 10, speed: 10 },
         skills: ["attack", "ironDiscipline", "overseersLash", "overseersCrackdown"],
         affinities: { psionic: 1.25 }
-        // Krell's "add" is a Riot Enforcer at his side from the start (see the
+        // Voraxx's "add" is a Riot Enforcer at his side from the start (see the
         // p4 encounter) — no mid-fight wave, keeping the L1 duo opener forgiving.
       },
 
       // ---------- SITE EREBUS (Dungeon 3, planned §5.3) ----------
-      // A native hive, not a Tiangong creation — the annex here studied and
+      // A native hive, not a Vossmark creation — the annex here studied and
       // tried to control it, not build it. Uniformly weak Psionic/Thermal
       // (fire + hive-mind disruption are the hive's classic counters); a mostly
       // Corrosive melee kit with the Shaman/Broodmarshal dealing Psionic
@@ -912,7 +913,7 @@
         affinities: { kinetic: WEAK, psionic: HARD_RESIST }
       },
       // Armored Warrior — the "counter-pick" fight, same design language as
-      // the Tiangong Security Mech: resists the one damage type every class
+      // the Vossmark Security Mech: resists the one damage type every class
       // gets for free (Kinetic), so the squad has to bring Thermal/Psionic.
       erebusArmoredWarrior: {
         typeName: "Erebus Armored Warrior", role: "hive heavy",
@@ -921,7 +922,7 @@
         skills: ["clawSlash", "crushingPincer"],
         affinities: { kinetic: RESIST, psionic: WEAK, thermal: WEAK }
       },
-      // The Broodmarshal — leadership caste, wears a fused Tiangong control
+      // The Broodmarshal — leadership caste, wears a fused Vossmark control
       // rig that never worked (§5.3). Hard-resists Psionic (commands it,
       // immune to it, same "resists its own element" shape as Arc Sentinel);
       // deliberately NOT Kinetic-resistant (the Warden lesson, §9: heroes go
@@ -1056,7 +1057,7 @@
       // fail on it for the right in-fiction reason (it was never organic),
       // and makes Hack's Cyber weakness below land as the mechanical/
       // narrative payoff of the "it's a machine" reveal — closing the loop
-      // back to the Netrunner, the original Tiangong specialist.
+      // back to the Netrunner, the original Vossmark specialist.
       sunGod: {
         typeName: "The Sun God", role: "Helios regulator core, corrupted",
         nature: "synthetic", tier: "boss",
@@ -1071,11 +1072,11 @@
 
     // ENEMY POOLS (Phase G, §5.1) — what a node draws from, by tier. Replaces
     // the old single hardcoded ENCOUNTER; mixes both factions so squads have
-    // to adapt (Netrunner counters Tiangong's synthetics, Mentalist counters
+    // to adapt (Netrunner counters Vossmark's synthetics, Mentalist counters
     // Talos's organics). Drawn from by rollEncounterForNode().
     // Talos units are DEFINED (below) but intentionally NOT pooled here: Talos
     // is a later-arc faction (§5.1), so Sector 1 — the only dungeon that draws
-    // from these pools — stays all-Tiangong (+ the unbranded Hull Roach pest).
+    // from these pools — stays all-Vossmark (+ the unbranded Hull Roach pest).
     // Re-add the talos* keys when a Talos-territory dungeon exists.
     const ENEMY_POOLS = {
       fodder:   ["spiderDrone", "hullRoach"],
@@ -1389,7 +1390,7 @@
         "................",
         "................"
       ],
-      // Humanoid grunt — Tiangong Pvt., Colony Guard: bare-headed fodder/
+      // Humanoid grunt — Grunt, Quota Enforcer: bare-headed fodder/
       // standard organic soldier, rifle-ish weapon hand, same visual recipe
       // as the hero humanoid shapes (outline + visible face + weapon color).
       humanoidGrunt: [
@@ -1415,10 +1416,10 @@
       // helmet + rim, heavy scowling brow, glaring eyes, a gritted snarl; a neck
       // gorget and a BOXY armored torso with shoulder pauldrons (a chest plate,
       // not the hero's lean vest); left arm RAISED overhead gripping a glowing
-      // stun-baton (matches the Colony Guard's Baton Strike), right arm down in
+      // stun-baton (matches the Quota Enforcer's Baton Strike), right arm down in
       // a gauntlet. Modular accent zones for later-tier reskins: H = pauldron /
       // heavy-plate accent, V = glow accent (baton tip / a visor glow) — recolor
-      // for riot / heavy variants. Used by Colony Guard + Tiangong Pvt.
+      // for riot / heavy variants. Used by Quota Enforcer + Grunt.
       // Legend: O outline | P helmet G helmet-rim/gorget | S skin K skin-lt D brow/shadow
       //   W eye-white/teeth E eye-dark | C collar/belt | H pauldron B chest-armor
       //   A arm/plate-shadow X gauntlet | M baton-shaft V baton-glow
@@ -1457,7 +1458,7 @@
         "..OFFFO......OFFFO......",
         "........................"
       ],
-      // Humanoid officer — Tiangong Lt., Talos Vanguard, Overseer Krell
+      // Humanoid officer — Officer, Talos Vanguard, Overseer Voraxx
       // (boss — same shape, bigger via tier-based scale, own palette): a
       // bigger, more ornate humanoid for elite/boss-tier organic enemies.
       humanoidOfficer: [
@@ -1566,7 +1567,7 @@
       // Hive lord — the Broodmarshal (boss): the biggest, most ornate hive
       // shape — jagged crown spikes, a wide glowing multi-eye band, claws
       // both sides. Its palette (below) gives one collar patch a cold metal
-      // tone — the fused Tiangong control rig from its story canon (§5.3) —
+      // tone — the fused Vossmark control rig from its story canon (§5.3) —
       // without needing extra geometry.
       hiveLord: [
         "................",
@@ -1586,7 +1587,7 @@
         "OLLLLLLLLLLLLLLO",
         "OKKKKKKKKKKKKKKO"
       ],
-      // Overseer Krell (boss) — a bespoke fat, jowly tyrant in an officer's coat,
+      // Overseer Voraxx (boss) — a bespoke fat, jowly tyrant in an officer's coat,
       // cracking a whip overhead. Small capped head, huge belly straining a red
       // sash, stubby legs; the lash (N) arcs up from his raised grip (W) and
       // curls at the top-right. 22x22, rendered a touch bigger than other bosses
@@ -1708,7 +1709,7 @@
       } },
 
       // ---------- TIANGONG (Sector 1 roster, §5.1) ----------
-      // Hull Roach — unbranded pest, not Tiangong-issue; grimy grey/rust vs.
+      // Hull Roach — unbranded pest, not Vossmark-issue; grimy grey/rust vs.
       // the hive's organic olive-green, so it still reads as "station vermin."
       hullRoach:    { shape: "hiveCrawler",     palette: {
         A: "#6b5a4a", H: "#5c4a3a", O: "#3a3128", B: "#7a6a55", L: "#4a3f30"
@@ -1717,7 +1718,7 @@
       arcSentinel:  { shape: "sentryBot",        palette: {
         O: "#14140a", V: "#fff27a", E: "#ffcc33", B: "#55524a", A: "#6b6a5e"
       } },
-      // Tiangong Pvt. — rank-and-file enforcer: drab khaki armor + olive helmet,
+      // Grunt — rank-and-file enforcer: drab khaki armor + olive helmet,
       // faction-green stun-baton glow. The differentiated guardTrooper (§5.1).
       tiangongPvt:  { shape: "guardTrooper",     palette: {
         O: "#12140f", P: "#4d5140", G: "#6b7052",                 // helmet shell / rim + gorget
@@ -1732,7 +1733,7 @@
         O: "#0e1012", H: "#454b52", V: "#ffcc33", C: "#33383d", A: "#4a5158",
         B: "#5a6169", W: "#2b2f33", G: "#4a5158", K: "#b23a2e", L: "#454b52", F: "#262a2d"
       } },
-      // Tiangong Lt. — field officer: richer khaki + a red rank sash.
+      // Officer — field officer: richer khaki + a red rank sash.
       tiangongLt:   { shape: "humanoidOfficer",  palette: {
         O: "#14140f", H: "#3f3f30", V: "#8a8f6a", S: "#c9a071", C: "#2e2e22",
         A: "#454533", B: "#565640", W: "#c9ccd1", G: "#c9a071", K: "#6b2b22", L: "#3d3d2c", F: "#1e1e15"
@@ -1762,9 +1763,9 @@
       } },
 
       // ---------- KHARON'S REACH (§5.2a) ----------
-      // Colony Guard — rough militia enforcer: dull worn brown armor + tan
+      // Quota Enforcer — rough militia enforcer: dull worn brown armor + tan
       // helmet, dull amber baton glow (scavenged colony gear, no faction color).
-      // Same guardTrooper shape as the Tiangong Pvt., recolored (§5.2a).
+      // Same guardTrooper shape as the Grunt, recolored (§5.2a).
       colonyGuard:  { shape: "guardTrooper",     palette: {
         O: "#100d0a", P: "#5c4a34", G: "#7a6547",                 // helmet shell / rim + gorget
         S: "#c9a071", K: "#e0b98a", D: "#7a5330", W: "#c9c6be", E: "#141414",  // skin / brow / teeth / eyes
@@ -1773,7 +1774,7 @@
         M: "#6b6158", V: "#d9a94e",                               // baton shaft / amber glow
         T: "#4a3c2a", U: "#2e2418", F: "#1a140d"                  // greaves / boots
       } },
-      // Overseer Krell — chief overseer, boss scale: a fat, jowly tyrant in a
+      // Overseer Voraxx — chief overseer, boss scale: a fat, jowly tyrant in a
       // brown/gold officer coat with a deep-red sash, cracking a leather whip.
       // Bespoke krellFat shape (§SPRITE_SHAPES).
       krell:        { shape: "krellFat",         palette: {
@@ -1812,7 +1813,7 @@
       // The Broodmarshal — hive leadership caste, boss scale: same species
       // colors as Warrior/Roach (olive carapace), a commanding gold multi-eye
       // band, and a cold-metal collar patch — the fused, non-functional
-      // Tiangong control rig from its story canon (§5.3), no extra geometry
+      // Vossmark control rig from its story canon (§5.3), no extra geometry
       // needed, just one palette key reading as metal instead of chitin.
       broodmarshal: { shape: "hiveLord",         palette: {
         O: "#0a0806", H: "#6b4423", V: "#ffcf5c", C: "#5a6169", A: "#5a3d1e",
@@ -1855,7 +1856,7 @@
     // reads it) — `null` means nothing built past this dungeon yet.
     const DUNGEONS = {
       // Kharon's Reach (Phase H3) — the story-mode prologue: a short, mostly
-      // solo escape from a Tiangong mining colony. Linear on purpose (an
+      // solo escape from a Vossmark mining colony. Linear on purpose (an
       // escape, not a dungeon crawl) and much shorter than Sector 1 — see
       // gridfall-design.md §5.2 for the story this dungeon tells.
       prologue: {
@@ -1874,17 +1875,17 @@
                 recruitClass: "mechRunner", recruitName: "Kade", recruitButtonLabel: "Move out.",
                 recruitText: [
                   "A side tunnel, half-collapsed. Kade is elbow-deep in a stalled loader rig, " +
-                    "muttering about Tiangong's maintenance budget.",
+                    "muttering about Vossmark's maintenance budget.",
                   "They see the rifle in your hands and the alarm lights just starting to strobe " +
                     "red down the shaft, and they don't ask a single question.",
                   "\"Hangar bay,\" Kade says, already pulling a salvaged mining laser off the " +
                     "loader's mount. \"I know a way through the drill line. Try to keep up.\""
                 ] },
           p4: { id: "p4", type: "boss", depth: 4, connectsTo: [],
-                enterText: "Overseer Krell blocks the hangar door!" }
+                enterText: "Overseer Voraxx blocks the hangar door!" }
         }
       },
-      // Tiangong Station Sector 1 (Phase G, §5.1) — a genuine branch (safer
+      // Vossmark Station Sector 1 (Phase G, §5.1) — a genuine branch (safer
       // Combat+Rest vs riskier Elite+Loot) that reconverges before a final
       // Elite gate, a Rest stop, then the Boss. (n8 was added during Slice G4
       // balance testing: with no free heal between fights, going straight
@@ -1893,7 +1894,7 @@
       // genre beat, so this earns its spot over strict 8-node math.)
       sector1: {
         start: "n1",
-        title: "TIANGONG STATION SECTOR 1",
+        title: "VOSSMARK STATION SECTOR 1",
         region: "station",   // map backdrop theme (Phase I): orbital space station
         nextDungeonKey: "erebus",
         // The Warden's fixed boss composition (§1d) — moved here from engine
@@ -1975,7 +1976,7 @@
                   "heavy is waiting in the dark, armor-plated and patient." },
           e6: { id: "e6", type: "loot", depth: 4, connectsTo: ["e7"] },
           e7: { id: "e7", type: "combat", depth: 5, connectsTo: ["e8"],
-                enterText: "Tiangong ID plates, half dissolved, are bolted to a door the hive " +
+                enterText: "Vossmark ID plates, half dissolved, are bolted to a door the hive " +
                   "tore open a long time ago. The annex is close now." },
           e8: { id: "e8", type: "rest", depth: 6, connectsTo: ["boss"] },
           boss: { id: "boss", type: "boss", depth: 7, connectsTo: [],

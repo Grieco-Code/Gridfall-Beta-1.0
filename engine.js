@@ -814,7 +814,7 @@
 
         if (isBossClear) {
           let clearLine;
-          if (currentDungeonKey === "prologue") clearLine = "Overseer Krell falls. The hangar is clear!";
+          if (currentDungeonKey === "prologue") clearLine = "Overseer Voraxx falls. The hangar is clear!";
           else if (currentDungeonKey === "sector1") clearLine = "The Warden collapses. Sector 1 is clear!";
           else if (currentDungeonKey === "erebus") clearLine = "The Broodmarshal collapses. The hive scatters!";
           else if (currentDungeonKey === "dungeon4") clearLine = "Proteus finally stops moving. Whatever it was becoming, it's over.";
@@ -901,7 +901,7 @@
         "The hangar door grinds open on a battered long-haul shuttle that has no business " +
           "still flying, and somehow it flies anyway.",
         "Behind you, Kharon's Reach is waking up: floodlights, sirens, someone on the comm " +
-          "still shouting Krell's name like he's going to answer.",
+          "still shouting Voraxx's name like he's going to answer.",
         "He's not going to. Two debts are paid, but there's still a long way to go, and the " +
           "ship is only the first part of getting there."
       ], "Break atmosphere.", function () {
@@ -925,7 +925,7 @@
           "which is why it doesn't make sense when the proximity alarm screams half a system " +
           "later and the empty black ahead lights up with turret fire that was never meant to " +
           "see a living target.",
-        "It isn't Tiangong retaliating. It's older than that: a blockade nobody's manned in " +
+        "It isn't Vossmark retaliating. It's older than that: a blockade nobody's manned in " +
           "years, still doing the one job it was ever given. The shuttle takes three hits before " +
           "anyone gets a hand back on the stick, and by then it doesn't matter whose fault it is.",
         "The ship goes down hard, atmosphere howling through a hull breach, tree cover rushing " +
@@ -955,11 +955,11 @@
         "The Broodmarshal doesn't get up again. For a long moment neither does anyone else. " +
           "The cavern is quiet in a way this planet hasn't been since the crash.",
         "What's left of the control rig comes away from the shell easier than it should, wiring " +
-          "still warm, half of it stamped with a Tiangong asset tag someone tried hard to scrub " +
+          "still warm, half of it stamped with a Vossmark asset tag someone tried hard to scrub " +
           "off. Whatever this thing was supposed to become, it never finished becoming it.",
         "The Long Shot isn't flying on its own parts anymore by the time the annex is stripped " +
           "for anything that still works, but it's flying. Kharon's Reach feels like a long time " +
-          "ago. Tiangong feels smaller than it did yesterday, and somehow that's worse."
+          "ago. Vossmark feels smaller than it did yesterday, and somehow that's worse."
       ], "Get off this rock.", function () {
         currentDungeonKey = nextDungeonKey;
         showTown();
@@ -1011,7 +1011,7 @@
           "the last honest piece of something built to keep a dying system fed, corrupted by " +
           "whatever got loose down here long before either corp came looking.",
         "The coordinates it was guarding aren't out here at all. They're keyed to a world both " +
-          "Tiangong and Talos wrote off generations ago, the one place scarred badly enough that " +
+          "Vossmark and Talos wrote off generations ago, the one place scarred badly enough that " +
           "nobody thought to fight over it. Home, if the word still means anything by now."
       ], "Set course for Earth.", function () {
         if (nextDungeonKey) currentDungeonKey = nextDungeonKey;

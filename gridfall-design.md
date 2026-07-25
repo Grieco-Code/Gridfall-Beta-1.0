@@ -473,7 +473,8 @@ but worth revisiting once H5 lands.
 
 **Canon story beats (the source of truth — game.html's narrative text should match this if the two
 ever drift):**
-- **Setting:** Kharon's Reach, a Tiangong Heavy Industries asteroid mining colony. Serfs are born
+- **Setting:** Kharon's Reach, a Vossmark Industries asteroid mining colony (renamed from Tiangong
+  Heavy Industries, 2026-07-25 — §9.2). Serfs are born
   already owing Tiangong — debt-bondage from birth, raised in tunnel-dark.
 - **Opening beat (no combat — a narrative-only intro screen):** the hero's younger brother, **Dez**,
   reroutes a haul-quota terminal to buy the work gang one shift's rest. **Foreman Voss** executes him
@@ -841,7 +842,7 @@ it's meant to read as the culmination.
   thematically — precursor "unmaking" tech fits it — both because it's a strong thematic fit and
   because it sim-tests the type before endless mode (Phase P3) leans on it harder. This is also where
   the endless-mode wormhole gets cracked open (§5.4b) — sealed as a story object until post-D6.
-- **Dungeon 6 (dead Earth, "the Cradle," finale):** the convergence dungeon — **mixed Tiangong +
+- **Dungeon 6 (dead Earth, "the Cradle," finale):** the convergence dungeon — **mixed Vossmark +
   Talos pools in the same encounters** (free enemy variety, zero new art needed, since both rosters
   already exist), the biggest node count, and the already-locked player-choice ending (§9.5) as the
   capstone.
@@ -1019,6 +1020,40 @@ Two fixes from actual play, not sim-found:
   landed hard. This makes the smart-autoplay tuning pass (already flagged as outstanding above) more
   urgent, not less — flagging explicitly rather than assuming "a bit stronger" landed where intended.
 
+**2026-07-25, same-day — Act I / Sector 1 naming pass (display-name-only, mechanically inert).**
+User-driven rename batch across the first two dungeons + the Region-1 faction, decided after a
+multi-round brainstorm (several AskUserQuestion rounds — the corp name in particular went through
+three passes before landing). Locked:
+- **Colony Guard → Quota Enforcer** — ties directly to the haul-quota terminal already in Dez's death
+  scene, more earned than a generic reskin.
+- **Overseer Krell → Overseer Voraxx.**
+- **Tiangong Pvt. → Grunt**, **Tiangong Lt. → Officer** (both display-name only, `tiangongPvt`/
+  `tiangongLt` ENEMIES keys unchanged — internal identifiers, never player-facing).
+- **The Warden's role subtitle → "Penal Colony AI"** (was "Station Security AI"; typeName stays "The
+  Warden"). Deliberately reuses the `.tile-sub` subtitle line built for exactly this — the ORIGINAL
+  Warden name, "Warden, Prison AI," got clipped by the 100px `.tile-name` ellipsis before that line
+  existed (§12's 2026-07-24 Warden-title-bug entry); this can't regress the same way since name and
+  role render as two separate lines now.
+- **Corp: Tiangong Heavy Industries → Vossmark Industries** (§9.2 carries the full note + rationale).
+  Landed on the "merger-name" technique (à la Weyland-**Yutani**) after two earlier rounds (a
+  wordplay-coinage batch: Blackrig/Gantry/Ironhand/Draeger; then a classic-megacorp-surname batch:
+  Strathmore/Kessler/Vantrell/Ferrous) didn't land — **Vossmark** ties directly into existing canon:
+  Foreman Voss, the mid-level enforcer the hero kills in the prologue's opening scene, shares his name
+  with the corp itself. Implied reading: the founding family's name outlived the family's power, or
+  it's simply common enough on Kharon's Reach that everyone on the floor carries a piece of it.
+- **Full pass executed** across `data.js`/`engine.js`/`ui.js` (typeNames, role subtitles, the Sector 1
+  dungeon title `"VOSSMARK STATION SECTOR 1"`, every narrative string mentioning the old names —
+  prologue intro/recruit/epilogue text, the Erebus shootdown/epilogue beats, the Sun God epilogue,
+  sprite-shape comments) — verified via the same headless jsc parse-check + full smoke test used for
+  the Dungeon 5 build, zero regressions. Two intentional exceptions left as historical record in
+  `data.js` comments (`// Grunt (was "Tiangong Pvt.", 2026-07-25)...`) rather than being erased — same
+  "don't rewrite history" discipline this doc already follows for "Squad Leader" → Tiangong Lt.
+- **Scope note:** this doc's own historical, dated build-log prose (§5.2a/§5.2c/§5.3/§5.4/§5.4a and
+  the §12 entries below this one) still says "Tiangong" and "Krell" in places — left as-is on purpose,
+  matching how this document has never retroactively rewritten past session logs when something was
+  renamed later. §9.1/§9.2/§9.4/the Factions list (the *living* canon, not a dated log) were updated to
+  Vossmark; anything still branded Tiangong below this point is describing what was true *at the time*.
+
 ---
 
 ## 6. Screens & state management (the "glue")
@@ -1163,8 +1198,13 @@ only force that doesn't want to own it.
   They are the story's *third force*: the only faction not trying to own the prize.
 
 ### 9.2 The thematic axis: CAGE vs. MERGE
+*Renamed 2026-07-25: **Tiangong Heavy Industries** is now **Vossmark Industries** — locked, applies
+everywhere below and in every shipped dungeon/enemy. The old name is preserved only in dated
+historical build-log entries earlier in this doc (matching how this doc already treats every prior
+naming change, e.g. "Squad Leader" → Tiangong Lt.); nothing below still uses it as current canon.*
+
 Both corps are two wrong answers to the same theft — this snaps the existing faction design into place:
-- **Tiangong Heavy Industries** (天宫, "heavenly palace") — **dominion through machines. Cage the
+- **Vossmark Industries** — **dominion through machines. Cage the
   alien, own the labor.** Industrial, synthetic, Kinetic/Shock/Cyber; security bots, mechs, the
   Warden AI, the Broodmarshal's *fused control rig that never worked* (§5.3 — already canon). Debt-
   bondage, black sites, authoritarian-industrial. Region-1 faction; the crew's first oppressor
@@ -1197,7 +1237,7 @@ identities, and per-node composition are authored per-dungeon (same discipline a
 dungeon), not pre-designed in the abstract.
 
 - **ACT I — Escape & revenge (SHIPPED).** Personal, boots-on-the-neck. **Kharon's Reach** (§5.2a) →
-  **Tiangong Station Sector 1** (§5.2c). Establishes Tiangong, the crew, the debt-war. Cast: hero +
+  **Vossmark Station Sector 1** (§5.2c). Establishes Vossmark, the crew, the debt-war. Cast: hero +
   Kade (Mech Runner) + Wren (Netrunner).
 - **ACT II — The wider truth (Erebus SHIPPED + 1 to author).**
   - **Site Erebus** (§5.3, shipped) — widens the world past the corp feud; drops the precursor
@@ -1219,7 +1259,7 @@ dungeon), not pre-designed in the abstract.
     abandoned homeworld where the engine actually is. Final confrontation + the ending choice (§9.5).
     The game ends **on burnt-out dead Earth.**
 
-**Named human antagonists to author (the war needs faces):** a **Tiangong director** (architect of the
+**Named human antagonists to author (the war needs faces):** a **Vossmark director** (architect of the
 debt system and the black sites) and a **Talos figure** (a half-transcended bio-executive — a
 body-horror antagonist). The finale can run three-way (both corp heads + the crew), or force the corps
 into a brief truce against the crew. Specifics deferred to when Dungeons 4/6 are authored.
@@ -1251,9 +1291,9 @@ available as an optional Dungeon-4.5 detour only if scope later expands to 7 dun
 
 ### Factions (established 2026-07-22, expanded 2026-07-23 — see §9.2 for the cage/merge axis)
 Two competing megacorps frame the setting — a corporate cold war the crew is caught in:
-- **Tiangong Heavy Industries** (天宫, "heavenly palace") — the **Region 1** faction. Industrial
-  maker of security bots and mechs; the current enemy roster is Tiangong. Grimy, hardware-heavy.
-  *Cage the alien, own the labor* (§9.2).
+- **Vossmark Industries** (renamed from Tiangong Heavy Industries, 2026-07-25 — §9.2) — the
+  **Region 1** faction. Industrial maker of security bots and mechs; the current enemy roster is
+  Vossmark. Grimy, hardware-heavy. *Cage the alien, own the labor* (§9.2).
 - **Talos Systems** — the **rival**, reached in Act II (Dungeon 4). Named for the mythic bronze
   automaton; sleeker, more predatory, *different* tech and affinity profiles so squads must re-adapt.
   *Merge with the alien, transcend humanity* (§9.2).
