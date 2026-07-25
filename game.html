@@ -1,0 +1,842 @@
+<!--
+  GRIDFALL — v2
+
+  A gritty space-core, turn-based RPG battle.
+  Combat runs on LISTS: a PARTY of heroes vs. a GROUP of enemies, everyone
+  acting in Speed order, and you choose which target each action hits.
+
+  Progress so far:
+    - Phase A: multi-combatant combat + targeting (done)
+    - Character-select screen, all 5 classes, expanded enemy roster,
+      smarter enemy AI (specials + heals), 6-slot enemy layout (done)
+    - Phase B: damage types + resistances/weaknesses "affinities" (done)
+    - Phase C: status-effect engine — Burn/Weaken/Sunder/Guard/Disable/Confuse (done)
+    - Phase D: special rebalance + full kits + armor-pierce + 6-enemy roster in
+      3 tiers, Tiangong-branded (done)
+    - Phase E: leveling, skill trees, equipment + Character Sheet (done)
+    - Phase D½: Limit Break gauge + 5 class ultimates (done)
+    - Equipment ownership: party-wide found/owned items, interim loot-on-victory (done)
+    - Phase F: scene manager (goToScene) (done)
+    - Phase G: first mini-dungeon map — Tiangong Station Sector 1, 9 nodes,
+      Talos Systems as a 2nd faction, boss "The Warden" (done)
+    - Phase H1: title screen (Start / Saved Game) + a real localStorage save/load
+      engine, checkpointed on arrival at the Map (done)
+    - Phase H2: story-mode start — a player-named starting hero (the Merc) added
+      to a persistent ROSTER, distinct from the active party; the squad-builder
+      (party management, revisited between dungeons) now reads from the roster
+      instead of a fixed 5-class pick list (done)
+    - Phase H3: the story-mode prologue — "Kharon's Reach," a 4-node Tiangong
+      mining-colony escape. A DUNGEONS registry replaces the single hardcoded
+      map (the game now supports more than one dungeon); a reusable story-scene
+      component delivers the opening beat (the hero's brother Dez killed by
+      Foreman Voss, the hero kills Voss and takes his rifle), a mid-escape
+      recruit beat (Kade, a Mech Runner, joins — duo for the finale), and an
+      escape epilogue (winning the finale vs. Overseer Krell hands off to
+      Sector 1). New: a full HP/EN heal at every fresh dungeon ATTEMPT
+      (not just within one) — both standard genre logic and the fix for a
+      real soft-lock risk once heroes persist across dungeons solo (done)
+    - Phase H4: the Town scene — "the Long Shot," the escape ship, now the
+      general hub between dungeons (Retire/New-squad/Abandon/a no-next-
+      dungeon boss-clear all route there once past the prologue). Hosts a
+      Roster & Equipment screen (Character Sheet generalized beyond the
+      battle endbar — Town opens it against the whole roster, not just the
+      active party), a new read-only Party Inventory screen, and an explicit
+      Save button (on top of the existing automatic checkpoint). A limited,
+      hand-picked salvage grant (Kevlar Mesh, Tactical Sidearm) seeds the
+      equipment pool on first arrival. Sector 1 is reframed as "dungeon 2" —
+      a new "why we're attacking the station" briefing plays once before it
+      — and gets a new mandatory entry node (Wren, a Netrunner, recruited
+      right at the breach point, guaranteed regardless of branch taken).
+      That required shifting every existing Sector 1 node's render depth by
+      +1; a new `levelDepth` field keeps the original enemy-scaling curve
+      intact so the branch's balance wasn't quietly retuned by the shift
+      (sim-verified, see gridfall-design.md §5.2b) (done)
+    - Tightening pass (2026-07-23, post-H4): story text rewritten to cut
+      em-dashes and other tells that read as AI-generated prose. Wren's
+      recruit node moved from BEFORE n1 to AFTER it, so the breach corridor
+      is fought solo/duo first and she's met once it's clear (her dialogue
+      rewritten to match — she no longer claims to have cleared it herself).
+      Difficulty nudged up (AI_SPECIAL_CHANCE 0.35→0.38, AI_HEAL_CHANCE
+      0.4→0.43, ENEMY_SCALE_PER_LEVEL 0.08→0.1); Limit Break gauge gain
+      rates roughly quintupled (0.06/0.03/0.05/1/3 → 0.31/0.13/0.21/3/11)
+      after sim testing showed the original "once per ~2 fights" pacing,
+      tuned against Sector 1's longer fights, meant the gauge rarely even
+      reached half-full across the whole prologue — now fires within the
+      prologue's 3 fights in ~73% of sim playthroughs, not 0% (done)
+    - Phase H5: inventory & loadout screens grown into the fuller flow —
+      Party Inventory is now actionable (a direct "→ Hero" equip button per
+      unequipped item for every eligible roster hero, instead of only
+      listing what's owned and sending the player to a separate screen to
+      act on it); "worn by X" is now a jump straight to that hero's
+      Character Sheet. The Character Sheet's Stats section grew from one
+      line of core numbers into a real overview (class/race/nature/level,
+      the Limit Break gauge %, non-neutral affinities), and both it and the
+      Equipment section now show what an item actually DOES (its stat bonus
+      or granted skill) right next to its name, not just its name (done)
+
+  Still to come: the graphics pass (sprites, canvas), Phase I.
+
+  This is ONE self-contained file with three parts:
+    1) HTML  — the visible structure
+    2) CSS    — the "space terminal" look
+    3) JS     — the game logic
+
+  To play: just double-click this file to open it in a browser.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GRIDFALL</title>
+
+  <!-- ============================================================
+       PART 2: CSS — the look and feel. All CSS, no images.
+       ============================================================ -->
+  <style>
+    body {
+      margin: 0;
+      padding: 12px 20px;
+      background: #0a0e12;
+      color: #c8d6cf;
+      font-family: "Courier New", monospace;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* The whole game fits the viewport height as a flex column, so the action
+       menu and log stay pinned and visible while the battlefield scrolls. */
+    #game {
+      width: 100%;
+      max-width: 760px;
+      height: calc(100vh - 24px);
+      display: flex;
+      flex-direction: column;
+    }
+    /* Select screen and battle each fill the remaining height and scroll inside.
+       #battle scrolls as a safety net — if the endbar/skills panel grow tall,
+       they stay reachable instead of pushing off past #game's fixed height. */
+    #title-scene { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+    #naming-scene { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+    #story-scene { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+    #select { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+    #map { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+    #battle { flex: 1 1 auto; min-height: 0; flex-direction: column; overflow-y: auto; }
+
+    #title {
+      flex: none;
+      text-align: center;
+      letter-spacing: 6px;
+      color: #6cff9e;
+      text-shadow: 0 0 8px rgba(108, 255, 158, 0.5);
+      margin: 0 0 10px 0;
+      border-bottom: 1px solid #1e2a24;
+      padding-bottom: 6px;
+      font-size: 22px;
+    }
+
+    /* ---------- Title screen (Phase H1) ---------- */
+    #title-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 280px;
+      margin: 40px auto 0 auto;
+    }
+    #title-buttons button { padding: 16px 8px; font-size: 16px; }
+    .title-flavor {
+      text-align: center;
+      color: #4d5a53;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    /* ---------- Name-your-hero screen (Phase H2) ---------- */
+    #naming-box {
+      max-width: 320px;
+      margin: 40px auto 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    #naming-box input[type="text"] {
+      background: #0f1116;
+      color: #e6f2ea;
+      border: 1px solid #375063;
+      border-radius: 5px;
+      padding: 10px 8px;
+      font-family: inherit;
+      font-size: 15px;
+    }
+    #naming-box input[type="text"]:focus { outline: none; border-color: #6cff9e; }
+
+    /* ---------- Story scene (Phase H3) — intro/recruit/epilogue beats ---------- */
+    #story-box {
+      max-width: 460px;
+      margin: 30px auto 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .story-p {
+      margin: 0;
+      line-height: 1.5;
+      color: #d7e5dd;
+      font-size: 14px;
+    }
+    #story-box button { margin-top: 6px; }
+
+    /* ---------- Character-select screen ---------- */
+    .select-help {
+      text-align: center;
+      color: #6f8278;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    #class-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .class-card {
+      flex: 1 1 210px;
+      background: #111820;
+      border: 1px solid #263029;
+      border-radius: 6px;
+      padding: 14px;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease,
+                  background 0.15s ease;
+    }
+    .class-card:hover { background: #1a232d; }
+    .class-card.selected {
+      border-color: #6cff9e;
+      box-shadow: 0 0 10px rgba(108, 255, 158, 0.3);
+    }
+
+    .class-card h3 { margin: 0 0 2px 0; font-size: 16px; color: #e6f2ea; }
+    .card-sub   { font-size: 11px; color: #6f8278; }
+    .card-role  { font-size: 12px; color: #9db3a8; margin: 8px 0; }
+    .card-stats { font-size: 11px; color: #c8d6cf; margin-bottom: 6px; }
+    .card-skills{ font-size: 11px; color: #3d8ce0; }
+
+    /* The little numbered badge showing pick order on a selected card. */
+    .pick-badge {
+      position: absolute;
+      top: 10px; right: 12px;
+      width: 20px; height: 20px;
+      line-height: 20px;
+      text-align: center;
+      border-radius: 50%;
+      background: #6cff9e;
+      color: #0a0e12;
+      font-size: 12px;
+      font-weight: bold;
+      display: none;
+    }
+    .class-card.selected .pick-badge { display: block; }
+
+    #deploy-row {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    #deploy-row .count { font-size: 12px; color: #6f8278; }
+
+    /* ---------- Dungeon map ---------- */
+    /* v1: plain rows of clickable node buttons, grouped by depth. Hex-shaped
+       markers + connecting-line art are a later Phase I graphics pass. */
+    .map-title {
+      text-align: center;
+      letter-spacing: 3px;
+      font-size: 12px;
+      color: #6f8278;
+      margin: 4px 0 18px;
+    }
+    .map-message {
+      text-align: center;
+      font-size: 13px;
+      color: #6cff9e;
+      margin: -8px 0 16px;
+    }
+    /* ---------- Dungeon map (Phase I: hex nodes + connectors + backdrop) ---------- */
+    #map { overflow-x: auto; }          /* narrow screens can scroll the fixed-width graph */
+    #map-graph {
+      position: relative;
+      margin: 0 auto 14px;
+      border: 1px solid #1e2a24;
+      border-radius: 10px;
+      overflow: hidden;                 /* clips the backdrop to the rounded frame */
+      background: #05080a;
+    }
+    /* Radial dungeons (§5.4b): a true circular frame, not just a rounded
+       rect — every node sits well inside this radius (computeMapLayoutRadial
+       keeps a margin), so nothing gets clipped, only the backdrop's corners. */
+    #map-graph.map-radial { border-radius: 50%; }
+    /* Backdrop (z0): a per-region atmosphere. All CSS, no image files. */
+    .map-backdrop { position: absolute; inset: 0; z-index: 0; }
+    .region-mining .map-backdrop {
+      background:
+        radial-gradient(circle at 22% 88%, rgba(255,150,60,0.12), transparent 42%),
+        radial-gradient(circle at 82% 96%, rgba(255,110,40,0.10), transparent 46%),
+        radial-gradient(circle at 60% 30%, rgba(120,90,70,0.10), transparent 55%),
+        linear-gradient(#140d09, #1c130c 55%, #0b0705);
+    }
+    .region-station .map-backdrop {
+      background:
+        radial-gradient(1.5px 1.5px at 12% 14%, #d6e8ff, transparent),
+        radial-gradient(1.5px 1.5px at 78% 9%,  #bcd6f5, transparent),
+        radial-gradient(1px 1px at 34% 24%,     #ffffff, transparent),
+        radial-gradient(1px 1px at 90% 30%,     #cfe0ff, transparent),
+        radial-gradient(1.5px 1.5px at 22% 46%, #e6f0ff, transparent),
+        radial-gradient(1px 1px at 66% 40%,     #b8ccf0, transparent),
+        radial-gradient(1px 1px at 46% 66%,     #ffffff, transparent),
+        radial-gradient(1.5px 1.5px at 84% 72%, #d0e2ff, transparent),
+        radial-gradient(1px 1px at 16% 82%,     #c0d4f5, transparent),
+        radial-gradient(circle at 70% 60%, rgba(60,140,224,0.10), transparent 55%),
+        linear-gradient(#06090f, #0a1120 60%, #060a12);
+    }
+    .region-hive .map-backdrop {
+      background:
+        radial-gradient(circle at 50% 8%,  rgba(150,90,210,0.14), transparent 50%),
+        radial-gradient(circle at 20% 70%, rgba(90,150,60,0.10), transparent 45%),
+        radial-gradient(circle at 82% 84%, rgba(120,80,160,0.10), transparent 45%),
+        linear-gradient(#0b0f0a, #121a10 55%, #090b08);
+    }
+    /* Talos bio-foundry (§5.4a): clinical/sterile, deliberately the OPPOSITE
+       read of the hive above — cold white/cyan lab light (ordered, lit) with
+       organic growth visibly breaching containment and a sickly red bleed
+       low in the frame. Cage-vs-merge as a room. */
+    .region-biofoundry .map-backdrop {
+      background:
+        radial-gradient(1px 1px at 20% 12%, #eaf6ff, transparent),
+        radial-gradient(1px 1px at 70% 8%,  #d8f0ff, transparent),
+        radial-gradient(circle at 50% 4%,  rgba(180,230,255,0.16), transparent 45%),
+        radial-gradient(circle at 15% 55%, rgba(90,220,180,0.08), transparent 40%),
+        radial-gradient(circle at 85% 92%, rgba(200,50,50,0.14), transparent 50%),
+        linear-gradient(#0a1012, #0c1618 50%, #130a0a 100%);
+    }
+    /* Helios Station (§5.4b, Dungeon 5): blinding solar glare, deliberately
+       the opposite read of every prior region (mining=dim ember, station=
+       cool starfield, hive=organic dark, biofoundry=clinical light) — this
+       one is a corona blowing OUT from the center, since the map itself is
+       circular (radial mapShape) with the double boss at that center. */
+    .region-helios .map-backdrop {
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,230,150,0.22), transparent 30%),
+        radial-gradient(circle at 50% 50%, rgba(255,150,60,0.14), transparent 55%),
+        radial-gradient(circle at 50% 50%, rgba(120,60,160,0.10), transparent 75%),
+        linear-gradient(#0a0508, #120810 60%, #06040a);
+    }
+    /* Connector lines (z1) between nodes, drawn in SVG. */
+    .map-edges { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+    .map-edge       { stroke: #223038; stroke-width: 2; }
+    .map-edge.open  { stroke: #3d6b7a; stroke-width: 2.5; }
+    .map-edge.taken { stroke: #3d8ce0; stroke-width: 2.5; }
+    /* Dead-end / loot spur (§5.4): dashed so it reads as an optional detour. */
+    .map-edge.spur       { stroke-dasharray: 4 4; }
+    .map-edge.spur.open  { stroke: #6b9e5a; }
+    .map-edge.spur.taken { stroke: #5ac97a; }
+    /* Hex nodes (z2). Each cell is centered on its computed (x,y). */
+    .hexcell {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      display: flex; flex-direction: column; align-items: center;
+      width: 64px;
+    }
+    .hexnode {
+      width: 46px; height: 52px;
+      padding: 0; border: none; cursor: pointer;
+      clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+      background: #1a232b;
+      display: flex; align-items: center; justify-content: center;
+      filter: drop-shadow(0 0 2px rgba(0,0,0,0.7));
+      transition: transform 0.1s ease;
+    }
+    .hex-icon  { font-size: 18px; line-height: 1; }
+    .hex-label {
+      font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+      color: #7a8c83; margin-top: 3px; white-space: nowrap;
+    }
+    /* Dead-end / loot spur (§5.4) sub-label — small, green (matches .spur edges). */
+    .hex-spur-tag {
+      font-size: 8px; letter-spacing: 0.5px; text-transform: uppercase;
+      color: #5ac97a; margin-top: 1px; white-space: nowrap;
+    }
+    /* Per-type fill + icon color. */
+    .hexnode.node-combat  { background: #29343f; } .hexnode.node-combat  .hex-icon { color: #d7e2ea; }
+    .hexnode.node-elite   { background: #382a16; } .hexnode.node-elite   .hex-icon { color: #ffb454; }
+    .hexnode.node-loot    { background: #15311e; } .hexnode.node-loot    .hex-icon { color: #6cff9e; }
+    .hexnode.node-rest    { background: #142838; } .hexnode.node-rest    .hex-icon { color: #5fb0f0; }
+    .hexnode.node-recruit { background: #2b1f3a; } .hexnode.node-recruit .hex-icon { color: #c77dff; }
+    .hexnode.node-unknown { background: #262425; } .hexnode.node-unknown .hex-icon { color: #d9c25a; }
+    .hexnode.node-boss    { width: 56px; height: 62px; background: #3a1618; }
+    .hexnode.node-boss    .hex-icon { color: #ff5a5a; font-size: 24px; }
+    /* States. */
+    .hexnode.locked   { filter: grayscale(1) brightness(0.5); cursor: not-allowed; }
+    .hexnode.locked   .hex-icon { color: #5a6a63; }
+    /* Fog of war (§5.4, Dungeons 4+): "undiscovered", not "forbidden" — a soft
+       glow instead of a dead grayscale lock. */
+    .hexnode.fogged   { background: #182028; cursor: not-allowed; opacity: 0.6; }
+    .hexnode.fogged   .hex-icon { color: #4a6a72; font-size: 22px; }
+    .hexnode.visited  { opacity: 0.5; }
+    .hexnode.visited  .hex-icon { color: #3d8ce0; }
+    .hexnode.reachable { animation: hexpulse 1.5s ease-in-out infinite; }
+    .hexnode.reachable:hover { transform: scale(1.09); }
+    @keyframes hexpulse {
+      0%, 100% { filter: drop-shadow(0 0 2px rgba(108,255,158,0.5)); }
+      50%      { filter: drop-shadow(0 0 8px rgba(108,255,158,0.95)); }
+    }
+    #map-back-row { margin-top: 8px; text-align: center; }
+
+    /* ---------- Battlefield ---------- */
+    .side-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #6f8278;
+      margin: 0 0 8px 2px;
+    }
+
+    /* FF layout: enemies (left) and heroes (right) side by side.
+       Takes the remaining height and scrolls internally if crowded, so the
+       action menu + log below it are always on screen. */
+    #battlefield {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      gap: 16px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+      border-radius: 8px;
+      padding: 10px 8px 0;
+    }
+    /* Combat backdrops (Phase I): the same three region themes as the map,
+       re-skinned as a battle "stage" with a horizon/ground plane so sprites
+       feel grounded. Applied to #battlefield by renderCombatants() from
+       DUNGEONS[currentDungeonKey].region. background-attachment defaults to
+       `scroll` on this overflow container, so the backdrop stays fixed while
+       crowded panels scroll past it. Combatant panels are translucent (below)
+       so the scene reads through and around the sprites. All CSS, no images. */
+    #battlefield.region-mining {
+      background:
+        radial-gradient(ellipse at 50% 102%, rgba(255,140,50,0.13), transparent 62%),
+        radial-gradient(circle at 78% 12%, rgba(150,90,60,0.10), transparent 45%),
+        linear-gradient(#0c0906 0%, #150e09 52%, #281a10 74%, #180f0a 100%);
+    }
+    #battlefield.region-station {
+      background:
+        radial-gradient(1.5px 1.5px at 14% 16%, #d6e8ff, transparent),
+        radial-gradient(1px 1px at 62% 10%, #bcd6f5, transparent),
+        radial-gradient(1.5px 1.5px at 86% 22%, #e6f0ff, transparent),
+        radial-gradient(1px 1px at 34% 30%, #ffffff, transparent),
+        radial-gradient(1px 1px at 46% 12%, #c0d4f5, transparent),
+        radial-gradient(ellipse at 50% 102%, rgba(60,140,224,0.13), transparent 62%),
+        linear-gradient(#06090f 0%, #0a1120 52%, #12244000 55%, #12233c 74%, #0a1526 100%);
+    }
+    #battlefield.region-hive {
+      background:
+        radial-gradient(circle at 50% -5%, rgba(150,90,210,0.14), transparent 55%),
+        radial-gradient(ellipse at 50% 102%, rgba(90,160,60,0.14), transparent 62%),
+        linear-gradient(#0a0f0a 0%, #121a10 52%, #1d2b16 74%, #0e150b 100%);
+    }
+    #battlefield.region-biofoundry {
+      background:
+        radial-gradient(circle at 50% -5%, rgba(180,230,255,0.14), transparent 55%),
+        radial-gradient(circle at 18% 30%, rgba(90,220,180,0.08), transparent 40%),
+        radial-gradient(ellipse at 50% 102%, rgba(200,50,50,0.16), transparent 62%),
+        linear-gradient(#0a1214 0%, #0d181a 52%, #1a0e0e 74%, #120a0a 100%);
+    }
+    #battlefield.region-helios {
+      background:
+        radial-gradient(circle at 50% 30%, rgba(255,230,150,0.20), transparent 45%),
+        radial-gradient(ellipse at 50% 102%, rgba(120,60,160,0.16), transparent 62%),
+        linear-gradient(#0a0508 0%, #120810 52%, #241226 74%, #100714 100%);
+    }
+    .field-col { flex: 1 1 0; min-width: 0; position: relative; z-index: 1; }
+    #enemy-col { flex: 1.35 1 0; }         /* enemies (up to 6) get a bit more room */
+
+    #enemies, #party {
+      display: flex;
+      flex-wrap: wrap;                     /* panels wrap within their column */
+      gap: 8px;
+    }
+
+    /* Narrow screens / phones: stack (enemies on top, heroes below). */
+    @media (max-width: 560px) {
+      #battlefield { flex-direction: column; }
+      .field-col, #enemy-col { flex: 1 1 auto; }
+    }
+
+    /* ============ FF1-style combat UI (Phase I overhaul) ============ */
+    /* Battlefield tiles are sprites ONLY now (no stat cards). Enemies cluster
+       left; the party stacks as a compact column on the right (FF convention).
+       The region backdrop shows fully behind the figures. */
+    #enemies { align-items: flex-end; justify-content: center; }
+    #party   { flex-direction: column; align-items: center; }
+    .sprite-tile {
+      position: relative;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 2px 4px; border-radius: 5px;
+    }
+    .sprite-tile.active .sprite-canvas { filter: drop-shadow(0 0 5px rgba(108, 255, 158, 0.9)); }
+    .sprite-tile.down .sprite-canvas   { opacity: 0.3; filter: grayscale(1); }
+    .sprite-tile.targetable { cursor: pointer; outline: 2px solid #ffd166; outline-offset: 2px; }
+    .sprite-tile.targetable:hover { background: rgba(255, 209, 102, 0.12); }
+    .tile-name {
+      font-size: 10px; color: #c8d6cf; margin-top: 1px; white-space: nowrap;
+      max-width: 120px; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tile-sub {
+      font-size: 8px; color: #7f9488; margin-top: 0; letter-spacing: 0.2px;
+      white-space: nowrap; max-width: 130px; overflow: hidden; text-overflow: ellipsis;
+      text-transform: uppercase;
+    }
+    .tile-hp {
+      width: 46px; height: 4px; margin-top: 2px; overflow: hidden;
+      background: #05080a; border: 1px solid #26302a; border-radius: 2px;
+    }
+    .tile-hp-fill { display: block; height: 100%; width: 100%; background: #e0533d; transition: width 0.2s ease; }
+    .tile-status { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; margin-top: 2px; }
+    .tile-down {
+      position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 9px; letter-spacing: 1px; color: #ff6a5a; z-index: 3;
+      background: rgba(0, 0, 0, 0.72); padding: 1px 4px; border-radius: 3px;
+    }
+
+    /* FF1 window frame in GRIDFALL's teal palette: a light teal border + a thin
+       inner bevel line over a dark gradient. Used by the party status window,
+       the command menu, and the log (all carry class="ff-window"). */
+    .ff-window {
+      background: linear-gradient(#0f2129, #091419);
+      border: 2px solid #3f6f68;
+      border-radius: 7px;
+      box-shadow: inset 0 0 0 1px rgba(120, 200, 180, 0.12);
+    }
+
+    /* Party status window: one compact row per hero (the fix for the tall
+       hero column) — name · class/Lv, then thin HP / EN / Limit bars. */
+    #party-status {
+      flex: none;
+      display: flex; flex-wrap: wrap; gap: 6px 10px;
+      padding: 7px 9px; margin-bottom: 8px;
+    }
+    .pstat-row {
+      flex: 1 1 150px; min-width: 138px;
+      padding: 3px 7px 4px;
+      border: 1px solid transparent; border-radius: 5px;
+    }
+    .pstat-row.active { border-color: #6cff9e; background: rgba(108, 255, 158, 0.07); }
+    .pstat-row.active .pstat-name::before { content: "\25B8\00a0"; color: #6cff9e; }  /* ▸ cursor */
+    .pstat-row.down { opacity: 0.5; }
+    .pstat-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+    .pstat-name { font-size: 13px; color: #e6f2ea; font-weight: bold; }
+    .pstat-sub  { font-size: 10px; color: #6f8278; }
+    .pstat-line { display: flex; align-items: center; gap: 5px; margin-bottom: 2px; }
+    .pstat-tag  { font-size: 9px; width: 15px; text-align: right; color: #7a8c83; }
+    .pstat-tag.limit { color: #c77dff; }
+    .pstat-track {
+      flex: 1 1 auto; height: 7px; overflow: hidden;
+      background: #05080a; border: 1px solid #263029; border-radius: 3px;
+    }
+    .pstat-track.thin { height: 5px; }
+    .pstat-fill { display: block; height: 100%; width: 100%; transition: width 0.2s ease; }
+    .pstat-fill.hp    { background: #e0533d; }
+    .pstat-fill.en    { background: #3d8ce0; }
+    .pstat-fill.limit { background: #c77dff; }
+    .pstat-num { font-size: 10px; color: #9fb0a8; min-width: 48px; text-align: right; }
+
+    /* Phase I sprite canvas: pixelated (no smoothing) so the chunky code-drawn
+       grid stays crisp at 5x scale. Hero canvases are flipped so both sides
+       face the center (enemies left-facing-right, heroes right-facing-left),
+       matching the enemies-left/heroes-right battlefield layout. */
+    .sprite-canvas {
+      display: block;
+      margin: 0 auto 4px;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .sprite-canvas.flip { transform: scaleX(-1); }
+
+    /* (The old .combatant stat-card styles — h2/subtitle/HP-EN-LIMIT bars,
+       active/targetable/down states, down-tag, status container — were retired
+       in the FF1 UI overhaul. Hero stats now live in #party-status; battlefield
+       state lives on .sprite-tile / .tile-* above.) */
+
+    /* Status pips shown under a battlefield sprite (.tile-status). */
+    .pip {
+      font-size: 9px;
+      letter-spacing: 0.5px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      color: #0a0e12;
+      background: #7a8a82;
+    }
+    .pip-burn    { background: #e0733d; }
+    .pip-weaken  { background: #d98cc0; }
+    .pip-sunder  { background: #d9a066; }
+    .pip-guard   { background: #6cff9e; }
+    .pip-disable { background: #9b8cff; }
+    .pip-confuse { background: #ff9ecb; }
+
+    #turn-banner {
+      flex: none;
+      text-align: center;
+      font-size: 13px;
+      color: #6cff9e;
+      min-height: 18px;
+      margin-bottom: 8px;
+    }
+
+    #actions {
+      flex: none;
+      display: flex; flex-wrap: wrap; gap: 6px;
+      padding: 7px 8px; margin-bottom: 8px;
+      min-height: 40px;
+    }
+    /* Command-menu buttons: more compact than the base button, with a small
+       FF cursor caret (▸) on hover. */
+    #actions button { flex: 1 1 auto; min-width: 94px; padding: 8px 10px; font-size: 13px; }
+    #actions button:hover:not(:disabled)::before { content: "\25B8\00a0"; color: #6cff9e; }
+
+    button {
+      flex: 1 1 auto;
+      background: #16212b;
+      color: #c8d6cf;
+      border: 1px solid #375063;
+      border-radius: 5px;
+      padding: 12px 8px;
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    button:hover:not(:disabled) { background: #1f2f3d; color: #ffffff; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    button.cancel { flex: 0 0 auto; border-color: #5a3a3a; }
+    .limit-btn { border-color: #6b4a8f; }
+    .limit-btn:not(:disabled) {
+      border-color: #c77dff;
+      color: #c77dff;
+      box-shadow: 0 0 8px rgba(199, 125, 255, 0.45);
+    }
+
+    #log {
+      flex: none;
+      background: #060d11;   /* darker inset for readability; keeps the ff-window teal frame */
+      padding: 7px 10px;
+      height: 118px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .log-line { margin: 0; padding: 2px 4px; border-radius: 2px; }
+    .log-line:nth-child(even) { background: rgba(255, 255, 255, 0.025); }   /* zebra striping */
+    .log-line.important { color: #6cff9e; }          /* big moments (win/lose/kills) */
+    .log-line.super { color: #ffd166; }              /* "Super effective!" */
+    .log-line.resist { color: #7a8a82; }             /* "Resisted." / "Barely a scratch." */
+
+    #endbar { flex: none; margin-top: 12px; display: flex; gap: 10px; }
+
+    /* Minimal Character Sheet panel (between fights): Stats / Skills / Equipment. */
+    #character-panel {
+      flex: none;
+      background: #111820;
+      border: 1px solid #263029;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    .char-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+    .char-tab {
+      flex: none;
+      padding: 5px 12px;
+      font-size: 12px;
+      background: #0d1319;
+      border-color: #263029;
+    }
+    .char-tab.active {
+      border-color: #6cff9e;
+      color: #6cff9e;
+    }
+    .char-section { margin-bottom: 12px; }
+    .char-section h4 { margin: 0 0 6px 0; font-size: 13px; color: #e6f2ea; }
+    .char-stats { font-size: 12px; color: #c8d6cf; }
+    .char-empty { color: #6f8278; font-size: 12px; margin: 4px 0; }
+    .skill-node {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      border-top: 1px solid #1e2a24;
+      font-size: 12px;
+    }
+    .skill-node em { color: #6f8278; font-style: normal; }
+    .skill-node button { flex: none; padding: 4px 10px; font-size: 12px; }
+
+    .equip-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 0;
+      border-top: 1px solid #1e2a24;
+      font-size: 12px;
+    }
+    .equip-slot-label { flex: 0 0 60px; color: #6f8278; letter-spacing: 0.5px; }
+    .equip-current { flex: 1 1 auto; min-width: 90px; color: #e6f2ea; }
+    .equip-row button { flex: none; padding: 4px 8px; font-size: 11px; }
+    .equip-none { color: #4d5a53; font-size: 11px; font-style: italic; }
+
+    /* ---------- Town scene (Phase H4) ---------- */
+    #town-scene { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+    .town-ship-name {
+      text-align: center;
+      color: #6cff9e;
+      font-size: 15px;
+      letter-spacing: 1px;
+      margin: 4px 0 2px 0;
+    }
+    .town-flavor {
+      text-align: center;
+      color: #6f8278;
+      font-size: 12px;
+      margin: 0 0 16px 0;
+    }
+    .town-message {
+      text-align: center;
+      color: #d7c46c;
+      font-size: 12px;
+      margin: 0 0 14px 0;
+    }
+    #town-roster {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .town-roster-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #111820;
+      border: 1px solid #263029;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+    .town-roster-row .name { color: #e6f2ea; font-weight: bold; }
+    .town-roster-row .sub { color: #6f8278; }
+    #town-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    /* ---------- Inventory panel (Phase H4) ---------- */
+    .inv-section { margin-top: 10px; }
+    .inv-section h4 { margin: 0 0 6px 0; color: #9db3a8; font-size: 13px; }
+    .inv-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-top: 1px solid #1e2a24;
+      font-size: 12px;
+    }
+    .inv-row .unworn { color: #6f8278; font-size: 11px; font-style: italic; }
+    .inv-row em { color: #6f8278; font-style: normal; }
+    .inv-worn-btn {
+      flex: none;
+      background: none;
+      border: none;
+      color: #6cff9e;
+      font-size: 11px;
+      padding: 0;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .inv-equip-choices { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+    .inv-equip-btn { flex: none; padding: 3px 7px; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <h1 id="title">G R I D F A L L</h1>
+
+    <!-- TITLE SCREEN (JS fills this in). Shown first — Start / Saved Game. -->
+    <div id="title-scene"></div>
+
+    <!-- NAME-YOUR-HERO SCREEN (JS fills this in). Shown once, right after Start
+         on a brand-new game, before the squad-builder (Phase H2). -->
+    <div id="naming-scene" style="display:none;"></div>
+
+    <!-- STORY SCENE (JS fills this in). A generic reusable "narrative beat"
+         screen — paragraphs + one Continue button (see showStoryScene, Phase
+         H3). Used for the prologue's intro, the mid-dungeon recruit beat, and
+         the escape epilogue; reusable for later story moments too. -->
+    <div id="story-scene" style="display:none;"></div>
+
+    <!-- TOWN SCENE (JS fills this in, Phase H4). The general hub between
+         dungeons — the escape ship, "the Long Shot," to start. Reachable
+         after the prologue and after any return-to-base action once past
+         it. Hosts Save, Roster/Inventory review, and the way to the next
+         dungeon's squad-builder. -->
+    <div id="town-scene" style="display:none;"></div>
+
+    <!-- SQUAD-BUILDER SCREEN (JS fills this in). Reached from Town (Phase
+         H4), or straight from the prologue's naming/intro flow before Town
+         exists — picks up to 3 from the player's roster (Phase H2; used to
+         be a fixed pick-3-of-5 CLASSES). -->
+    <div id="select" style="display:none;"></div>
+
+    <!-- DUNGEON MAP (JS fills this in). Shown between Deploy and the first node,
+         and again after every node that returns to the map. -->
+    <div id="map" style="display:none;"></div>
+
+    <!-- BATTLEFIELD (hidden until you Deploy).
+         FF-style: enemies on the LEFT, heroes on the RIGHT (stacks on narrow screens). -->
+    <div id="battle" style="display:none;">
+      <div id="battlefield">
+        <div class="field-col" id="enemy-col">
+          <p class="side-label">HOSTILES</p>
+          <div id="enemies"></div>
+        </div>
+        <div class="field-col" id="hero-col">
+          <p class="side-label">SQUAD</p>
+          <div id="party"></div>
+        </div>
+      </div>
+
+      <div id="turn-banner"></div>
+      <!-- FF1-style party status window: one compact row per hero (Phase I).
+           Replaces the tall per-hero stat cards that used to live on the
+           battlefield. Filled by renderCombatants(). -->
+      <div id="party-status" class="ff-window"></div>
+      <div id="actions" class="ff-window"></div>
+      <div id="log" class="ff-window"></div>
+    </div>
+  </div>
+
+  <!-- PART 3: JavaScript — split into classic <script> files (Phase I refactor,
+       2026-07-23). Load order matters: data → state → ui → engine → main (the
+       showTitle() entry point). Classic scripts (NOT ES modules) so
+       double-click file:// still works; they share one global scope, so this
+       split is purely organizational — no behavior change. The headless
+       balance sim (tech reference §9) now CONCATENATES these files instead of
+       extracting one inline <script> block. -->
+  <script src="data.js"></script>
+  <script src="state.js"></script>
+  <script src="ui.js"></script>
+  <script src="engine.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
