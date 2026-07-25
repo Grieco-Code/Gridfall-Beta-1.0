@@ -332,6 +332,51 @@
         radial-gradient(circle at 50% 50%, rgba(120,60,160,0.10), transparent 75%),
         linear-gradient(#0a0508, #120810 60%, #06040a);
     }
+    /* Dungeon 6 "the Cradle" (§5.4c): a multi-zone descent through dead Earth.
+       These 6 themes are set per-NODE (not just per-dungeon) so the backdrop
+       can visibly change as the crew descends through zones within ONE
+       dungeon — the map graph itself still uses the dungeon-wide default
+       (below), but the battlefield (see #battlefield.region-* further down)
+       reads the CURRENT node's region if it sets one. Ash/ember city ->
+       damp dark undercity -> cold-white frozen wastes -> charred forest ->
+       magma-red descent -> void+molten core, each deliberately distinct from
+       every prior region and from each other. */
+    .region-burntcity .map-backdrop {
+      background:
+        radial-gradient(circle at 30% 85%, rgba(255,120,60,0.10), transparent 50%),
+        radial-gradient(circle at 75% 20%, rgba(120,110,100,0.08), transparent 55%),
+        linear-gradient(#0d0c0b, #171512 55%, #0a0908);
+    }
+    .region-undercity .map-backdrop {
+      background:
+        radial-gradient(circle at 50% 10%, rgba(80,120,140,0.10), transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(60,90,70,0.08), transparent 45%),
+        linear-gradient(#07090a, #0b1012 55%, #050707);
+    }
+    .region-frozen .map-backdrop {
+      background:
+        radial-gradient(circle at 50% 20%, rgba(180,220,255,0.16), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(140,190,230,0.10), transparent 45%),
+        linear-gradient(#0a0e14, #10181f 55%, #060a0e);
+    }
+    .region-forest .map-backdrop {
+      background:
+        radial-gradient(circle at 50% 90%, rgba(255,110,40,0.10), transparent 50%),
+        radial-gradient(circle at 30% 20%, rgba(90,140,60,0.10), transparent 45%),
+        linear-gradient(#0a0b07, #12140c 55%, #070804);
+    }
+    .region-descent .map-backdrop {
+      background:
+        radial-gradient(circle at 50% 95%, rgba(255,90,40,0.18), transparent 45%),
+        radial-gradient(circle at 70% 30%, rgba(140,60,30,0.10), transparent 50%),
+        linear-gradient(#0a0605, #180a06 55%, #060302);
+    }
+    .region-core .map-backdrop {
+      background:
+        radial-gradient(circle at 50% 50%, rgba(160,80,220,0.20), transparent 35%),
+        radial-gradient(circle at 50% 50%, rgba(255,90,40,0.14), transparent 60%),
+        linear-gradient(#08050a, #0e0710 55%, #050308);
+    }
     /* Connector lines (z1) between nodes, drawn in SVG. */
     .map-edges { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
     .map-edge       { stroke: #223038; stroke-width: 2; }
@@ -457,6 +502,44 @@
         radial-gradient(circle at 50% 30%, rgba(255,230,150,0.20), transparent 45%),
         radial-gradient(ellipse at 50% 102%, rgba(120,60,160,0.16), transparent 62%),
         linear-gradient(#0a0508 0%, #120810 52%, #241226 74%, #100714 100%);
+    }
+    /* Dungeon 6 zone backdrops (§5.4c) — set per-NODE via renderCombatants(),
+       not just per-dungeon (see the ui.js comment there). */
+    #battlefield.region-burntcity {
+      background:
+        radial-gradient(ellipse at 50% 102%, rgba(255,120,60,0.12), transparent 60%),
+        radial-gradient(circle at 50% -5%, rgba(140,130,120,0.10), transparent 50%),
+        linear-gradient(#0c0b0a 0%, #16130f 52%, #241d15 74%, #130f0b 100%);
+    }
+    #battlefield.region-undercity {
+      background:
+        radial-gradient(circle at 50% -5%, rgba(80,120,140,0.12), transparent 50%),
+        radial-gradient(ellipse at 50% 102%, rgba(50,80,60,0.12), transparent 60%),
+        linear-gradient(#070909 0%, #0b1112 52%, #10181a 74%, #080b0c 100%);
+    }
+    #battlefield.region-frozen {
+      background:
+        radial-gradient(circle at 50% -5%, rgba(200,230,255,0.18), transparent 50%),
+        radial-gradient(ellipse at 50% 102%, rgba(120,170,220,0.14), transparent 60%),
+        linear-gradient(#0a0e12 0%, #101a20 52%, #1c2e38 74%, #0c141a 100%);
+    }
+    #battlefield.region-forest {
+      background:
+        radial-gradient(ellipse at 50% 102%, rgba(255,110,40,0.12), transparent 60%),
+        radial-gradient(circle at 50% -5%, rgba(110,150,70,0.12), transparent 50%),
+        linear-gradient(#090a06 0%, #12140c 52%, #1c2010 74%, #0d0f08 100%);
+    }
+    #battlefield.region-descent {
+      background:
+        radial-gradient(ellipse at 50% 102%, rgba(255,90,40,0.20), transparent 55%),
+        radial-gradient(circle at 50% -5%, rgba(160,70,30,0.12), transparent 50%),
+        linear-gradient(#090504 0%, #170a06 52%, #2a1108 74%, #120704 100%);
+    }
+    #battlefield.region-core {
+      background:
+        radial-gradient(circle at 50% 30%, rgba(170,90,230,0.22), transparent 45%),
+        radial-gradient(ellipse at 50% 102%, rgba(255,90,40,0.18), transparent 60%),
+        linear-gradient(#08050a 0%, #100714 52%, #241030 74%, #0c0610 100%);
     }
     .field-col { flex: 1 1 0; min-width: 0; position: relative; z-index: 1; }
     #enemy-col { flex: 1.35 1 0; }         /* enemies (up to 6) get a bit more room */

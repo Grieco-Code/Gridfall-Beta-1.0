@@ -19,11 +19,20 @@ pass** (§9.2, §12) — Colony Guard → Quota Enforcer, Overseer Krell → Ove
 → Vossmark Grunt/Vossmark Officer, the Warden's role → "Penal Colony AI", and the corp itself,
 **Tiangong Heavy Industries → Vossmark Industries** — both the display text and the internal code
 identifiers (`ENEMIES.krell`→`voraxx`, `tiangongPvt`→`vossmarkGrunt`, `tiangongLt`→`vossmarkOfficer`,
-`colonyGuard`→`quotaEnforcer`) were updated and verified. **Remaining story content: Dungeon 6 (dead
-Earth finale)**, plus that smart-autoplay balance pass on Dungeon 5 (structurally verified, zero
-crashes, but only naive-floor tested — see §5.4b) and a sprite-art pass for Dungeon 4's AND Dungeon 5's
-new rosters (currently generic-blob fallback — see [[gridfall-sprite-workflow]] /
-[[gridfall-sprite-status]] for the full consolidated debt list). Everything below this line is
+`colonyGuard`→`quotaEnforcer`) were updated and verified. **Same day, follow-up: Dungeon 5 balance
+pass** (a full-chain sim caught the bosses' hardcoded levels 7/8 were miscalibrated against a party
+that actually arrives around level 2 — fixed and re-verified) **and Dungeon 6 "the Cradle" fully
+designed AND built** (§5.4c) — Talos retconned from a rival corp into a precursor-touched human
+lineage; the finale is a two-phase double boss (Kredex fuses with the Loom into **Chthon, God of the
+Breach**, whose defeat directly cracks the Helios seal open); Talos's own leader (**Phthora, the
+Fleshspring**) fails a mirrored merge attempt earlier in the dungeon; two new recruits (Vincent/Dread
+Knight, Sexias/new Corrosive-specialist class) close real content/system gaps; the game's first
+branching ending (all three §9.5 choices) is implemented. **Story arc is now content-complete** —
+sim-verified as a first-pass baseline (structurally clean, no crashes, one squad clears the full chain
+at 36% win rate), but NOT yet balance-tuned to the game's usual target band — that's its own later
+roadmap phase (§5.4c). Sprite art for Dungeon 4/5/6's new rosters is still outstanding (generic-blob
+fallback — see [[gridfall-sprite-workflow]] / [[gridfall-sprite-status]] for the full consolidated
+debt list). Everything below this line is
 the v3 changelog, kept as history. · **Prior build:** v3 — Phases A–G: the v2 combat core (damage types,
 statuses, tiered Tiangong roster, skill trees, equipment, leveling, Limit Break) plus a real scene
 manager and the **first mini-dungeon** (Tiangong Station Sector 1, 9 nodes, Talos Systems as a 2nd
@@ -1065,6 +1074,282 @@ three passes before landing). Locked:
 
 ---
 
+### 5.4c Dungeon 6 "the Cradle" — finale design lock + the Talos retcon (locked 2026-07-25;
+**BUILT same day, first-pass sim-verified** — see the dated addendum at the end of this section)
+
+Full design pass for the game's finale, done as a dedicated planning session (multiple genuine
+back-and-forth rounds, same brainstorm discipline as every prior naming/design session in this doc).
+Below is the ORIGINAL spec as authored against — same status §5.4a/§5.4b
+had before their respective build sessions. Opens directly on the line Dungeon 5's epilogue already
+wrote: *"The coordinates ... are keyed to a world both Vossmark and Talos wrote off generations ago
+... Home, if the word still means anything by now."*
+
+**The Talos retcon (core canon, not just D6 content — §9.2/§9.3/§9.6/Factions above already updated).**
+Talos is not a corporation — it's a lineage descended from humans who, over generations of
+self-directed bio-slicing and cloning, became something no longer recognizably human. Their
+transformation was triggered/amplified by exposure to precursor technology or biology, the same root
+cause as the Erebus hive's own nature (§9.3) — one precursor-adjacent origin, two outcomes: a
+caretaker-organism that was never human (the hive), and humans who lost their humanity on purpose,
+believing it was transcendence (Talos). **Talos began on Earth**, generations before being scattered
+to their current territory (the Europa/moon bio-foundry, §9.4 — that's just where they live now, not
+where they started). Researched every existing Talos reference (`data.js`/`engine.js`/this doc) before
+locking this: **the actual player-facing text in Dungeon 4 never once says "corporation"** — it's
+already written ambiguously ("the foundry," "specimens," "SUBJECT SIX," "whatever was still human in
+there") — so **Dungeon 4 needs zero retconning**, only this doc's own authorial framing changes.
+Vestigial human-institutional language surviving among Talos ("bio-executive," "specimen," "the
+executive suite") is ceremonial/caste terminology inherited from whatever program started this,
+generations ago — not an ongoing corporate structure. D4's existing Security Wing / Specimen Wing
+split now reads as a caste system for free: Talos Wraith/Phantom/Vanguard (closer to human,
+soldier-shaped) vs. Splice Husk/Bio-Tank/Chimera Specimen (experimental, unstable) — no new content
+needed, just a reveal of what the structure already implied. Naming simplified to **"Talos"** (dropped
+"Systems" — reads as a name like Erebus/Kharon/Helios, not corporate branding).
+
+**Story climax.** Every final boss in this game so far shares one shape: a control/regulator structure
+that lost control (the Warden = AI, the Broodmarshal = a fused rig that never worked, the Sun God = a
+corrupted regulator mistaken for a god). Dungeon 6 closes that trilogy at its biggest scale, and
+correctly assigns it to **Vossmark** — the faction whose entire identity IS control — rather than
+Talos (whose doctrine is already "merge on purpose," so a Talos merge would be a win condition, not a
+horror):
+- **Chancellor Kredex au Ra** (Vossmark's supreme leader — the title escalated past
+  Director/Overseer/Foreman on purpose, implying Vossmark's debt-empire has become closer to a state
+  than a corporation by the endgame) has been hunting Talos's bio-technology — and by extension
+  whatever lies beneath it — not just for generic power, but to destroy Talos and his other rivals
+  outright (a personal, near-genocidal supremacy drive, not simple greed). This hunt has been running
+  as a hidden strategic thread above what the player has seen in Acts I-II; nothing about Kharon's
+  Reach or Sector 1's day-to-day operations needs to change. At the Core, desperate to crack the
+  Loom/Breach open under his OWN control, his ritual instead becomes the very thing that frees what it
+  was trying to harness — **the entity has been letting him believe he was in control the whole time,
+  and uses his completed ritual as its way out.** The ultimate believer in cages becomes the vessel for
+  the ultimate loss of control — the cleanest possible final statement on Vossmark's doctrine.
+- **Phthora, the Fleshspring** — Talos's actual leader and origin-point (retroactively, every earlier
+  Talos enemy — Splice Husk, Bio-Tank, Chimera Specimen, even Proteus's "half-transcended" experiment —
+  reads as a generation/branch descended from this one source). Explicitly NOT a reuse of Proteus, who
+  already died completing D4's "Talos figure" beat ("whatever it was becoming, it's over" reads as
+  final). Races ahead of Vossmark to reach the Loom first and attempts to complete the lineage's
+  founding transcendence at the source — **fails**, stopped mid-transformation by the crew, left a
+  body-horror wreck rather than the ascension the whole lineage was bred toward. This is the deliberate
+  mirror to Kredex's arc: Talos's doctrine (merge on purpose) fails outright, while Vossmark's doctrine
+  (control it) produces the worst possible outcome imaginable. Both philosophies get a real, earned
+  final word; neither wins — reinforcing "the crew rejects both, neither is the good one" (§9.2).
+  Name landed after a multi-round brainstorm: started at "Prometheus" (rejected once the ending
+  flipped — Prometheus succeeded in the myth, wrong for a character who fails), through
+  Icarus/Tantalus/Lycaon/Actaeon (hubris-punished figures), through Nosos (disease-spirit, close but
+  not quite), to **Phthora** — the actual Greek word for "corruption/decay/ruin," repurposed as a name
+  the same way "Chthon" was. Title iterated from "Talos Prime" (too corporate-rank once the retcon
+  landed) through "Broodfather Phthora" to the final pick, **"the Fleshspring"** — an epithet in the
+  "The Warden"/"The Sun God" style, stating directly that he isn't just a ruler, he's the literal
+  source everything Talos's flesh flows from.
+- **Void Wyrm stays reserved for endless mode** (already locked, gameplay-direction memory) — not
+  spent here. Appears only as a glimpse (a shape in Chthon's death-vision, or in the newly-widening
+  Breach during the epilogue) — a sequel hook, not a spent reveal.
+
+**The finale fight — a two-phase double boss at the Core (reuses the exact engine capability D5's
+Void Soul Eater → Sun God chain already built, no new engine work needed):**
+1. **Phase 1 — "the caged god"** (no separate typeName needed): still partially bound, straining
+   against what's left of the Loom's containment while Kredex's rig tears at the seams trying to
+   harness it.
+2. **Fusion beat**, on-screen, not off-screen exposition: Kredex's ritual completes as his rig fails;
+   the entity, never actually contained, seizes him as its way out.
+3. **Phase 2 — Chthon, God of the Breach** — the fused Kredex+entity, the true final boss. Name
+   repurposes "Chthon," already sitting in §9.3 as an unused alternate working-name for the Loom's
+   site — paying off a thread already planted. Presentation: omnipotent/god-beast/dimension-dragon,
+   despite secretly still being "a control structure that lost control," same DNA as every prior final
+   boss. Void-touched. No rest node between phases — same "the attrition IS the fight" pattern as D5.
+
+**The Breach.** Chthon's defeat is the literal, in-fiction CAUSE of the Helios wormhole finally tearing
+open for real — not a coincidental parallel epilogue event. Mechanically grounded, not just poetic:
+Earth and Helios are already established as ONE split precursor system (§5.4b), so the entity tearing
+free at one end reverberates at the other. Sequence: fight Chthon → an immediate on-screen consequence
+beat (the Breach cracks open, before any dialogue) → THEN the Loom presents the §9.5 ending choice, all
+three of which now get framed against a door that's already open, not a hypothetical one.
+
+**Two new recruits (both join in D6 — closes a real content gap AND fixes a real system gap):**
+- **Vincent — Dread Knight.** Dread Knight has a fully-built kit (Tank/Guard, "Unbreakable Line" limit
+  break, race tag "Human (Voidborn)") but has **never once been recruited in the story** — a real
+  orphaned-content gap caught during this planning session, not a design choice (roster recruit order:
+  Merc/player at game start → Kade/Mech Runner → Wren/Netrunner → Six/Mentalist — Dread Knight was
+  built and then never used). "Voidborn" is read POETICALLY, not as a literal Void-damage-type
+  connection to Helios: Vincent is a native descendant of Earth's post-scouring survivor lineages,
+  born generations into the aftermath/void the scouring left behind. Recruited in the Undercity/caves
+  zone: initially reads as an obstacle (a wary guardian testing/blocking the crew at the edge of the
+  ruins) before joining — fits "Tank/Guard" identity better than a straightforward rescue. This same
+  Undercity lore node is also where Talos's true Earth origin (above) gets uncovered, via old records.
+- **Sexias — new class, Corrosive specialist.** Closes a real, data-verified gap in the affinity
+  system: grepping every `affinities:`/`damageType:` in `data.js` showed Corrosive is a dead type —
+  Talos and Erebus both built signature kits around dealing it, but no hero could deal it and nothing
+  was ever weak to it, pure sunk authoring cost with zero payoff. (Broader findings from that same
+  audit — Kinetic being the most commonly-resisted type despite being everyone's free basic attack,
+  Psionic/Cyber's hard organic/synthetic binary, 3 of 5 classes having zero personal affinities — are
+  real but explicitly OUT OF SCOPE for D6, deferred to their own dedicated rebalance session.) Sexias
+  is a Vossmark deserter from the corp's own Earth expedition, turned against orders when he saw what
+  "securing the Loom" actually meant on the ground; fights with scavenged, corroded ex-Vossmark gear
+  (armor-stripping/Sunder-synergy kit). Mirrors the crew's own arc (another person walking away from
+  the cage) rather than duplicating Six's "freed specimen" beat. Held by Vossmark loyalist enforcers
+  for desertion; freed via a mini-boss fight in the burnt-forest side-arm (below). Full kit
+  (skills/growth/limitBreak/tree/sprite) not yet designed — only the identity + damage-type niche is
+  locked.
+
+**Map & zones.** One continuous fog-of-war descent (matches every dungeon since D4), reusing D5's
+radial "dive to center" layout (the capability already exists — cheapest engine cost, and thematically
+fits "descend into a planet" at least as well as it fit "approach a station"). Estimated ~20-26 nodes —
+deliberately the biggest map yet, earmarked back when D4/D5/D6 were first differentiated (§5.4a). A new
+engine capability is likely needed: **per-node/per-zone backdrop `region` override** (`region` is
+currently dungeon-wide only) so the visual backdrop can actually change as the crew descends through
+zones within one dungeon — not yet built.
+
+1. **Surface — burnt city ruins.** Opening zone. Both Vossmark's expedition and what's left of Talos
+   are already here, fighting the environment and each other — mixed encounters from fight one (an
+   already-locked D6 intent from §5.4a's original differentiation pass).
+2. **Undercity / caves.** Connective zone. Houses BOTH the Talos-origin lore node (above) and Vincent's
+   recruit gate (above).
+3. **Frozen wastes.** The one biome nothing in the game has visually touched yet (everything so far is
+   dark-organic, grimy-industrial, clinical-white, or blinding-solar — nothing cold-white). Dead
+   Earth's climate collapsed after the scouring. No dedicated named boss here — pure exploration/combat
+   bulk, not every zone needs one.
+4. **Burnt forest** — a SHORT side-arm/detour (like D4/D5's dead-end spurs), not a full zone (keeps the
+   already-biggest-map's node count sane). Gates Sexias's recruit beat via a Vossmark loyalist
+   mini-boss holding him for desertion.
+5. **Deep descent — crust into mantle.** The literal plunge into the Earth. **Phthora's boss fight
+   lives here** — closer to the Loom than Vossmark got at this point in the story, which is part of
+   why Kredex is so desperate by the time the crew reaches him.
+6. **The Core — the Loom.** Final arena, Void-touched. The two-phase Chthon double boss (above) → the
+   Breach cracks open live → the Loom presents the §9.5 ending choice.
+
+**Not yet decided / explicitly deferred:** exact per-node composition and enemy pools for each zone;
+sprite work for anything new (per the sprite-workflow discipline — ask-before-drawing, not bundled
+into a content pass); Sexias's full kit; the broader damage-type rebalance flagged above; the new
+per-zone `region`-override engine capability; sim-verification of D6's difficulty once authored (per
+the established naive+smart-autoplay, FULL-CHAIN methodology — §12/gameplay-direction memory's
+2026-07-25 Dungeon 5 entry found a real 5-level boss-tag mismatch bug that ONLY a full chain test
+caught, isolated tests at the "authored" level looked fine and hid it completely — do not skip the
+full-chain step for D6).
+
+**Scope reduction, worth flagging:** unlike Dungeon 4/5 (each of which introduced a full new enemy
+roster), D6's zones 1-3 don't need new trash/standard/elite enemies at all — the "mixed Vossmark+Talos
+pools in the same encounters" intent (locked since §5.4a's original D4/5/6 differentiation pass) means
+zones 1-3 can draw on the ENEMIES already shipped (`vossmarkGrunt`/`vossmarkOfficer`/`securityMech`/
+`talosWraith`/`talosPhantom`/`talosVanguard`/`spliceHusk`/`bioTank`/`chimeraSpecimen`), zero new art or
+data needed there. Real new content is concentrated in: Sexias (new class + full kit), the mini-boss
+guarding him (can reuse an existing Vossmark elite, e.g. a `vossmarkOfficer`/`riotEnforcer`-shaped
+"loyalist enforcer"), Phthora, and Chthon's two phases. This makes D6 cheaper to author than its node
+count alone suggests.
+
+**Build order (locked 2026-07-25) — author and verify in this sequence, not all at once:**
+1. **Full node-graph skeleton first** — all 6 zones' node ids/types/`connectsTo` edges laid out before
+   any prose or enemy work, so the whole shape can be structurally checked (every edge resolves, exactly
+   one terminal boss, no orphan nodes) before content goes on top of it — same discipline as every prior
+   dungeon's headless structural check.
+2. **Zone 1 (Surface city)** — mixed pools, no new enemies. Fastest path to something sim-testable.
+3. **Zone 2 (Undercity)** — Vincent's recruit node (no new kit — Dread Knight already exists in full)
+   + the Talos-origin lore node (§5.4c above).
+4. **New engine capability: per-node/per-zone `region` backdrop override** — built and verified against
+   Zone 3 first (the first zone that actually needs a visual break from Zone 1/2's ruins), since it's
+   infrastructure every later zone depends on.
+5. **Zone 3 (Frozen Wastes)** — no dedicated boss, pure bulk zone.
+6. **Zone 4 (Forest side-arm) + Sexias** — his full kit (skills/growth/limitBreak/tree) authored here,
+   plus the loyalist-enforcer mini-boss gate.
+7. **Zone 5 (Deep Descent) + Phthora, the Fleshspring** — new boss content.
+8. **Zone 6 (the Core) + the Chthon two-phase finale** — the caged-god phase, the fusion beat, Chthon
+   itself, the Breach consequence beat, then the §9.5 ending choice screen.
+9. **Wiring:** `dungeon5.nextDungeonKey = "dungeon6"` + a `showDungeon5Epilogue`-pattern epilogue
+   function for D6 itself (check for the `showXEpilogue()`-with-no-argument landmine pattern first,
+   per the Erebus→D4 postmortem, §13 changelog).
+10. **Full-chain sim verification** (naive + smart autoplay, real `startDungeon`→`onNodeClick` control
+    flow, not isolated fights) across the ENTIRE 6-zone run before calling D6 done — non-negotiable per
+    the Dungeon 5 postmortem above.
+
+**The roadmap beyond D6 (locked 2026-07-25, user-directed sequencing):** once D6 ships and is
+sim-verified, work continues in this order — each phase gets its own dedicated pass, not bundled:
+1. **Story tightening pass #2** — re-read the full arc end-to-end once D6 exists as real content (not
+   just spec) and fix anything that reads wrong now that the whole story is actually playable start to
+   finish.
+2. **Battle balance, mechanics, equipment, skill trees ("P2 build-depth," gameplay-direction memory)**
+   — branching skill trees with real passives/opportunity cost (currently every tree is 1-2 nodes, all
+   "unlock one active," no real choice), the deferred Affinity/Armor-Shields gear-families model (§7.1),
+   and the broader damage-type rebalance flagged in §5.4c above (Kinetic's identity, softening the
+   Psionic/Cyber binaries, giving Merc/Dread Knight/Mech Runner real affinities).
+3. **Sprite pass, throughout** — clears the full accumulated art debt (D4 Specimen Wing, D5's Void
+   roster, Dread Knight/Mentalist's undersized sprites, and whatever D6 adds) in one dedicated pass
+   rather than piecemeal, per the established ask-before-drawing workflow.
+4. **UI/UX quality-of-life improvements** — polish pass on the menu/battle/map screens themselves,
+   independent of new content.
+5. **The endless-mode portal ("P3")** — the actual playable wormhole/infinite-scaling endgame, whose
+   in-fiction origin (the Breach, §5.4c) will already exist in the story by this point; this is where
+   it becomes real content, not just narrative setup.
+6. **Final tuning pass with heavy playtesting** — once every system is in, a dedicated pass to
+   fine-tune everything against real play, not just simulation.
+
+**2026-07-25, SAME-DAY BUILD SESSION — Dungeon 6 fully authored + first-pass sim-verified.** Everything
+above (Talos retcon, the Chthon two-phase finale, Vincent/Sexias, the full 6-zone map) was built into
+`data.js`/`engine.js`/`ui.js`/`index.html` in one session, following the locked build order exactly.
+
+**Shipped:**
+- **The full 22-node graph** (all 6 zones, radial "dive to center" layout, fog of war) — structurally
+  verified clean (every edge resolves, exactly one terminal boss, full reachability from start,
+  every skill/pool/bossEncounter/recruitClass reference resolves).
+- **New engine capability: per-NODE `region` backdrop override** (`ui.js` `renderCombatants`) — falls
+  back to the dungeon-wide region, so every pre-D6 dungeon is byte-for-byte unaffected. 6 new CSS
+  region themes added (`burntcity`/`undercity`/`frozen`/`forest`/`descent`/`core`, both map and
+  battlefield variants, same gradient-only technique as every prior region).
+- **Sexias (new class, Saboteur)** — full kit shipped (`corrodedEdge`/`acidCharge` base skills,
+  `corrosionField` skill-tree unlock, `acidPurge` limit break) — closes the Corrosive dead-type gap
+  the affinity audit found. Vincent (Dread Knight) recruited via a real story beat — closes the
+  orphaned-class gap.
+- **Phthora, the Fleshspring** (Deep Descent boss) and the **Chthon two-phase finale** ("the caged
+  god" → fusion → **Chthon, God of the Breach**, reusing D5's double-boss engine capability, zero new
+  engine work needed there) — all fully authored with unique skills.
+- **The game's first branching ending** — `showDungeon6Epilogue` (the Breach-cracks-open consequence
+  beat) → `showEndingChoice` (a new 3-button story-scene pattern, reusing `showSquadSwapPrompt`'s
+  multi-button shape rather than `showStoryScene`'s single-continue one) → `showEndingEpilogue` (all
+  three §9.5 endings, each acknowledging the freshly-opened Breach).
+- **One real narrative fix** caught during the pre-build audit: D5's epilogue (`showDungeon5Epilogue`)
+  said "either corp" about Talos — corrected to avoid spoiling D6's reveal while staying accurate.
+
+**Two real bugs found and fixed during the mandatory full-chain sim pass (not caught by structural
+checks alone — same lesson D5's Sun God fix already taught, reconfirmed a third time):**
+1. **A `depth`/`levelDepth` desync inflated the enemy level curve far ahead of real party progression.**
+   Large `depth` values were chosen purely for radial-layout spacing across 6 zones, but
+   `rollEncounterForNode`'s fodder/standard tier-mix check reads raw `node.depth` (not
+   `levelDepth`) — so by mid-dungeon, `depth` had drifted 5-7 higher than the party's real
+   level-relevant position, making "standard tier" (and its jitteredaccompanying level) trigger far
+   more aggressively than the party's own real level. Fixed by adding explicit `levelDepth` overrides to every combat
+   node, mirroring Sector 1's own `depth = levelDepth + 1` convention exactly, WITHOUT touching the
+   shared engine check itself (which would have regressed Sector 1/D4/D5's already-locked balance).
+2. **Two "elite"-type nodes (f2, d2) rolled from the same elite pool as Sector 1/D4's endgame-caliber
+   elites (including `securityMech`) far too early** (f2 was only the 5th real fight in the whole
+   dungeon) — 0% smart-win even at a fresh, full-HP, correctly-leveled party. Downgraded both to
+   `type: "combat"` (fodder/standard only); the "elite" pool stays defined for a future zone-scaled
+   pass. Also trimmed `bioTank` (Regen attrition) out of the early mixed standard tier — too punishing
+   against a party that can't yet out-DPS it.
+3. **Phthora's and Chthon's initial base-stat/level guesses were badly miscalibrated against their
+   real chain-arrival levels** — the exact same class of error the Sun God fix (D5) already
+   documented. Corrected via the same full-chain-sim, not-isolated-guess methodology: Phthora
+   hp210/atk24/def15 @ Lv8 → hp100/atk14/def9 @ Lv4; Chthon hp180/atk26/def16 @ Lv10 →
+   hp115/atk18/def12 @ Lv7; the caged god (Phase 1) and cagedGod's own level corrected 9→6 to match.
+
+**Current balance state — a genuine first-pass baseline, NOT the final locked numbers (deep tuning is
+its own later roadmap phase, per the sequence above):** after all three fixes, one tested squad
+(Merc/Mech Runner/Mentalist) clears the full 18-combat-node chain at **36% smart-play win rate / 29.5%
+avg HP remaining** — the first non-zero, non-broken result after starting from a literal 0%-across-
+every-squad state. Other tested comps (Merc/Dread Knight/Mentalist; Dread Knight/Netrunner/Mentalist —
+both lacking a strong sustained-damage class) still struggle in the early-mid zones (u1/f1/f2) and
+rarely reach the finale. This is flagged honestly, not smoothed over: D6 is **playable and beatable
+with a good squad**, but not yet tuned to the ~55-70%-HP target band every other boss eventually hit —
+that calibration is explicitly deferred to the "battle balance" roadmap phase above, not skipped.
+Regression-verified: Warden/Proteus/bossSoul all read within normal variance of their previously
+locked numbers — nothing outside D6's own new content was touched in a way that changed other
+dungeons' balance.
+
+**Not yet done:** sprite work for anything new (Sexias, Phthora, the caged god, Chthon — all render via
+the generic nature-colored blob fallback per the ask-before-drawing workflow); the deep balance/
+comp-viability tuning pass above; the deferred cross-dungeon damage-type rebalance; a fuller
+`renderMap`-level per-zone visual treatment (currently only the battlefield backdrop changes per node
+— the overworld map screen still uses one dungeon-wide backdrop, a scoped simplification, not the
+full "map background changes too" ask; worth revisiting if it matters enough to justify the extra
+rendering work).
+
+---
+
 ## 6. Screens & state management (the "glue")
 
 Introduce a lightweight **scene manager**: exactly one active scene, transitions via `goToScene()`.
@@ -1218,12 +1503,25 @@ Both corps are two wrong answers to the same theft — this snaps the existing f
   Warden AI, the Broodmarshal's *fused control rig that never worked* (§5.3 — already canon). Debt-
   bondage, black sites, authoritarian-industrial. Region-1 faction; the crew's first oppressor
   (Dez, Kharon's Reach).
-- **Talos Systems** — **transcendence through flesh. Merge with the alien, evolve past humanity.**
-  Named (ironically) for the bronze automaton *animated by living ichor* — a fusion of machine and
-  life. Organic, bio-augmented, Corrosive/Thermal, uniformly weak Psionic (§5.1 — already canon).
-  Predatory-biotech. Has been secretly **experimenting on hive-derived precursor biology** — which is
-  exactly why §5.1/§5.3 gave the Erebus Shaman/Broodmarshal a Psionic profile "echoing Talos ahead of
-  ever reaching Talos territory." The hive and Talos are the same story.
+- **Talos** — *(retconned 2026-07-25, §5.4c: NOT a corporation — see below. Historical prose elsewhere
+  in this doc still says "Talos Systems"/"the rival corp," left as-is per this doc's established
+  "don't rewrite history" discipline.)* **Transcendence through flesh. Merge with the alien, evolve
+  past humanity.** But this isn't a doctrine a company chose to pursue — it's what an entire lineage
+  *became*. Talos is a culture descended from humans who, over generations of self-directed bio-
+  slicing and cloning, turned into something no longer recognizably human. Named (fittingly, now more
+  than ever) for the bronze automaton *animated by living ichor* — a thing shaped like life but
+  fundamentally not. Organic, bio-augmented, Corrosive/Thermal, uniformly weak Psionic (§5.1 — already
+  canon, mechanically unchanged by the retcon). Their bio-program was triggered/amplified by exposure
+  to precursor tech or biology — the same root cause as the Erebus hive's own transformation (§9.3) —
+  which is exactly why §5.1/§5.3 gave the Erebus Shaman/Broodmarshal a Psionic profile "echoing Talos
+  ahead of ever reaching Talos territory." The hive and Talos are the same story, literally: one
+  precursor-adjacent root, expressed two ways — a caretaker-organism that was never human (the hive),
+  and humans who became something else (Talos). **Talos began on Earth**, generations before whatever
+  scattered them to their current territory (a Europa/moon site, §9.4 — unaffected, that's just where
+  they live now) — meaning Dungeon 6, the game's literal homecoming, is also where Talos's own origin
+  finally gets uncovered. Vestigial human-institutional language ("bio-executive," "specimen," "the
+  executive suite") survives among them as ceremonial/caste terminology, a relic of whatever program
+  started this generations ago — not evidence of an ongoing corporate structure.
 
 The crew rejects both. Neither corp is "the good one."
 
@@ -1238,7 +1536,16 @@ The crew rejects both. Neither corp is "the good one."
   once* (which is why the tech is there and why Earth is dead), and humanity merely never let it heal.
 - Dead Earth's codename: **"the Cradle"** (humanity's abandoned birthplace). The engine's working
   name: **"the Loom"** (it weaves/reseeds life) — or "Chthon" for its site. (Names tunable; they
-  continue the established Greek/underworld naming vein: Kharon, Erebus.)
+  continue the established Greek/underworld naming vein: Kharon, Erebus.) *("Chthon" was ultimately
+  used elsewhere — see §5.4c: Dungeon 6's finale boss, not the site itself.)*
+- **Talos is the same story told a different way (retconned 2026-07-25, §5.4c, full detail there).**
+  The Erebus hive is a precursor caretaker-organism that was never human. Talos is the mirror case:
+  humans, generations ago on Earth itself, whose bio-slicing/cloning program was triggered or amplified
+  by exposure to this same precursor biology/technology, and who became something else entirely as a
+  result — no longer a rival corporation, a lineage. One root, two outcomes: something that was never
+  human losing itself further (the hive), and humans losing their humanity on purpose, generation by
+  generation, believing it was transcendence (Talos). Both threads converge back on dead Earth in the
+  finale.
 
 ### 9.4 Act structure & the locked roadmap (3 built + 3 to author = 6 dungeons)
 **Length locked 2026-07-23: 3 more dungeons, a clean 3-act shape.** Antagonist names, exact recruit
@@ -1248,38 +1555,49 @@ dungeon), not pre-designed in the abstract.
 - **ACT I — Escape & revenge (SHIPPED).** Personal, boots-on-the-neck. **Kharon's Reach** (§5.2a) →
   **Vossmark Station Sector 1** (§5.2c). Establishes Vossmark, the crew, the debt-war. Cast: hero +
   Kade (Mech Runner) + Wren (Netrunner).
-- **ACT II — The wider truth (Erebus SHIPPED + 1 to author).**
+- **ACT II — The wider truth (Erebus + Dungeon 4, BOTH SHIPPED).**
   - **Site Erebus** (§5.3, shipped) — widens the world past the corp feud; drops the precursor
     fragment.
-  - **Dungeon 4 — a Talos bio-site** (TO AUTHOR). Finally reach the rival corp; the war goes hot from
-    the crew's side. Reveal the *merge* horror — Talos splicing hive/precursor biology into people.
-    **Recruit the Psionic ally** the Erebus notes teased (§5.3 flagged "a Psionic-leaning Mentalist
-    recruit would pay off the Shaman caste") — a freed test-subject / defector, the crew's window into
-    the alien truth. Payoff: the **2nd key fragment.** Setting sketch: a moon bio-foundry (e.g. a
-    Jovian/Europa lab). Faction focus: Talos (the Mentalist's designated counter-faction, §5.1).
-- **ACT III — The Cradle (2 to author).**
-  - **Dungeon 5 — the Sun** ("Helios," TO AUTHOR, location locked §5.4b). The assembled key points to
+  - **Dungeon 4 — the Talos bio-foundry** (SHIPPED 2026-07-24, §5.4a). First direct contact with Talos.
+    Reveals the *merge* horror — but per the 2026-07-25 retcon (§5.4c), what the crew actually
+    witnesses here is a lineage's self-inflicted transformation, not corporate R&D; the shipped content
+    reads consistently under either framing, no retrofit needed. **Recruited the Psionic ally** the
+    Erebus notes teased (§5.3) — **Six**, a freed specimen (not "test subject" in the corporate sense —
+    a Talos-born clone who didn't fully take the transformation, the crew's living window into what
+    Talos's people used to be). Payoff: the **2nd key fragment.** Setting: a Europa/moon bio-foundry —
+    where Talos lives NOW, not where the lineage began (that's Earth — see §5.4c). Boss: **Proteus**,
+    "half-transcended bio-executive" — his own attempt at the lineage's transcendence, incomplete when
+    the crew stops him. Faction focus: Talos (the Mentalist's designated counter-faction, §5.1).
+- **ACT III — The Cradle (Dungeon 5 shipped, Dungeon 6 TO AUTHOR — full spec §5.4c).**
+  - **Dungeon 5 — the Sun** ("Helios," SHIPPED 2026-07-24, §5.4b). The assembled key points to
     a precursor structure built into Sol itself — the engine's regulator/power-tap, not a separate,
     unrelated site. The full truth lands: a seed-or-scour engine on Earth (the Loom), keyed by Helios;
-    the precursors were *caretakers who lost control* — a mirror for the corps. Also where the crew
-    cracks the endless-mode wormhole open (§5.4b), sealed until after D6. Both corps may race the
-    crew here.
-  - **Dungeon 6 — Dead Earth, "the Cradle"** (FINALE, TO AUTHOR). Both corps converge on the
-    abandoned homeworld where the engine actually is. Final confrontation + the ending choice (§9.5).
-    The game ends **on burnt-out dead Earth.**
+    the precursors were *caretakers who lost control* — a mirror for both Vossmark AND Talos, not just
+    the corp. Also where the crew cracks the endless-mode wormhole open (§5.4b), sealed until after D6.
+  - **Dungeon 6 — Dead Earth, "the Cradle"** (FINALE, TO AUTHOR, full design LOCKED 2026-07-25 — see
+    §5.4c for the complete spec). Vossmark and what's left of Talos both converge on the abandoned
+    homeworld where the engine actually is — and where Talos's own true origin gets uncovered too.
+    Final confrontation + the ending choice (§9.5). The game ends **on burnt-out dead Earth**, with the
+    Helios seal finally breaking as a direct consequence of that confrontation (§5.4c).
 
-**Named human antagonists to author (the war needs faces):** a **Vossmark director** (architect of the
-debt system and the black sites) and a **Talos figure** (a half-transcended bio-executive — a
-body-horror antagonist). The finale can run three-way (both corp heads + the crew), or force the corps
-into a brief truce against the crew. Specifics deferred to when Dungeons 4/6 are authored.
+**Named human antagonists (LOCKED 2026-07-25 — see §5.4c for full detail, this is the pointer):**
+**Chancellor Kredex au Ra** (Vossmark's supreme leader — a title escalated past Director/Overseer to
+reflect a debt-empire that's become closer to a state than a corporation) and **Phthora, the
+Fleshspring** (Talos's actual leader/origin-point — not a second Proteus; Proteus already paid off
+"the Talos figure" beat in Dungeon 4). Their arcs deliberately mirror and invert each other: Kredex
+(cage doctrine) becomes the vessel for the very power he tried to control; Phthora (merge doctrine)
+attempts the lineage's founding transcendence and fails outright. Neither corp/lineage "wins" — both
+philosophies get a real, earned final word, reinforcing that the crew is right to want no part of
+either (§9.2).
 
 **Faster fallback (not chosen, kept on record):** a 2-more-dungeon cut (Talos → Earth, folding the
 precursor reveal into the Talos site) would reach a finished game one dungeon sooner if scope needs
 to tighten mid-build.
 
-### 9.5 The ending — player choice (locked 2026-07-23)
+### 9.5 The ending — player choice (locked 2026-07-23, finalized 2026-07-25 — §5.4c full detail)
 A lightweight branching capstone on dead Earth (not a content explosion — one choice, short divergent
-epilogues via the existing `showStoryScene` component). Three options:
+epilogues via the existing `showStoryScene` component). **All three options ship** (finalized
+2026-07-25 — the "curate to two" option below was considered and rejected):
 - **Reseed** — the dispossessed use the engine to begin bringing the dead homeworld back. Earned,
   bittersweet hope; the corps threw Earth away, the crew reclaims it.
 - **Destroy / deny** — wreck the engine so neither corp can own the future. Bleak but clean: the win
@@ -1287,27 +1605,41 @@ epilogues via the existing `showStoryScene` component). Three options:
 - **Deny both, walk away** — leave it buried and sealed; the crew chooses not to be the next hand
   that reaches for it. The most thematically pointed refusal.
 
-*(Exact wording, and whether all three or a curated two ship, is finalized when Dungeon 6 is
-authored.)*
+**This choice now happens AFTER the Helios seal has already broken, not before.** The finale boss
+fight (§5.4c: Chthon) is what cracks the wormhole open for real, as a direct, on-screen consequence of
+winning — not a coincidental epilogue event. So the choice screen is no longer "what do we do with
+Earth's engine" in a vacuum; it's "what do we do with it, knowing we already caused one door to open
+before we ever got to choose this one." All three epilogues should acknowledge the freshly-cracked
+Breach in their own way (§5.4c has the framing for each).
 
 ### 9.6 Continuity — what this locks vs. what's already shipped
 This bible **contradicts nothing shipped.** It makes explicit: (a) the Erebus fragment = precursor
-key; (b) the hive = precursor caretaker; (c) Talos's Psionic-adjacent bio-tech = hive/precursor
-experimentation; (d) both corps' existing tech identities = the cage/merge axis; (e) the regions arc
-lands on dead Earth. The old §5 "regions arc (draft): R1 → R2 raider moon → R3 Space Squid depths" is
+key; (b) the hive = precursor caretaker; (c) Talos's Psionic-adjacent bio-tech = precursor-triggered
+transformation of an originally-human lineage, NOT corporate experimentation (retconned 2026-07-25,
+§5.4c — verified against every existing player-facing line in Dungeon 4, none of which actually said
+"corporation"); (d) Vossmark's tech identity = the cage half of the cage/merge axis, Talos's
+transformation = the merge half; (e) the regions arc lands on dead Earth, which is also where Talos's
+own lineage began. The old §5 "regions arc (draft): R1 → R2 raider moon → R3 Space Squid depths" is
 **superseded** by this concrete Sol roadmap (the raider-moon / Voidborn-Space-Squid ideas remain
 available as an optional Dungeon-4.5 detour only if scope later expands to 7 dungeons — not planned).
 
-### Factions (established 2026-07-22, expanded 2026-07-23 — see §9.2 for the cage/merge axis)
-Two competing megacorps frame the setting — a corporate cold war the crew is caught in:
+### Factions (established 2026-07-22, expanded 2026-07-23, Talos retconned 2026-07-25 — see §9.2)
+Vossmark is a corporation. Talos is not — an asymmetry that's more interesting than the "two competing
+megacorps" framing this doc used through 2026-07-24: a real corporation warring against/hunting a
+bio-horror lineage for its technology, not two symmetric businesses.
 - **Vossmark Industries** (renamed from Tiangong Heavy Industries, 2026-07-25 — §9.2) — the
   **Region 1** faction. Industrial maker of security bots and mechs; the current enemy roster is
   Vossmark. Grimy, hardware-heavy. *Cage the alien, own the labor* (§9.2).
-- **Talos Systems** — the **rival**, reached in Act II (Dungeon 4). Named for the mythic bronze
-  automaton; sleeker, more predatory, *different* tech and affinity profiles so squads must re-adapt.
-  *Merge with the alien, transcend humanity* (§9.2).
+- **Talos** *(not "Talos Systems" — dropped "Systems" 2026-07-25, since it's no longer a corporation;
+  historical dated prose elsewhere in this doc still says "Talos Systems," left as-is)* — first
+  encountered in Act II (Dungeon 4). A lineage descended from humans altered by precursor-adjacent
+  bio-technology over generations, not a rival company. Named for the mythic bronze automaton; sleeker,
+  more predatory, *different* tech and affinity profiles so squads must re-adapt. *Merge with the
+  alien, transcend humanity* (§9.2) — not a chosen corporate doctrine, but what an entire people
+  became and now believes in.
 
-This rivalry is the spine for the story and for why regions escalate.
+Vossmark's pursuit of Talos's technology (and what lies beneath it) is the spine for the story and for
+why regions escalate.
 
 ---
 
@@ -1341,7 +1673,7 @@ then graphics, then story. Graphics can slot in partially earlier as a coat of p
 | **H. Title, roster & town** *(redefined 2026-07-23, §5.2 — all slices shipped)* | H1 title scene + real `localStorage` save/load ✅ · H2 roster/active-party split (solo start, Merc, **player-named** — §5.2 update) ✅ · H3 prologue ("Kharon's Reach" — §5.2a) ✅ · H4 Town scene ("the Long Shot" — §5.2c: Roster/Equipment, Party Inventory, explicit Save, general dungeon-return hub; Sector 1 reframed as dungeon 2 with a new Netrunner recruit) ✅ · H5 inventory & loadout screens proper (§5.2e: Party Inventory made actionable, Character Sheet Stats grown into a real overview, item effects shown inline) ✅ |
 | ~~**L. Dungeon 3 — "Site Erebus"**~~ ✅ DONE *(§5.3)* | bug-planet crash dungeon: Roach/Warrior/Shaman/Armored Warrior tiers → boss "the Broodmarshal" (add-spawn at 50% HP, a new generic reinforcement engine hook + a relay-jam counter), a Tiangong black-site reveal that widens the story past the corp cold war, one-dungeon detour (no new region, no recruit), sim-verified |
 | **I. Graphics pass** | ✅ combat sprites (all 5 heroes + all 17 enemies, idle bob + hit flash, tier-scaled), ✅ hex-node map + per-region backdrops, ✅ combat backdrops (mining/station/hive). Also this phase: the single `game.html` was split into 5 classic `<script>` files (data/state/ui/engine/main). **Sprite-quality pass (2026-07-24) in progress, paused:** ✅ 3/5 heroes redrawn to 24×32 w/ human faces (Merc, Kade-mech, Wren-female); ✅ Spider Drone, guards (`guardTrooper`, w/ tier-recolor accent zones), Overseer Krell redrawn. Remaining: ⬜ **Dread Knight + Mentalist** 24×32 redraws, ⬜ guard tier-recolor variants (Riot/Heavy), ⬜ UI/menu theming polish |
-| **J. Story arc → finished game** *(canon locked 2026-07-23, §9; map-system spec locked 2026-07-24, §5.4)* | The 3-act Sol arc to a finite ending. Act I shipped (Kharon's Reach → Tiangong Station); Act II = Erebus (shipped) + **Dungeon 4 ✅ SHIPPED 2026-07-24** (Talos bio-foundry, §5.4a — 14 nodes, two pool-differentiated wings, Six the Psionic Mentalist recruit, boss Proteus, sim-verified end-to-end) — debuted the §5.4 map upgrade (fog of war, Unknown nodes, loot variance, dead-end spurs) as reusable systemic mechanics, not one-off content; Act III = **Dungeon 5 "Helios Station" ✅ BONES SHIPPED 2026-07-24** (§5.4b — a new radial/circular map shape, the double boss, a narrow Void/Entropy preview roster, structurally sim-verified but NOT yet balance-tuned) + **Dungeon 6 (dead Earth "the Cradle," finale — mixed Tiangong+Talos pools, biggest map, player-choice ending)**, still TO AUTHOR. Sprite art for Dungeon 4's AND Dungeon 5's new rosters still outstanding (generic-blob fallback). See §9.4 for story beats, §5.4/§5.4a/§5.4b for the map-system + Dungeon 4/5 specs |
+| **J. Story arc → finished game** *(canon locked 2026-07-23, §9; map-system spec locked 2026-07-24, §5.4; Dungeon 6 fully speced + Talos retconned 2026-07-25, §5.4c)* | The 3-act Sol arc to a finite ending. Act I shipped (Kharon's Reach → Vossmark Station Sector 1); Act II = Erebus (shipped) + **Dungeon 4 ✅ SHIPPED 2026-07-24** (Talos bio-foundry, §5.4a — 14 nodes, two pool-differentiated wings, Six the Psionic Mentalist recruit, boss Proteus, sim-verified end-to-end) — debuted the §5.4 map upgrade (fog of war, Unknown nodes, loot variance, dead-end spurs) as reusable systemic mechanics, not one-off content; Act III = **Dungeon 5 "Helios Station" ✅ SHIPPED 2026-07-24/25** (§5.4b — a new radial/circular map shape, the double boss, a narrow Void/Entropy preview roster; **balance-tuned 2026-07-25** — a full-chain sim caught the bosses' encounter levels were hardcoded 7/8 against a party that actually arrives around level 2, fixed and re-verified) + **Dungeon 6 "the Cradle" ✅ SHIPPED 2026-07-25 (finale, §5.4c — designed AND built same day)**: Vossmark's Chancellor merges with the Loom into the true final boss (Chthon, God of the Breach) in a two-phase double-boss finale that directly causes the Helios wormhole to finally open; Talos's own leader (Phthora, the Fleshspring) fails a mirrored merge attempt earlier in the dungeon; two new recruits (Vincent/Dread Knight, Sexias/new Corrosive class) close real content/system gaps; 22 nodes, biggest map yet; the game's first branching ending (all 3 §9.5 choices) implemented. **The Sol arc is now content-complete, start to finish.** Sim-verified as a first-pass baseline (structurally clean, zero crashes, one squad clears the full chain at 36% win rate) — NOT yet balance-tuned to the game's usual target band, that's its own later roadmap phase. Sprite art for Dungeon 4/5/6's new rosters still outstanding (generic-blob fallback). See §9.4 for story beats, §5.4/§5.4a/§5.4b/§5.4c for the map-system + Dungeon 4/5/6 specs |
 | ~~**K. Town/hub layer**~~ *(retired 2026-07-23 — absorbed into Phase H, §5.2)* | superseded: towns/roster/save could not wait for a "future" phase once story-mode start was decided |
 
 *(B and C are close cousins and may be built together; I is flexible and can start once F lands.)*
@@ -1349,6 +1681,27 @@ then graphics, then story. Graphics can slot in partially earlier as a coat of p
 ---
 
 ## 12. Decisions
+
+**Locked (2026-07-25, Dungeon 6 finale design + Talos retcon — full detail §5.4c, this is the
+pointer):**
+- **Talos is retconned from a rival megacorp into a lineage** — humans altered across generations by
+  precursor-adjacent bio-slicing/cloning, originating on Earth itself. Ties into the same precursor
+  root as the Erebus hive. Verified against every existing player-facing line before locking: Dungeon 4
+  needed ZERO retconning, only this doc's own framing changed. "Talos Systems" → "Talos."
+- **Dungeon 6 finale locked:** Chancellor Kredex au Ra (Vossmark) becomes the vessel for the Loom's
+  true occupant in a two-phase double-boss fight ("the caged god" → fusion → **Chthon, God of the
+  Breach**), reusing D5's double-boss engine capability. Phthora, the Fleshspring (Talos's actual
+  leader/origin, not a reused Proteus) is a separate earlier boss whose own merge attempt fails —
+  deliberately mirrors and inverts Kredex's arc. Chthon's defeat is the literal cause of the Helios
+  wormhole finally opening for real, immediately before the (unchanged, still all-three) §9.5 ending
+  choice.
+- **Two new recruits join in D6:** Vincent (Dread Knight — closes a real gap: this class was fully
+  built but never once recruited in the shipped game) and Sexias (new class, Corrosive specialist —
+  closes a real, data-verified gap: no hero could deal Corrosive damage before this).
+- **Damage-type system audited** (every `affinities:`/`damageType:` in `data.js` grepped and tallied):
+  confirmed real issues (Kinetic over-resisted despite being everyone's free basic; Psionic/Cyber's
+  hard organic/synthetic binary; 3 of 5 classes with zero personal affinities) — fixing the Corrosive
+  gap via Sexias is IN scope for D6; the rest is explicitly deferred to its own future session.
 
 **Locked (2026-07-24, post-beta difficulty & direction pass — new gameplay-direction plan):**
 - **Structure = HYBRID:** keep the authored 6-dungeon story + saves as the campaign AND add an
@@ -1514,6 +1867,53 @@ then graphics, then story. Graphics can slot in partially earlier as a coat of p
 ---
 
 ## 13. Changelog
+- **2026-07-25** — **Dungeon 6 "the Cradle" fully BUILT (same-day follow-up to the design session
+  below) — the Sol story arc is now content-complete start to finish.** Authored the full 22-node
+  graph (6 zones, radial layout, fog of war), Sexias's complete class kit, Phthora/the caged god/
+  Chthon with unique skills, and the game's first branching ending (`showDungeon6Epilogue` →
+  `showEndingChoice` → `showEndingEpilogue`, all 3 §9.5 choices). New engine capability: per-NODE
+  `region` backdrop override (`ui.js` `renderCombatants`, falls back to dungeon-wide — every pre-D6
+  dungeon unaffected) + 6 new CSS region themes. Also fixed one real narrative inconsistency found in
+  a pre-build audit: D5's epilogue said "either corp" about Talos, corrected without spoiling D6's
+  reveal. **The mandatory full-chain sim pass (not just structural checks) caught two more real bugs**,
+  the same "isolated/guessed numbers hide problems a real chain reveals" lesson as the D5 Sun God fix,
+  now confirmed a third time: (1) large `depth` values chosen purely for radial-layout spacing had
+  drifted 5-7 higher than the party's real level-relevant position by mid-dungeon, since
+  `rollEncounterForNode`'s tier-mix check reads raw `node.depth` — fixed with explicit `levelDepth`
+  overrides on every combat node (Sector 1's own `depth = levelDepth+1` convention, extended, not a
+  new mechanic); (2) two "elite" nodes rolled Sector-1/D4-caliber elites (incl. `securityMech`) as
+  early as the 5th real fight in the dungeon — downgraded to `type:"combat"`, `bioTank` also trimmed
+  from the early standard tier (Regen attrition too punishing pre-DPS-scaling). Phthora's and Chthon's
+  base-stat/level guesses were also badly miscalibrated against their real arrival levels — corrected
+  the same way the Sun God was. **Current state: a genuine first-pass baseline** (one tested squad
+  clears the full chain at 36% win rate / 29.5% HP, others still struggle early — deep comp-by-comp
+  balance tuning is explicitly deferred to its own later roadmap phase, per §5.4c, not skipped).
+  Regression-verified: Warden/Proteus/bossSoul all read within normal variance of their previously
+  locked numbers.
+- **2026-07-25** — **Dungeon 6 "the Cradle" finale fully designed (§5.4c) + Talos retconned from a
+  rival megacorp into a bio-lineage descended from precursor-altered humans (§9.2/§9.3/§9.6/Factions).
+  Planning/writing session only — nothing built, no code touched.** Researched every existing Talos
+  reference before proposing anything: found the actual in-fiction text never says "corporation," so
+  Dungeon 4 needed no retconning at all, only this doc's authorial framing. Locked: Talos began on
+  Earth generations ago, tied to the same precursor root as the Erebus hive; Chancellor Kredex au Ra
+  (Vossmark) becomes the vessel for the Loom's escape in a two-phase double-boss finale (`the caged
+  god` → fusion → **Chthon, God of the Breach**, reusing D5's double-boss engine capability, no new
+  engine work); Phthora, the Fleshspring (Talos's real leader — NOT a reused Proteus, who already died
+  paying off that beat in D4) is a separate earlier boss whose own merge attempt fails, mirroring and
+  inverting Kredex's arc; Chthon's defeat is the literal, on-screen cause of the Helios wormhole
+  finally opening, immediately before the (still all-three) §9.5 ending choice. Two new recruits close
+  real gaps found during planning: **Vincent** (Dread Knight — a fully-built class that had never once
+  been recruited in the shipped game, a genuine orphaned-content bug, not a design choice) and
+  **Sexias** (new Corrosive-specialist class — closes a real, data-verified gap: grepping every
+  `affinities:`/`damageType:` in `data.js` showed no hero could ever deal Corrosive damage despite two
+  enemy factions building signature kits around it). Also audited the whole damage-type system while in
+  there (Kinetic over-resisted despite being the free universal basic; Psionic/Cyber's hard organic/
+  synthetic binary; 3 of 5 hero classes with zero personal affinities) — real findings, but explicitly
+  scoped OUT of D6 and deferred to a dedicated future rebalance session, per direct instruction. Map
+  plan: ~20-26 nodes (biggest yet, as earmarked since §5.4a), one continuous fog-of-war descent through
+  6 zones (burnt city → undercity/caves → frozen wastes → a short burnt-forest side-arm →
+  crust/mantle → the Core), reusing D5's radial "dive to center" layout. **Status: SPEC ONLY** — next
+  actionable step is authoring D6 zone by zone.
 - **2026-07-24** — **Map system rebuilt after playtest feedback: fog of war was cosmetic, not
   structural (a real leak) + a mid-dungeon recruit had no way to actually join the fight.** Two
   distinct fixes to §5.4:

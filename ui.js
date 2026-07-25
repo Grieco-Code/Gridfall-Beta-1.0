@@ -1165,11 +1165,14 @@
     }
 
     function renderCombatants() {
-      // Skin the battlefield with the current dungeon's region backdrop
-      // (Phase I combat backdrops) — same themes as the map (mining/station/
-      // hive). Falls back to "station" if a dungeon somehow has no region.
+      // Skin the battlefield with the current NODE's region backdrop if it
+      // sets one (§5.4c, Dungeon 6 — lets one dungeon visually transition
+      // through zones as you descend, e.g. burnt city -> frozen wastes ->
+      // the Core), falling back to the dungeon-wide region (every dungeon
+      // before D6, unaffected) and finally "station" if neither is set.
       const dungeon = DUNGEONS[currentDungeonKey];
-      const region = (dungeon && dungeon.region) || "station";
+      const node = dungeon && currentNodeId ? dungeon.nodes[currentNodeId] : null;
+      const region = (node && node.region) || (dungeon && dungeon.region) || "station";
       document.getElementById("battlefield").className = "region-" + region;
 
       document.getElementById("enemies").innerHTML = enemies.map(tileHtml).join("");

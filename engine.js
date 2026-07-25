@@ -819,11 +819,17 @@
           else if (currentDungeonKey === "erebus") clearLine = "The Broodmarshal collapses. The hive scatters!";
           else if (currentDungeonKey === "dungeon4") clearLine = "Proteus finally stops moving. Whatever it was becoming, it's over.";
           else if (currentDungeonKey === "dungeon5") clearLine = "The Sun God goes still. Helios finally goes dark.";
+          else if (currentDungeonKey === "dungeon6") clearLine = "Chthon goes still. Whatever it was wearing, it isn't anymore.";
           else clearLine = "Victory!";
           log(clearLine, true);
         } else if (clearedNode.type === "boss") {
-          // The non-terminal half of the double boss (Void Soul Eater).
-          log("The Void Soul Eater unravels. Something colder is still waiting at the center of the station.", true);
+          // The non-terminal half of a double boss (Dungeon 5's Void Soul
+          // Eater, Dungeon 6's caged god) — dungeon-specific flavor line,
+          // generalized 2026-07-25 (was hardcoded to Void Soul Eater only).
+          let midLine;
+          if (currentDungeonKey === "dungeon6") midLine = "The caged god tears free of the ritual holding it. Kredex is already screaming.";
+          else midLine = "The Void Soul Eater unravels. Something colder is still waiting at the center of the station.";
+          log(midLine, true);
         }
 
         // Non-boss win: back to the Map, next nodes unlocked. Boss win: each
@@ -839,6 +845,7 @@
           else if (currentDungeonKey === "erebus") next.textContent = "Get off this rock →";
           else if (currentDungeonKey === "dungeon4") next.textContent = "Get out before more come →";
           else if (currentDungeonKey === "dungeon5") next.textContent = "Turn back toward the dark →";
+          else if (currentDungeonKey === "dungeon6") next.textContent = "Face what's left →";
           else next.textContent = "Dungeon Clear! ✓";
         } else {
           next.textContent = "Continue →";
@@ -851,6 +858,7 @@
             else if (currentDungeonKey === "erebus") showErebusEpilogue(nextDungeonKey);
             else if (currentDungeonKey === "dungeon4") showDungeon4Epilogue(nextDungeonKey);
             else if (currentDungeonKey === "dungeon5") showDungeon5Epilogue(nextDungeonKey);
+            else if (currentDungeonKey === "dungeon6") showDungeon6Epilogue(nextDungeonKey);
             else returnToHub();
           } else {
             resolveNodeVictory();
@@ -1009,12 +1017,122 @@
           "circuitry, a regulator core that spent longer being worshipped than understood.",
         "What's left of it isn't divine and was never really a god. It's a caretaker's machine, " +
           "the last honest piece of something built to keep a dying system fed, corrupted by " +
-          "whatever got loose down here long before either corp came looking.",
+          "whatever got loose down here long before anyone came looking.",
         "The coordinates it was guarding aren't out here at all. They're keyed to a world both " +
           "Vossmark and Talos wrote off generations ago, the one place scarred badly enough that " +
           "nobody thought to fight over it. Home, if the word still means anything by now."
       ], "Set course for Earth.", function () {
         if (nextDungeonKey) currentDungeonKey = nextDungeonKey;
+        showTown();
+      });
+    }
+
+    // Dungeon 6 finale (§5.4c) — the game's first real branching ending.
+    // Chthon's defeat is the literal, on-screen CAUSE of the Helios seal
+    // finally breaking (locked design decision, not a coincidental parallel
+    // event) — that consequence plays FIRST, before the player ever sees the
+    // ending choice, so the choice itself is made already knowing what its
+    // own victory cost. The precursor Psionic lattice (§9.3 — already canon)
+    // is the in-fiction reason the crew can feel/perceive something happening
+    // at the Sun instantly from dead Earth.
+    function showDungeon6Epilogue(nextDungeonKey) {
+      showStoryScene([
+        "Kredex doesn't finish dying so much as stop being separate from what killed him. Whatever " +
+          "answered to Chthon a moment ago goes still, and the quiet that's left behind doesn't feel " +
+          "like an ending. It feels like something letting go of a held breath.",
+        "That's when the lattice screams. Not a sound — every psion in the squad feels it at once, a " +
+          "signal running through the same precursor thread the Erebus fragment was always a piece " +
+          "of, out past the dead ground overhead, out past Sol's dark, all the way to a wound the " +
+          "crew tore open themselves at Helios months ago. It stops pretending to be sealed. " +
+          "Whatever was holding it shut just died down here, wearing a corporate title.",
+        "The Loom is still standing at the center of the chamber, patient in the specific way only " +
+          "something built to outlast its makers can be. Nobody planted a flag on it. Nobody's told " +
+          "it what happens next. That part's still yours to decide."
+      ], "Decide what happens to the Loom.", function () {
+        showEndingChoice();
+      });
+    }
+
+    // Three-way branching capstone (§9.5, locked 2026-07-23, finalized
+    // 2026-07-25). Reuses the story-scene container the way
+    // showSquadSwapPrompt() does for a multi-button beat, rather than
+    // showStoryScene's single-continue shape. All three endings ship — see
+    // §5.4c for why "curate to two" was considered and rejected.
+    function showEndingChoice() {
+      goToScene("story-scene");
+      const el = document.getElementById("story-scene");
+      el.innerHTML = "";
+
+      const box = document.createElement("div");
+      box.id = "story-box";
+
+      const p = document.createElement("p");
+      p.className = "story-p";
+      p.textContent = "Vossmark threw this world away. Talos was born from it and forgot. The " +
+        "precursors built it and lost control of it twice over. Whatever you do here is the first " +
+        "thing that's happened to the Loom that wasn't someone trying to own it.";
+      box.appendChild(p);
+
+      const options = [
+        { key: "reseed", label: "Reseed — bring the homeworld back." },
+        { key: "destroy", label: "Destroy — make sure no one ever owns this." },
+        { key: "deny", label: "Deny — leave it buried, and walk away." }
+      ];
+      options.forEach(function (opt) {
+        const btn = document.createElement("button");
+        btn.textContent = opt.label;
+        btn.onclick = function () { showEndingEpilogue(opt.key); };
+        box.appendChild(btn);
+      });
+
+      el.appendChild(box);
+    }
+
+    // The three divergent endings (§9.5/§5.4c). Each acknowledges the
+    // freshly-cracked Breach in its own way — the choice was never made in
+    // a vacuum, it was made already knowing what defeating Chthon cost.
+    function showEndingEpilogue(choice) {
+      const ENDING_TEXT = {
+        reseed: [
+          "The engine doesn't wake up so much as remember how. Something moves through the dead " +
+            "rock overhead that hasn't moved in this world's favor in longer than anyone alive can " +
+            "measure — not fast, not dramatic, just patient the way growing things are patient.",
+          "It'll be generations before anyone calls this world green again, and the squad already " +
+            "knows they won't live to see it finished. That was never really the point. The corps " +
+            "threw this place away because it stopped being profitable to want. Wanting it back for " +
+            "free is the whole answer.",
+          "Out past Sol's dark, the Breach doesn't care what you chose. It's open regardless, and " +
+            "something is going to come through it eventually. But that's a fight for whoever's still " +
+            "standing when it happens — not a reason to let this one go unfinished."
+        ],
+        destroy: [
+          "The Loom doesn't scream when it dies. It just stops being a question anyone can ask " +
+            "again — no seed, no scour, no second Chancellor with a better rig and a worse reason. " +
+            "The chamber goes dark in a way that feels less like an ending and more like a door " +
+            "finally shutting all the way.",
+          "Earth stays dead. That was always going to be true either way, whether the squad wrecked " +
+            "the engine or let someone else eventually find it and try again. At least this time " +
+            "it's not for sale, not to Vossmark, not to whatever's left of Talos, not to the next " +
+            "flag-planter who thinks they'll be the one who finally controls it right.",
+          "Out past Sol's dark, the Breach doesn't care what you chose. It's already open, a wound " +
+            "with no engine left on this end to ever close it again. That's someone else's problem " +
+            "now — the squad just made sure it isn't also someone's weapon."
+        ],
+        deny: [
+          "Nobody throws a switch. Nobody plants a flag, and nobody detonates anything either. The " +
+            "squad just walks back out the way they came, and leaves the Loom exactly as they found " +
+            "it — patient, buried, undecided, the one thing in this whole system nobody gets to own " +
+            "because nobody took it.",
+          "It's the smallest possible ending, and it might be the only honest one. Every hand that's " +
+            "ever reached for this thing — the precursors, both corps, Phthora's whole lineage, " +
+            "Kredex right up until it wasn't his hand anymore — reached for it wanting something. " +
+            "The squad is the first to walk away wanting nothing at all.",
+          "Out past Sol's dark, the Breach doesn't care what you chose. It's open either way, waiting " +
+            "on something the squad never met and can't un-open. But whatever comes through it, it " +
+            "won't be able to say Earth's own engine handed it the way in."
+        ]
+      };
+      showStoryScene(ENDING_TEXT[choice], "This is where it ends.", function () {
         showTown();
       });
     }

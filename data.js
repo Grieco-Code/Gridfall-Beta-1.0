@@ -529,6 +529,88 @@
       mindsMercy: {   // Mentalist: full-party heal + cleanse (strips debuffs/DoTs, keeps buffs)
         name: "Mind's Mercy", enCost: 0, kind: "heal", target: "allAllies",
         power: 60, cleanse: true, message: "channels Mind's Mercy into"
+      },
+
+      // ---------- DUNGEON 6 "THE CRADLE" (§5.4c, 2026-07-25) ----------
+      // --- Sexias (new class, Saboteur) — Corrosive/armor-strip specialist,
+      // fights with scavenged, corroded ex-Vossmark gear. Closes the one real
+      // dead-type gap in the affinity system (no prior hero could deal
+      // Corrosive damage — see §5.4c). ---
+      corrodedEdge: {   // signature: reliable heavy single-target, partly armor-piercing
+        name: "Corroded Edge", enCost: 9, kind: "attack", target: "enemy",
+        damageType: "corrosive", power: 17, pierce: 0.2, message: "drags a corroded blade across"
+      },
+      acidCharge: {   // signature: the armor-strip gimmick — Corrosive + Sunder
+        name: "Acid Charge", enCost: 10, kind: "attack", target: "enemy",
+        damageType: "corrosive", power: 6, message: "detonates a charge of scavenged acid across",
+        applies: [{ type: "sunder", magnitude: 6, duration: 2 }]
+      },
+      corrosionField: {   // skill-tree unlock: AoE Corrosive
+        name: "Corrosion Field", enCost: 12, kind: "attack", target: "allEnemies",
+        damageType: "corrosive", power: 8, message: "unleashes a field of corrosive vapor across"
+      },
+      acidPurge: {   // Limit Break: massive Corrosive AoE + Sunder
+        name: "Acid Purge", enCost: 0, kind: "attack", target: "allEnemies",
+        damageType: "corrosive", power: 15, message: "unleashes Acid Purge across",
+        applies: [{ type: "sunder", magnitude: 8, duration: 2 }]
+      },
+
+      // --- Phthora, the Fleshspring (boss — Talos's actual leader/origin
+      // point, §5.4c; NOT a reuse of Proteus, D4's boss, already dead) ---
+      fleshspringGrasp: {   // basic — Corrosive
+        name: "Fleshspring Grasp", enCost: 0, kind: "attack", target: "enemy",
+        damageType: "corrosive", power: 6, message: "grasps with hands still deciding what they want to be at"
+      },
+      fleshspringRupture: {   // heavy special — Corrosive burst, partly armor-piercing
+        name: "Fleshspring Rupture", enCost: 0, kind: "attack", target: "enemy",
+        damageType: "corrosive", power: 24, pierce: 0.3,
+        message: "ruptures into something that was never meant to finish becoming, tearing into"
+      },
+      originUnbinding: {   // AoE status — Weaken (the failed ritual unraveling backward through the lineage)
+        name: "Origin Unbinding", enCost: 0, kind: "attack", target: "allEnemies",
+        damageType: "corrosive", power: 0,
+        message: "unravels backward through every generation that led here, and the will of",
+        applies: [{ type: "weaken", magnitude: 6, duration: 2 }]
+      },
+
+      // --- The caged god (boss, Phase 1 of the D6 finale double boss) — the
+      // Loom's true occupant, still bound, straining against Kredex's ritual.
+      // No typeName of its own needed distinct from the ENEMIES entry. ---
+      boundLash: {   // basic — Void (deliberately more Void than earlier dungeons: this
+        // IS the thing the whole reserved damage type has been pointing at)
+        name: "Bound Lash", enCost: 0, kind: "attack", target: "enemy",
+        damageType: "void", power: 8, message: "lashes out with something that hasn't fully arrived yet at"
+      },
+      fracturingWill: {   // self-buff — Overclock (a crack widening in whatever was holding it)
+        name: "Fracturing Will", enCost: 0, kind: "status", target: "self",
+        message: "widens a crack in whatever was holding it, and it grows stronger",
+        applies: [{ type: "overclock", magnitude: 6, duration: 3 }]
+      },
+
+      // --- Chthon, God of the Breach (boss, Phase 2 — the fused Kredex+
+      // entity, the true final boss of the game, §5.4c). Psionic weakness
+      // (see ENEMIES.chthon) is deliberate: hitting it with Psionic reaches
+      // whatever's left of Kredex's mind still trapped inside. ---
+      breachLash: {   // basic — Void
+        name: "Breach Lash", enCost: 0, kind: "attack", target: "enemy",
+        damageType: "void", power: 8, message: "reaches through a seam that shouldn't exist to strike at"
+      },
+      worldUnmaking: {   // heavy special — Void burst, partly armor-piercing
+        name: "World Unmaking", enCost: 0, kind: "attack", target: "enemy",
+        damageType: "void", power: 24, pierce: 0.35,
+        message: "opens a wound in the world itself and drags it across"
+      },
+      chorusOfBreach: {   // AoE status — Weaken
+        name: "Chorus of the Breach", enCost: 0, kind: "attack", target: "allEnemies",
+        damageType: "void", power: 0,
+        message: "speaks with a chorus of voices that were never meant to share one throat, and the will of",
+        applies: [{ type: "weaken", magnitude: 6, duration: 2 }]
+      },
+      kredexEcho: {   // status — Disable (something almost human fights for control for one instant)
+        name: "Kredex's Echo", enCost: 0, kind: "attack", target: "enemy",
+        damageType: "void", power: 0,
+        message: "flickers with something almost human fighting for control, and the spasm that follows locks up",
+        applies: [{ type: "disable", magnitude: 1, duration: 1 }]
       }
     };
 
@@ -586,6 +668,23 @@
         affinities: { cyber: HARD_RESIST, psionic: RESIST },             // organic, trained mind
         growth: { hp: 8, en: 5, attack: 1, defense: 1, speed: 1 },
         limitBreak: "mindsMercy"
+      },
+      // Saboteur (Sexias, Dungeon 6, §5.4c) — a Vossmark deserter fighting with
+      // scavenged, corroded ex-Vossmark gear. Closes the one real dead-type
+      // gap the affinity-system audit found: no prior hero could deal
+      // Corrosive damage, despite two enemy factions building signature kits
+      // around it. `corrosive: WEAK` is a deliberate ironic vulnerability —
+      // his own patched-together gear is exactly as fragile to acid/chem as
+      // what he deals out.
+      saboteur: {
+        className: "Saboteur", race: "Human (Vossmark Deserter)",
+        role: "Corrosive specialist · armor-strip + AoE",
+        nature: "organic",
+        baseStats: { hp: 105, en: 30, attack: 17, defense: 9, speed: 13 },
+        skills: ["attack", "corrodedEdge", "acidCharge"],
+        affinities: { corrosive: WEAK },
+        growth: { hp: 10, en: 3, attack: 2, defense: 1, speed: 1 },
+        limitBreak: "acidPurge"
       }
     };
 
@@ -612,6 +711,12 @@
       mentalist: [
         { key: "terror", skillKey: "terror", name: "Terror", cost: 1, prereq: null },
         { key: "cerebralOverload", skillKey: "cerebralOverload", name: "Cerebral Overload", cost: 2, prereq: "terror" }
+      ],
+      // Single-node tree for now, matching Merc/Dread Knight/Mech Runner's
+      // simpler pattern — deeper branching skill trees are P2 build-depth
+      // work (§5.4c roadmap), out of scope for a brand-new class right now.
+      saboteur: [
+        { key: "corrosionField", skillKey: "corrosionField", name: "Corrosion Field", cost: 1, prereq: null }
       ]
     };
 
@@ -1047,26 +1152,105 @@
       // machine wearing a god's face, not a literal deity (§5.4b). Fought
       // immediately after the Soul Eater with NO rest node between the two
       // — the double boss's real teeth is the attrition, not either fight
-      // alone. Strengthened 2026-07-25 (hp 135->155, atk 20->21, def 13->14)
-      // + given a reinforceWave (Sol's Acolytes x2 at 50% HP) per direct
-      // request — this DOES stack on top of an already-brutal chain fight
-      // (naive floor already wiped the party pre-buff, gameplay-direction
-      // memory), so treat this as even more explicitly first-pass/needs-the-
-      // smart-autoplay-tuning-pass than before, not a locked number.
-      // nature: "synthetic" (not "void") is deliberate: it makes Confuse
-      // fail on it for the right in-fiction reason (it was never organic),
-      // and makes Hack's Cyber weakness below land as the mechanical/
-      // narrative payoff of the "it's a machine" reveal — closing the loop
-      // back to the Netrunner, the original Vossmark specialist.
+      // alone. nature: "synthetic" (not "void") is deliberate: it makes
+      // Confuse fail on it for the right in-fiction reason (it was never
+      // organic), and makes Hack's Cyber weakness below land as the
+      // mechanical/narrative payoff of the "it's a machine" reveal —
+      // closing the loop back to the Netrunner, the original Vossmark
+      // specialist.
+      // REBALANCED 2026-07-25 (smart-autoplay sim pass, see the dungeon5
+      // node comment for the full readout): the 2026-07-25 buff to
+      // hp155/atk21/def14 + a 2-Acolyte reinforceWave was tuned against a
+      // hypothetical fresh level-7/8 party — a level that never actually
+      // occurs (see bossSoul/bossSun node comments — the real chain-arrival
+      // level is ~2). Against the REAL arriving party (worn down from
+      // Void Soul Eater, no rest), those numbers wiped the party outright.
+      // Corrected down to hp100/atk15/def10 (roughly an elite-tier
+      // baseline, appropriate once the level tag is fixed too) + trimmed
+      // the reinforceWave to 1 Acolyte (keeps the "chorus answers" beat
+      // without doubling the escort on an already-thin party). THIS is now
+      // the locked number, not the 2026-07-25 buff it replaces.
       sunGod: {
         typeName: "The Sun God", role: "Helios regulator core, corrupted",
         nature: "synthetic", tier: "boss",
-        baseStats: { hp: 155, en: 0, attack: 21, defense: 14, speed: 11 },
+        baseStats: { hp: 100, en: 0, attack: 15, defense: 10, speed: 11 },
         skills: ["solarLash", "coronalFlare", "unmakingPulse", "eclipseProtocol"],
         affinities: { cyber: 2.0, thermal: HARD_RESIST },
         reinforceAt: 0.5,
-        reinforceWave: [{ key: "solAcolyte", count: 2 }],
+        reinforceWave: [{ key: "solAcolyte", count: 1 }],
         reinforceMessage: "The Sun God's voice splits into a chorus. Sol's Acolytes answer the call."
+      },
+
+      // ---------- DUNGEON 6 "THE CRADLE" (§5.4c, 2026-07-25) ----------
+      // Phthora, the Fleshspring — Talos's actual leader and origin-point,
+      // NOT a reuse of Proteus (D4's boss, already dead — Proteus paid off
+      // §9.4's "Talos figure" beat there). Races Vossmark to the Loom and
+      // attempts to complete the lineage's founding transcendence at the
+      // source — fails, stopped mid-transformation. The mirror-image ending
+      // to Kredex/Chthon below: Talos's doctrine (merge on purpose) fails
+      // outright, where Vossmark's doctrine (control it) produces the worst
+      // possible outcome. No self-heal (same lesson as every prior boss —
+      // Warden/Proteus/Void Soul Eater — a self-sustaining boss on
+      // EN-starved late rounds is an attrition slog, not a hard fight).
+      // Stats are a first-pass guess — sim-tune before locking, same
+      // discipline as every prior boss.
+      phthora: {
+        typeName: "Phthora, the Fleshspring", role: "Talos's origin, mid-failed-transcendence",
+        nature: "organic", tier: "boss",
+        // Base stats corrected down (2026-07-25 baseline sim pass) — the
+        // original 210/24/15 guess was tuned for a much later encounter
+        // than the real chain-arrival level (~4), the same class of error
+        // the Sun God fix (D5) already caught once. Not a final locked
+        // number — deep balance tuning is its own later roadmap phase.
+        baseStats: { hp: 100, en: 0, attack: 14, defense: 9, speed: 11 },
+        skills: ["fleshspringGrasp", "fleshspringRupture", "originUnbinding"],
+        affinities: { psionic: 2.0, kinetic: RESIST },
+        reinforceAt: 0.5,
+        reinforceWave: [{ key: "chimeraSpecimen", count: 1 }],
+        reinforceMessage: "Phthora's ritual falters, and the lineage answers anyway — a Chimera " +
+          "Specimen claws free of the wreckage to finish what he can't."
+      },
+      // The caged god (double-boss Phase 1, §5.4c) — the Loom's true
+      // occupant, still bound, straining against Kredex's ritual as it
+      // fails. No self-heal/reinforceWave — same "gatekeeper hits, doesn't
+      // grind" shape as Void Soul Eater before it; its whole job is setting
+      // up the fusion into Chthon, not winning a long fight of its own.
+      // nature: "void" — it was never organic, and never will be, even
+      // wearing a human's body in Phase 2.
+      cagedGod: {
+        typeName: "The Caged God", role: "the Loom's true occupant, still bound",
+        nature: "void", tier: "boss",
+        baseStats: { hp: 140, en: 0, attack: 20, defense: 13, speed: 10 },
+        skills: ["boundLash", "fracturingWill"],
+        affinities: { thermal: WEAK, kinetic: RESIST }
+      },
+      // Chthon, God of the Breach (double-boss Phase 2 — the fused
+      // Kredex+entity, the TRUE final boss of the game, §5.4c). Fought
+      // immediately after the caged god with NO rest — the fusion happens
+      // between phases, not off-screen. Psionic weakness is deliberate:
+      // hitting it with Psionic reaches whatever's left of Kredex's own mind
+      // still trapped inside — a final callback giving the Mentalist (every
+      // organic faction's designated counter all game) one last, huge
+      // finale moment, the same way Netrunner got the Sun God's Cyber 2.0.
+      // Defeating Chthon is the literal, on-screen cause of the Helios
+      // wormhole finally tearing open for real (see engine.js's ending
+      // sequence + §9.5/§5.4c). Stats are a first-pass guess — sim-tune
+      // before locking, same discipline as every prior boss.
+      chthon: {
+        typeName: "Chthon, God of the Breach", role: "the Loom, fully escaped, wearing what's left of Kredex",
+        nature: "void", tier: "boss",
+        // Base stats corrected down (2026-07-25 baseline sim pass), same
+        // class of fix as the Sun God (D5) and Phthora above — the original
+        // 180/26/16 guess wiped a party at the real chain-arrival level
+        // (~7) almost every time even under smart play. Not a final locked
+        // number — deep balance tuning is its own later roadmap phase.
+        baseStats: { hp: 115, en: 0, attack: 18, defense: 12, speed: 12 },
+        skills: ["breachLash", "worldUnmaking", "chorusOfBreach", "kredexEcho"],
+        affinities: { psionic: 2.0, thermal: WEAK, kinetic: RESIST },
+        reinforceAt: 0.5,
+        reinforceWave: [{ key: "voidHorror", count: 1 }],
+        reinforceMessage: "A piece of the Breach tears through with it. Something that was never " +
+          "meant to be here answers the call."
       }
     };
 
@@ -2125,7 +2309,7 @@
         title: "HELIOS STATION",
         region: "helios",   // map backdrop theme (§5.4b): blinding solar glare vs. the dark
         mapShape: "radial", // circular layout (§5.4b) — the boss sits at the center, not a row
-        nextDungeonKey: null,   // Dungeon 6 "the Cradle" not yet built
+        nextDungeonKey: "dungeon6",   // Dungeon 6 "the Cradle" (§5.4c) — the finale
         foggy: true,   // §5.4 fog of war, same as Dungeons 4+
         pools: {
           void: {
@@ -2163,24 +2347,233 @@
           // resolveNodeVictory() unlock, not the dungeon's terminal clear
           // (engine.js renderEndbar's isBossClear now checks connectsTo.
           // length === 0). No rest node between the two fights — deliberate. ---
-          // Guards added 2026-07-25: two Void Shade escorts from the START of
+          // Guards added 2026-07-25: one Void Shade escort from the START of
           // the fight (not a mid-fight reinforceWave — that's the Sun God's
           // rhythm below). Gives the double boss two distinct shapes: the
           // gatekeeper arrives with an entourage, the thing at the center
           // doesn't need one until it's already hurting.
+          // LEVEL FIXED 2026-07-25 (deferred smart-autoplay balance pass,
+          // finally run): both boss nodes were hardcoded level 7/8, but a
+          // full-chain sim (h1->h2a->restA->converge->restFinal->bossSoul,
+          // real XP, no manual level-setting) showed the party actually
+          // arrives around level 2 — only 3 real fights precede this boss,
+          // fewer than Sector 1's Warden (level 4, 4 pre-boss fights) or
+          // Dungeon 4's Proteus (level 6). The 7/8 tags were guessed, never
+          // checked against the graph's own XP curve — the exact Proteus-
+          // postmortem mismatch (gameplay-direction memory), just much
+          // bigger. Corrected to level 1 (2 guards trimmed to 1 to match —
+          // see ENEMIES.sunGod for the matching Sun God fix). Isolated
+          // smart-play at the real arrival level (Lv2, full HP): 100% win /
+          // 54% HP remaining — back in the project's normal target band.
           bossSoul: { id: "bossSoul", type: "boss", depth: 6, connectsTo: ["bossSun"],
                       bossEncounter: [
-                        { key: "voidSoulEater", level: 7 }, { key: "shade", level: 7 }, { key: "shade", level: 7 }
+                        { key: "voidSoulEater", level: 1 }, { key: "shade", level: 1 }
                       ],
                       enterText: "The atrium floor isn't floor anymore, just an absence with a shape, " +
                         "and the shape is hungry. It has been waiting here longer than the station has " +
                         "had a name. It hasn't been waiting alone." },
+          // LEVEL FIXED 2026-07-25 (same pass as bossSoul above): fixed
+          // level 8 -> 1, matched to the party's real arrival level. Full
+          // chain (both bosses back to back, no rest — the intended
+          // attrition): smart-play 92% win / 47% HP remaining, naive floor
+          // ~0-3% (same "mashing dies" doctrine as every other boss).
           bossSun:  { id: "bossSun", type: "boss", depth: 7, connectsTo: [],
-                      bossEncounter: [{ key: "sunGod", level: 8 }],
+                      bossEncounter: [{ key: "sunGod", level: 1 }],
                       enterText: "The dark clears in one instant, not gradually, the way night breaks " +
                         "over a horizon that shouldn't exist this close to a star. Something wearing " +
                         "the shape of Helios's own regulator core opens eyes that were never built to " +
                         "see with." }
+        }
+      },
+
+      // Dungeon 6 — dead Earth, "the Cradle" (§5.4c, finale, 2026-07-25). One
+      // continuous fog-of-war descent through 6 zones (a `region` per NODE,
+      // not just per dungeon — see ui.js renderCombatants — so the backdrop
+      // visibly changes as the crew descends: burnt city -> undercity ->
+      // frozen wastes -> [a forest side-arm] -> the deep descent -> the
+      // Core). Reuses the radial "dive to center" map shape from Dungeon 5.
+      // Zones 1-3 need ZERO new trash enemies (§5.4c) — the "mixed
+      // Vossmark+Talos pools in the same encounters" intent, locked since
+      // the original D4/5/6 differentiation pass, means real new content is
+      // concentrated in Sexias, Phthora, and the Chthon double boss.
+      dungeon6: {
+        start: "s1",
+        title: "THE CRADLE",
+        region: "burntcity",   // dungeon-wide fallback (map screen); battlefield uses per-node region
+        mapShape: "radial",
+        nextDungeonKey: null,   // this IS the finale — no Dungeon 7
+        foggy: true,
+        pools: {
+          // Zones 1-3: both Vossmark's expedition and what's left of Talos
+          // are already here, fighting the environment and each other —
+          // mixed encounters from fight one, no wing-differentiation (unlike
+          // D4's Security/Specimen split — that split IS the caste system
+          // reveal now, not a repeatable structure).
+          // Trimmed 2026-07-25 (baseline sim pass): dropped bioTank —
+          // Regen's whole design is an attrition race, which is brutal
+          // against a party that's still level 1-4 and can't out-DPS it yet
+          // (it's tuned for D4's later position). Elite tier is currently
+          // unused (no D6 node rolls type:"elite" in this first pass — f2/d2
+          // were both downgraded to "combat" after securityMech-caliber
+          // elites proved way too strong this early), kept defined for when
+          // the later balance pass revisits zone-by-zone difficulty scaling.
+          mixed: {
+            fodder:   ["talosWraith", "spliceHusk"],
+            standard: ["vossmarkGrunt", "talosPhantom"],
+            elite:    ["vossmarkOfficer", "talosVanguard", "chimeraSpecimen", "securityMech"]
+          },
+          // The Core (zone 6): human factions are behind you now, this is
+          // pure Void-touched territory — reuses D5's roster wholesale.
+          voidTouched: {
+            fodder:   ["poltergeist"],
+            standard: ["shade", "terror"],
+            elite:    ["voidHorror", "chimeraSpecimen"]
+          }
+        },
+        nodes: {
+          // --- Zone 1: Surface — burnt city ruins ---
+          s1: { id: "s1", type: "combat", depth: 1, levelDepth: 1, poolBranch: "mixed", region: "burntcity",
+                connectsTo: ["s2", "s2x"],
+                enterText: "The shuttle sets down in what used to be a boulevard, ash drifting instead " +
+                  "of snow. Vossmark strike teams and something wearing Talos's shape are already " +
+                  "killing each other three blocks over, and neither side has noticed you yet." },
+          s2: { id: "s2", type: "combat", depth: 2, levelDepth: 2, poolBranch: "mixed", region: "burntcity",
+                connectsTo: ["restS"],
+                enterText: "A collapsed transit station, its old maps still legible under generations " +
+                  "of soot. Something in the dark below decides you're worth the trouble of coming up " +
+                  "for." },
+          s2x: { id: "s2x", type: "unknown", depth: 2, levelDepth: 2, poolBranch: "mixed", region: "burntcity",
+                 connectsTo: [] },
+          restS: { id: "restS", type: "rest", depth: 3, region: "burntcity", connectsTo: ["u1"] },
+
+          // --- Zone 2: Undercity / caves ---
+          u1: { id: "u1", type: "combat", depth: 4, levelDepth: 3, poolBranch: "mixed", region: "undercity",
+                connectsTo: ["u2"],
+                enterText: "Below the ash line the city keeps going — service tunnels, flooded rail, " +
+                  "the bones of a subway that never got its evacuation finished. Something down here " +
+                  "has been surviving on worse than you for a long time." },
+          // Vincent's recruit gate (§5.4c) — initially reads as an obstacle,
+          // not a rescue. Also carries the Talos-origin-on-Earth reveal
+          // (folded in here rather than a separate node/mechanic — Vincent,
+          // a native descendant, is the one person who'd actually know it).
+          u2: { id: "u2", type: "recruit", depth: 5, connectsTo: ["restU", "forestGate"],
+                recruitClass: "dreadKnight", recruitName: "Vincent",
+                recruitButtonLabel: "Stand with him.",
+                recruitText: [
+                  "The tunnel narrows into a chokepoint, and something already standing there doesn't " +
+                    "step aside. Armor built from a dozen different eras of scrap, a weapon that's " +
+                    "clearly killed things far worse than you. It's been watching you fight your way " +
+                    "down for longer than you realized.",
+                  "\"You're not Vossmark. You're not what's left of the flesh-things either.\" He " +
+                    "doesn't lower the weapon, but he doesn't raise it either. \"Nobody's come down " +
+                    "here in three generations who wasn't one or the other.\"",
+                  "\"My people never left,\" he says, when you ask. \"Voidborn, we call ourselves — " +
+                    "born into what the sky looked like after. We remember what the flesh-things " +
+                    "were, before they were that. People. Some company's experiment that outlived the " +
+                    "company. It started here, on this dirt, before whatever was left of them ever got " +
+                    "off-world.\" He finally lowers the weapon. \"You're going to the center of this. " +
+                    "So am I. Might as well be for the same reasons.\""
+                ] },
+          // Forest side-arm (§5.4c): a short detour off Vincent's node, not a
+          // full zone. Gates Sexias behind a fixed Vossmark loyalist fight
+          // (type "boss" so the encounter is authored, not pool-rolled — a
+          // real one-off "story fight" like the prologue's, same pattern the
+          // engine already supports; connectsTo is non-empty so it's NOT
+          // treated as a terminal boss clear, just a normal unlock).
+          forestGate: { id: "forestGate", type: "boss", depth: 5, region: "forest",
+                        connectsTo: ["forestRecruit"],
+                        bossEncounter: [{ key: "vossmarkOfficer", level: 1 }, { key: "riotEnforcer", level: 1 }],
+                        enterText: "The tree line here burned black years ago and never grew back right " +
+                          "— charred trunks, a wrongness of color low in the canopy. A Vossmark holding " +
+                          "cell sits in the middle of it, and the enforcers guarding it aren't here to " +
+                          "keep anything out." },
+          forestRecruit: { id: "forestRecruit", type: "recruit", depth: 5, connectsTo: [],
+                           recruitClass: "saboteur", recruitName: "Sexias",
+                           recruitButtonLabel: "Cut him loose.",
+                           recruitText: [
+                             "The cell reeks of scavenged chem and worse. The man inside has already " +
+                               "half-dismantled the lock himself — corroded tools, a Vossmark sidearm " +
+                               "stripped down to something that barely resembles its manual anymore.",
+                             "\"Took you long enough,\" he says, like he'd been expecting a rescue " +
+                               "he'd already stopped counting on. \"Deserted three weeks before the " +
+                               "landing. Command wanted to know what 'securing the Loom' meant hard " +
+                               "enough that I didn't want to be there when they found out.\"",
+                             "He kicks the cell door the rest of the way open. \"I know what their gear " +
+                               "does to a body when it fails. Figure that's worth something to whoever's " +
+                               "still walking down there.\""
+                           ] },
+          restU: { id: "restU", type: "rest", depth: 6, region: "undercity", connectsTo: ["f1"] },
+
+          // --- Zone 3: Frozen wastes ---
+          f1: { id: "f1", type: "combat", depth: 7, levelDepth: 4, poolBranch: "mixed", region: "frozen",
+                connectsTo: ["f2", "f2x"],
+                enterText: "The ash gives way to ice without warning, like the planet itself couldn't " +
+                  "decide how it wanted to die. Whatever's still moving out here has had a very long " +
+                  "time to get used to the cold." },
+          f2: { id: "f2", type: "combat", depth: 8, levelDepth: 5, poolBranch: "mixed", region: "frozen",
+                connectsTo: ["restF"],
+                enterText: "A frozen convoy, decades dead, its cargo still strapped down under the " +
+                  "frost. Something has been nesting in the wreckage, and it doesn't appreciate the " +
+                  "company." },
+          f2x: { id: "f2x", type: "unknown", depth: 8, levelDepth: 5, poolBranch: "mixed", region: "frozen",
+                 connectsTo: [] },
+          restF: { id: "restF", type: "rest", depth: 9, region: "frozen", connectsTo: ["d1"] },
+
+          // --- Zone 4: Deep descent — crust into mantle ---
+          d1: { id: "d1", type: "combat", depth: 10, levelDepth: 6, poolBranch: "mixed", region: "descent",
+                connectsTo: ["d2"],
+                enterText: "The ice ends at a fault line that shouldn't exist, a wound in the crust " +
+                  "leading straight down. The air gets warmer with every step, and the dark gets more " +
+                  "certain of itself." },
+          d2: { id: "d2", type: "combat", depth: 11, levelDepth: 7, poolBranch: "mixed", region: "descent",
+                connectsTo: ["restD"],
+                enterText: "A structure that isn't rock and isn't quite metal either, half-grown into " +
+                  "the tunnel wall, humming with a current no one laid the cable for. Something is " +
+                  "already very interested in why you're still walking." },
+          restD: { id: "restD", type: "rest", depth: 12, region: "descent", connectsTo: ["bossPhthora"] },
+          // Phthora, the Fleshspring (§5.4c) — Talos's own leader, racing
+          // the crew here, attempting to complete the lineage's founding
+          // transcendence at the source. Level is a first-pass placeholder,
+          // to be corrected against the real chain-arrival level via the
+          // established full-chain sim methodology before this is
+          // considered locked (see the §5.4c build-order — balance tuning
+          // is its own later roadmap phase, not skipped, just not final yet).
+          bossPhthora: { id: "bossPhthora", type: "boss", depth: 13, region: "descent",
+                         connectsTo: ["restD2"],
+                         bossEncounter: [{ key: "phthora", level: 4 }],
+                         enterText: "The tunnel opens into a cavern lit by something that used to be " +
+                           "bioluminescence and is now just wrong. Phthora is already mid-ritual, and " +
+                           "whatever he's reaching for, he got here first." },
+          restD2: { id: "restD2", type: "rest", depth: 14, region: "descent", connectsTo: ["core1"] },
+
+          // --- Zone 5: the Core — the Loom ---
+          core1: { id: "core1", type: "combat", depth: 15, levelDepth: 8, poolBranch: "voidTouched", region: "core",
+                   connectsTo: ["restCore"],
+                   enterText: "Human territory ends here, whatever's left of it. The walls stop " +
+                     "pretending to be rock and start looking like something that was poured, once, " +
+                     "by hands that weren't hands. The dark answers back." },
+          restCore: { id: "restCore", type: "rest", depth: 16, region: "core", connectsTo: ["bossCagedGod"] },
+          // The double-boss finale (§5.4c) — bossCagedGod connects onward to
+          // bossChthon instead of connectsTo: [], same generalized pattern
+          // D5's double boss already proved out (renderEndbar's isBossClear
+          // requires connectsTo.length === 0, so this correctly falls
+          // through to a normal resolveNodeVictory() unlock, not the
+          // dungeon's terminal clear). No rest between phases — the fusion
+          // happens live, on-screen, not off-screen exposition. Levels are
+          // first-pass placeholders, same caveat as Phthora above.
+          bossCagedGod: { id: "bossCagedGod", type: "boss", depth: 17, region: "core",
+                          connectsTo: ["bossChthon"],
+                          bossEncounter: [{ key: "cagedGod", level: 6 }],
+                          enterText: "Kredex is already here, and he's not alone — or rather, something " +
+                            "is here WITH him, still mostly bound, straining against a rig that was " +
+                            "never built to hold something that never agreed to be caged. \"You're " +
+                            "too late,\" he says, and he isn't wrong, just not in the way he thinks." },
+          bossChthon: { id: "bossChthon", type: "boss", depth: 18, region: "core", connectsTo: [],
+                        bossEncounter: [{ key: "chthon", level: 7 }],
+                        enterText: "Kredex stops screaming before the shape finishes changing, which " +
+                          "is somehow worse than if he hadn't. Whatever answers to Chthon now was " +
+                          "never a god, and was never really Kredex either — just the last honest " +
+                          "thing left standing where both of them used to be." }
         }
       }
     };
