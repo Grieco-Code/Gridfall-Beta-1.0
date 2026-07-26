@@ -1497,6 +1497,12 @@ The classic Final Fantasy battle layout, which scales as we add party members:
 - **Full "Combat UI overhaul" slice (later):** the complete FF bottom-band (party status window + command
   menu + log) with sprites — scheduled **after D½ (Limit) + Phase E (levels)**, built with the Scene
   manager (F) and Graphics (I) so it's done once with all its data present.
+- **Flagged for that same pass (2026-07-25, story-tightening session):** every node's `enterText` only
+  ever surfaces as the first line of the battle log — easy to miss entirely mid-scroll, which is why a
+  real player asked "does this text even show up?" about content that's been in the game for a while.
+  When the UI overhaul happens, make these more prominent/prioritized on-screen (not buried at the top
+  of a scrolling log), and consider a popup story-beat window as an alternative presentation for
+  `enterText` specifically, distinct from ordinary combat-log chatter.
 
 ---
 

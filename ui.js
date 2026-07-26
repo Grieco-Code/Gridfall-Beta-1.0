@@ -930,7 +930,7 @@
         btn.onclick = function () {
           const idx = party.indexOf(h);
           party[idx] = companion;
-          lastMapMessage = companion.name + " joins the active squad — " + h.name + " falls back to reserve.";
+          lastMapMessage = companion.name + " joins the active squad. " + h.name + " falls back to reserve.";
           showMap();
         };
         box.appendChild(btn);
@@ -938,7 +938,7 @@
 
       const skip = document.createElement("button");
       skip.className = "cancel";
-      skip.textContent = "Not now — keep the current squad";
+      skip.textContent = "Not now, keep the current squad";
       skip.onclick = function () {
         lastMapMessage = companion.name + " joins the roster, ready to swap in at Town.";
         showMap();
@@ -1036,12 +1036,11 @@
       sector1BriefingShown = true;
       showStoryScene([
         "The Long Shot's sensors don't lie. Kharon's Reach answers to a station in high " +
-          "orbit, Vossmark Station Sector 1. Every quota, every guard rotation, every debt " +
-          "ledger on the colony runs through it.",
-        "Torque already knows the approach vectors. Running isn't enough anymore, not with " +
-          "Dez's name still fresh, and if Vossmark wants a fight, this crew isn't going to " +
-          "keep hiding from one.",
-        "Sector 1 is bigger and better defended, and whatever's waiting up there won't be " +
+          "orbit, Vossmark Directorate Mining Station 4. Every quota, every guard rotation, " +
+          "every debt ledger on the colony runs through it.",
+        "Torque already knows the approach vectors. If Vossmark wants a fight, this crew " +
+          "isn't hiding from one.",
+        "Station 4 is bigger and better defended, and whatever's waiting up there won't be " +
           "the only thing that wants you dead. Time to gear up."
       ], "Breach the station.", function () {
         showSelect();
@@ -1371,7 +1370,7 @@
         jamBtn.textContent = "Jam the Relay (annex console)";
         jamBtn.onclick = function () {
           broodmarshal.reinforced = true;
-          log(hero.name + " overrides the annex console. The relay dies — whatever the " +
+          log(hero.name + " overrides the annex console. The relay dies. Whatever the " +
               "Broodmarshal was about to call, it isn't coming.", true);
           finishHeroAction();
         };

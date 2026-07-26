@@ -925,7 +925,7 @@
         // calls a second wave of sentinels + a repair drone at half HP (§1d).
         reinforceAt: 0.5,
         reinforceWave: [{ key: "arcSentinel", count: 1 }, { key: "repairDrone", count: 1 }],
-        reinforceMessage: "The Warden seals the deck — more security units drop in!"
+        reinforceMessage: "The Warden seals the deck. More security units drop in!"
       },
       // ---------- WARDEN BOSS-SUPPORT ADDS (2026-07-24) ----------
       // Sentry Turret — slow, armored, high-damage kinetic emplacement. Punishes
@@ -1207,7 +1207,7 @@
         affinities: { psionic: 2.0, kinetic: RESIST },
         reinforceAt: 0.5,
         reinforceWave: [{ key: "chimeraSpecimen", count: 1 }],
-        reinforceMessage: "Phthora's ritual falters, and the lineage answers anyway — a Chimera " +
+        reinforceMessage: "Phthora's ritual falters, and the lineage answers anyway. A Chimera " +
           "Specimen claws free of the wreckage to finish what he can't."
       },
       // The caged god (double-boss Phase 1, §5.4c) — the Loom's true
@@ -1282,14 +1282,14 @@
     ];
     const UNKNOWN_TRAP_HP_FRACTION = 0.12;   // % of max HP lost per hero on a "trap" roll
     const UNKNOWN_TRAP_FLAVOR = [
-      "A pressure plate gives way — a burst of scalding steam catches the squad before anyone can move.",
+      "A pressure plate gives way, and a burst of scalding steam catches the squad before anyone can move.",
       "Something in the dark trips a wire. The blast is small, but it isn't nothing.",
       "The floor isn't floor. It takes a few bad seconds to climb back out."
     ];
     const UNKNOWN_NARRATIVE_FLAVOR = [
       "Nothing here but old silence and a dead terminal. Whatever happened, it happened a long time ago.",
       "A supply locker, emptied out and abandoned. Someone else got here first.",
-      "The corridor doubles back on itself. A dead end — just a dead end."
+      "The corridor doubles back on itself. A dead end, just a dead end."
     ];
 
     // SPRITES (Phase I, Slice 1; hero shapes redrawn in a follow-up pass to
@@ -2066,7 +2066,10 @@
                     "loader's mount. \"I know a way through the drill line. Try to keep up.\""
                 ] },
           p4: { id: "p4", type: "boss", depth: 4, connectsTo: [],
-                enterText: "Overseer Voraxx blocks the hangar door!" }
+                enterText: "Overseer Voraxx doesn't look surprised to see you, just annoyed at the " +
+                  "paperwork this is going to cause. \"Thiel's replacement will have to process a " +
+                  "body sooner than expected,\" he says, already sounding bored. \"The Prison AI " +
+                  "doesn't care which of you makes quota. Only that quota gets made.\"" }
         }
       },
       // Vossmark Station Sector 1 (Phase G, §5.1) — a genuine branch (safer
@@ -2078,7 +2081,7 @@
       // genre beat, so this earns its spot over strict 8-node math.)
       sector1: {
         start: "n1",
-        title: "VOSSMARK STATION SECTOR 1",
+        title: "VOSSMARK DIRECTORATE MINING STATION 4",
         region: "station",   // map backdrop theme (Phase I): orbital space station
         nextDungeonKey: "erebus",
         // The Warden's fixed boss composition (§1d) — moved here from engine
@@ -2105,7 +2108,9 @@
           // scales off THAT, not the render `depth` — so recruit1 changes
           // where nodes sit on the map without changing how hard anything
           // hits. See §5.2b/§9 for the sim numbers.
-          n1:   { id: "n1",   type: "combat", depth: 1, connectsTo: ["recruit1"] },
+          n1:   { id: "n1",   type: "combat", depth: 1, connectsTo: ["recruit1"],
+                  enterText: "The breach corridor is still hot from the entry charges. Whatever's " +
+                    "on the other side already knows you're here." },
           recruit1: { id: "recruit1", type: "recruit", depth: 2, connectsTo: ["n2", "n3"],
                       recruitClass: "netrunner", recruitName: "Nyx", recruitButtonLabel: "Move in.",
                       recruitText: [
@@ -2119,14 +2124,30 @@
                         "Three operators against a station isn't great odds, but it beats the " +
                           "two you walked in with."
                       ] },
-          n2:   { id: "n2",   type: "combat", depth: 3, levelDepth: 2, connectsTo: ["n4"] },
-          n3:   { id: "n3",   type: "elite",  depth: 3, levelDepth: 2, connectsTo: ["n5"] },
+          n2:   { id: "n2",   type: "combat", depth: 3, levelDepth: 2, connectsTo: ["n4"],
+                  enterText: "The corridor opens into a maintenance level nobody's supposed to " +
+                    "walk through unescorted." },
+          n3:   { id: "n3",   type: "elite",  depth: 3, levelDepth: 2, connectsTo: ["n5"],
+                  enterText: "A heavier patrol holds this stretch of the ring, armor plating built " +
+                    "for a war nobody here expected to fight this early." },
           n4:   { id: "n4",   type: "rest",   depth: 4, levelDepth: 3, connectsTo: ["n6"] },
           n5:   { id: "n5",   type: "loot",   depth: 4, levelDepth: 3, connectsTo: ["n6"] },
-          n6:   { id: "n6",   type: "combat", depth: 5, levelDepth: 4, connectsTo: ["n7"] },
-          n7:   { id: "n7",   type: "elite",  depth: 6, levelDepth: 5, connectsTo: ["n8"] },
+          n6:   { id: "n6",   type: "combat", depth: 5, levelDepth: 4, connectsTo: ["n7"],
+                  enterText: "Both halls funnel into the same access ring, and Vossmark's response " +
+                    "has had time to organize." },
+          n7:   { id: "n7",   type: "elite",  depth: 6, levelDepth: 5, connectsTo: ["n8"],
+                  enterText: "The last checkpoint before the command deck is a full security " +
+                    "detail, mechs and all. Whoever's coordinating them from here knows exactly " +
+                    "how many of you there are." },
           n8:   { id: "n8",   type: "rest",   depth: 7, levelDepth: 6, connectsTo: ["boss"] },
-          boss: { id: "boss", type: "boss",   depth: 8, levelDepth: 7, connectsTo: [] }
+          boss: { id: "boss", type: "boss",   depth: 8, levelDepth: 7, connectsTo: [],
+                  enterText: "The command deck doesn't have a door, just an interface throne " +
+                    "fused into the floor, cables feeding into it from every direction like it " +
+                    "grew there instead of being built. This is what Thiel was trying to call. " +
+                    "This is what Voraxx answered to. The Warden doesn't need a voice to make " +
+                    "itself understood: every debt on Kharon's Reach, every quota, every name in " +
+                    "its ledgers, is still open on a screen behind it, and yours is the only one " +
+                    "still moving." }
         }
       },
       // Site Erebus (Dungeon 3, planned §5.3) — the bug-planet crash. Hand-
@@ -2148,7 +2169,7 @@
                   "crawling out of the treeline." },
           e2: { id: "e2", type: "combat", depth: 2, connectsTo: ["e3", "e4"],
                 enterText: "The tunnel ahead reeks of resin and rust, old conduit chewed straight " +
-                  "through." },
+                  "through, half of it fused with cable runs that were never hive-grown." },
           // Safe branch: a standard-tier fight (Warrior + Shaman), then Rest.
           e3: { id: "e3", type: "combat", depth: 3, connectsTo: ["e5"],
                 enterText: "A chittering call echoes off the tunnel walls. Whatever's answering it " +
@@ -2217,7 +2238,7 @@
           // the fog-of-war decision at d2 is at least informed by one wing.
           d1: { id: "d1", type: "combat", depth: 1, levelDepth: 7, poolBranch: "security",
                 connectsTo: ["d2"],
-                enterText: "Motion sensors flare red the moment you breach the outer seal — the " +
+                enterText: "Motion sensors flare red the moment you breach the outer seal. The " +
                   "foundry's perimeter guard doesn't wait to ask who you are." },
           // Recruit: Six, the Psionic Mentalist ally teased since Site Erebus
           // (§5.3/§9.4 — "a Psionic-leaning Mentalist recruit would pay off
@@ -2233,7 +2254,7 @@
                     "she doesn't fully trust what those hands will do next. A specimen tag is still " +
                     "fused to one wrist: SUBJECT SIX. She doesn't offer another name.",
                   "\"They were trying to teach it to listen,\" Six says, finally looking up. \"It " +
-                    "listened to me instead. I can hear the ones still in the tanks — screaming " +
+                    "listened to me instead. I can hear the ones still in the tanks, screaming " +
                     "without mouths. I want to make it stop. All of it.\""
                 ] },
 
@@ -2261,7 +2282,7 @@
           // --- Specimen Wing arm --- (same restructure as Security Wing above)
           d3p: { id: "d3p", type: "combat", depth: 3, levelDepth: 7, poolBranch: "specimen",
                  connectsTo: ["d4p", "d5p"],
-                 enterText: "The air changes past this point — warmer, wetter, wrong. Something " +
+                 enterText: "The air changes past this point, warmer, wetter, wrong. Something " +
                    "in the dark has been listening to you argue about which way to go." },
           d4p: { id: "d4p", type: "unknown", depth: 4, levelDepth: 7, poolBranch: "specimen",
                  connectsTo: [] },
@@ -2281,7 +2302,7 @@
           // safe/risky branch) ---
           converge: { id: "converge", type: "combat", depth: 7, levelDepth: 9, poolBranch: "mixed",
                       connectsTo: ["restFinal"],
-                      enterText: "Both wings of the foundry answer the alarm at once — security " +
+                      enterText: "Both wings of the foundry answer the alarm at once, security " +
                         "drones and something far worse, closing from opposite ends of the same hall." },
           restFinal: { id: "restFinal", type: "rest", depth: 8, connectsTo: ["boss"] },
           boss: { id: "boss", type: "boss", depth: 9, connectsTo: [],
@@ -2465,7 +2486,7 @@
           // --- Zone 2: Undercity / caves ---
           u1: { id: "u1", type: "combat", depth: 4, levelDepth: 3, poolBranch: "mixed", region: "undercity",
                 connectsTo: ["u2"],
-                enterText: "Below the ash line the city keeps going — service tunnels, flooded rail, " +
+                enterText: "Below the ash line the city keeps going, service tunnels, flooded rail, " +
                   "the bones of a subway that never got its evacuation finished. Something down here " +
                   "has been surviving on worse than you for a long time." },
           // Moro's recruit gate (§5.4c) — initially reads as an obstacle,
@@ -2483,7 +2504,7 @@
                   "\"You're not Vossmark. You're not what's left of the flesh-things either.\" He " +
                     "doesn't lower the weapon, but he doesn't raise it either. \"Nobody's come down " +
                     "here in three generations who wasn't one or the other.\"",
-                  "\"My people never left,\" he says, when you ask. \"Voidborn, we call ourselves — " +
+                  "\"My people never left,\" he says, when you ask. \"Voidborn, we call ourselves, " +
                     "born into what the sky looked like after. We remember what the flesh-things " +
                     "were, before they were that. People. Some company's experiment that outlived the " +
                     "company. It started here, on this dirt, before whatever was left of them ever got " +
@@ -2499,16 +2520,16 @@
           forestGate: { id: "forestGate", type: "boss", depth: 5, region: "forest",
                         connectsTo: ["forestRecruit"],
                         bossEncounter: [{ key: "vossmarkOfficer", level: 1 }, { key: "riotEnforcer", level: 1 }],
-                        enterText: "The tree line here burned black years ago and never grew back right " +
-                          "— charred trunks, a wrongness of color low in the canopy. A Vossmark holding " +
-                          "cell sits in the middle of it, and the enforcers guarding it aren't here to " +
-                          "keep anything out." },
+                        enterText: "The tree line here burned black years ago and never grew back " +
+                          "right, charred trunks, a wrongness of color low in the canopy. A Vossmark " +
+                          "holding cell sits in the middle of it, and the enforcers guarding it aren't " +
+                          "here to keep anything out." },
           forestRecruit: { id: "forestRecruit", type: "recruit", depth: 5, connectsTo: [],
                            recruitClass: "saboteur", recruitName: "Sexias",
                            recruitButtonLabel: "Cut him loose.",
                            recruitText: [
                              "The cell reeks of scavenged chem and worse. The man inside has already " +
-                               "half-dismantled the lock himself — corroded tools, a Vossmark sidearm " +
+                               "half-dismantled the lock himself, corroded tools, a Vossmark sidearm " +
                                "stripped down to something that barely resembles its manual anymore.",
                              "\"Took you long enough,\" he says, like he'd been expecting a rescue " +
                                "he'd already stopped counting on. \"Deserted three weeks before the " +
@@ -2596,8 +2617,8 @@
           core1: { id: "core1", type: "combat", depth: 1, levelDepth: 8, poolBranch: "voidTouched",
                    connectsTo: ["restCore"],
                    enterText: "Human territory ends here, whatever's left of it. The walls stop " +
-                     "pretending to be rock and start looking like something that was poured, once, " +
-                     "by hands that weren't hands. The dark answers back." },
+                     "pretending to be rock. Whatever shaped them wasn't human, and didn't need to " +
+                     "be. The dark answers back." },
           restCore: { id: "restCore", type: "rest", depth: 2, connectsTo: ["bossCagedGod"] },
           // The double-boss finale (§5.4c) — bossCagedGod connects onward to
           // bossChthon instead of connectsTo: [], same generalized pattern
@@ -2610,15 +2631,15 @@
           bossCagedGod: { id: "bossCagedGod", type: "boss", depth: 3,
                           connectsTo: ["bossChthon"],
                           bossEncounter: [{ key: "cagedGod", level: 6 }],
-                          enterText: "Kredex is already here, and he's not alone — or rather, something " +
-                            "is here WITH him, still mostly bound, straining against a rig that was " +
-                            "never built to hold something that never agreed to be caged. \"You're " +
-                            "too late,\" he says, and he isn't wrong, just not in the way he thinks." },
+                          enterText: "Kredex is already here, and he's not alone. Something is here " +
+                            "WITH him, still mostly bound, straining against a rig that was never " +
+                            "built to hold something that never agreed to be caged. \"You're too " +
+                            "late,\" he says, and he isn't wrong, just not in the way he thinks." },
           bossChthon: { id: "bossChthon", type: "boss", depth: 4, connectsTo: [],
                         bossEncounter: [{ key: "chthon", level: 7 }],
                         enterText: "Kredex stops screaming before the shape finishes changing, which " +
                           "is somehow worse than if he hadn't. Whatever answers to Chthon now was " +
-                          "never a god, and was never really Kredex either — just the last honest " +
+                          "never a god, and was never really Kredex either. Just the last honest " +
                           "thing left standing where both of them used to be." }
         }
       }

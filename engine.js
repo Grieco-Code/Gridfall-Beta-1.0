@@ -838,8 +838,10 @@
 
         if (isBossClear) {
           let clearLine;
-          if (currentDungeonKey === "prologue") clearLine = "Overseer Voraxx falls. The hangar is clear!";
-          else if (currentDungeonKey === "sector1") clearLine = "The Warden collapses. Sector 1 is clear!";
+          if (currentDungeonKey === "prologue") clearLine = "Overseer Voraxx falls. The hangar is " +
+            "clear, but whatever he was reporting to already knows you're gone.";
+          else if (currentDungeonKey === "sector1") clearLine = "The Warden collapses, and every " +
+            "ledger it was holding open goes dark at once. Station 4 is clear.";
           else if (currentDungeonKey === "erebus") clearLine = "The Broodmarshal collapses. The hive scatters!";
           else if (currentDungeonKey === "dungeon4") clearLine = "Proteus finally stops moving. Whatever it was becoming, it's over.";
           else if (currentDungeonKey === "dungeon5") clearLine = "The Sun God goes still. Helios finally goes dark.";
@@ -933,12 +935,13 @@
     // (now meaningfully a 2-person roster) to prep for it.
     function showPrologueEpilogue(nextDungeonKey) {
       showStoryScene([
-        "The hangar door grinds open on a battered long-haul shuttle that has no business " +
-          "still flying, and somehow it flies anyway.",
+        "The hangar door grinds open on a battered long-haul shuttle, hull scarred from a " +
+          "dozen patch jobs that never should have held. Whoever tagged it 'the Long Shot' " +
+          "in peeling paint by the airlock wasn't kidding.",
         "Behind you, Kharon's Reach is waking up: floodlights, sirens, someone on the comm " +
           "still shouting Voraxx's name like he's going to answer.",
-        "He's not going to. Two debts are paid, but there's still a long way to go, and the " +
-          "ship is only the first part of getting there."
+        "He's not going to. Two debts are paid. Dez was the only reason you had for living. " +
+          "He's gone. There's nothing pulling you back anymore."
       ], "Break atmosphere.", function () {
         currentDungeonKey = nextDungeonKey;
         lastTownMessage = grantShipStartingItems();
@@ -954,15 +957,16 @@
     // startDungeon call, not the Town-then-showSelect flow).
     function showSector1Epilogue(nextDungeonKey) {
       showStoryScene([
-        "The Warden's wreckage is still sparking behind you when the shuttle clears Sector 1's " +
+        "The Warden's wreckage is still sparking behind you when the shuttle clears Station 4's " +
           "outer ring, alarms finally quiet for the first time in what feels like days.",
         "Nobody up top even knows you're out here. That's the whole point of running dark, " +
-          "which is why it doesn't make sense when the proximity alarm screams half a system " +
-          "later and the empty black ahead lights up with turret fire that was never meant to " +
-          "see a living target.",
-        "It isn't Vossmark retaliating. It's older than that: a blockade nobody's manned in " +
-          "years, still doing the one job it was ever given. The shuttle takes three hits before " +
-          "anyone gets a hand back on the stick, and by then it doesn't matter whose fault it is.",
+          "which is why it doesn't make sense when the proximity alarm screams anyway, and the " +
+          "empty black ahead lights up with turret fire that was never meant to see a living " +
+          "target.",
+        "It isn't Vossmark retaliating. Whatever's out here predates them. A derelict blockade " +
+          "running on bio-tech grown rather than built, exactly the signature the Long Shot's " +
+          "scanners were never tuned to catch. Three hits land before anyone gets a hand back on " +
+          "the stick, and by then it doesn't matter whose fault it is.",
         "The ship goes down hard, atmosphere howling through a hull breach, tree cover rushing " +
           "up too fast to read as anything but a crash."
       ], "Brace for impact.", function () {
@@ -989,9 +993,11 @@
       showStoryScene([
         "The Broodmarshal doesn't get up again. For a long moment neither does anyone else. " +
           "The cavern is quiet in a way this planet hasn't been since the crash.",
-        "What's left of the control rig comes away from the shell easier than it should, wiring " +
-          "still warm, half of it stamped with a Vossmark asset tag someone tried hard to scrub " +
-          "off. Whatever this thing was supposed to become, it never finished becoming it.",
+        "The collar comes off easier than it should, wiring still warm underneath. A Vossmark " +
+          "asset tag is stamped into the metal, scrubbed hard enough that only half of it still " +
+          "reads. Whatever this was supposed to control, it clearly never did. Fused to the " +
+          "collar is a terminal, dead for years, holding just enough backup power to eject one " +
+          "intact data core before it finally gives out for good.",
         "The Long Shot isn't flying on its own parts anymore by the time the annex is stripped " +
           "for anything that still works, but it's flying. Kharon's Reach feels like a long time " +
           "ago. Vossmark feels smaller than it did yesterday, and somehow that's worse."
@@ -1012,15 +1018,19 @@
     // memory) — now fixed the same way, before it could ever bite.
     function showDungeon4Epilogue(nextDungeonKey) {
       showStoryScene([
-        "Proteus doesn't scream on the way down. Whatever was still human in there goes quiet " +
-          "first, and the rest just stops a moment later, mid-transformation, like a sentence " +
-          "that never finds its verb.",
+        "Proteus doesn't scream on the way down. The splice rig bolted into his spine keeps " +
+          "trying to finish the sequence even after he stops moving, feeding some rewritten " +
+          "strand of himself into a body that can't use it anymore. Whatever was still human in " +
+          "him goes quiet first. The rest just stops a moment later, mid-transformation, like a " +
+          "sentence that never finds its verb.",
         "Six doesn't look away from it. \"That was supposed to be a mercy,\" she says, prying a " +
           "data core loose from the ruin of the executive suite. \"Nobody gave it one.\"",
-        "The core's fragment locks against the one pulled from the Broodmarshal's rig months ago, " +
-          "two broken halves of the same key finally admitting they were always one piece. What " +
-          "they point at isn't a place in the outer dark where a corp could hide a black site. " +
-          "It's the system's own star, and something built into it that was never supposed to be found."
+        "The core's fragment locks against the one pulled from the Broodmarshal's rig, two " +
+          "broken halves finally admitting they were always one piece. Six goes very still " +
+          "holding it, the way she does right before she says something she wishes she couldn't " +
+          "hear. \"It's not pointing at a hiding place,\" she says. \"It's pointing at the star. " +
+          "Whatever's built into it isn't a weapon and isn't a cure. It's both, waiting on " +
+          "somebody to decide which.\""
       ], "Chart a course for the sun.", function () {
         if (nextDungeonKey) currentDungeonKey = nextDungeonKey;
         showTown();
@@ -1039,12 +1049,15 @@
     // Dungeon 4 sat in before this session.
     function showDungeon5Epilogue(nextDungeonKey) {
       showStoryScene([
-        "The Sun God's light doesn't fade so much as it stops arguing with the dark. For the " +
-          "first time since the breach, Helios Station is just wreckage: dead metal, dead " +
-          "circuitry, a regulator core that spent longer being worshipped than understood.",
-        "What's left of it isn't divine and was never really a god. It's a caretaker's machine, " +
-          "the last honest piece of something built to keep a dying system fed, corrupted by " +
-          "whatever got loose down here long before anyone came looking.",
+        "The Sun God doesn't die quietly. Whatever's left of its stored charge goes all at once, " +
+          "one blinding pulse that reads on every sensor like the core just had its own private " +
+          "supernova. The shockwave alone buckles a bulkhead two decks over. When the light " +
+          "finally clears, there's nothing left where it stood but a scorched crater and the " +
+          "smell of superheated metal.",
+        "Whatever that was, it was never a god. Just a caretaker's machine, one piece of " +
+          "something far older meant to keep a dying system fed. Something got into it long " +
+          "before anyone came looking, and it stopped being able to tell the difference between " +
+          "tending something and owning it.",
         "The coordinates it was guarding aren't out here at all. They're keyed to a world both " +
           "Vossmark and Talos wrote off generations ago, the one place scarred badly enough that " +
           "nobody thought to fight over it. Home, if the word still means anything by now."
@@ -1062,13 +1075,11 @@
     // the Core's short, tight, climactic sequence (dungeon6b).
     function showDungeon6Epilogue(nextDungeonKey) {
       showStoryScene([
-        "Phthora doesn't finish becoming anything. Whatever the ritual was reaching for collapses " +
-          "back into meat and failure, and the cavern goes quiet in the specific way only something " +
-          "that was trying very hard to stop being human can go quiet.",
-        "Past the wreckage of his rig, the rock stops pretending to be rock. A passage drops away " +
-          "into something too smooth, too deliberate, lit by a light that doesn't have a source — " +
-          "the kind of architecture that was never built by hands that needed to explain themselves " +
-          "to anyone.",
+        "Phthora goes down mid-reach. Whatever the ritual was building toward collapses with him, " +
+          "and what's left on the cavern floor is just meat again.",
+        "Past his rig, the tunnel stops being rock. What's underneath is smooth and deliberate, " +
+          "lit by nothing anyone can find the source of. Whoever built this never had to explain " +
+          "themselves to anybody.",
         "This is the last door. Whatever's actually running this world's dead engine is down there, " +
           "and Kredex already has a head start."
       ], "Go deeper.", function () {
@@ -1090,7 +1101,7 @@
         "Kredex doesn't finish dying so much as stop being separate from what killed him. Whatever " +
           "answered to Chthon a moment ago goes still, and the quiet that's left behind doesn't feel " +
           "like an ending. It feels like something letting go of a held breath.",
-        "That's when the lattice screams. Not a sound — every psion in the squad feels it at once, a " +
+        "That's when the lattice screams. Not a sound, every psion in the squad feels it at once, a " +
           "signal running through the same precursor thread the Erebus fragment was always a piece " +
           "of, out past the dead ground overhead, out past Sol's dark, all the way to a wound the " +
           "crew tore open themselves at Helios months ago. It stops pretending to be sealed. " +
@@ -1124,9 +1135,9 @@
       box.appendChild(p);
 
       const options = [
-        { key: "reseed", label: "Reseed — bring the homeworld back." },
-        { key: "destroy", label: "Destroy — make sure no one ever owns this." },
-        { key: "deny", label: "Deny — leave it buried, and walk away." }
+        { key: "reseed", label: "Reseed · bring the homeworld back." },
+        { key: "destroy", label: "Destroy · make sure no one ever owns this." },
+        { key: "deny", label: "Deny · leave it buried, and walk away." }
       ];
       options.forEach(function (opt) {
         const btn = document.createElement("button");
@@ -1146,18 +1157,18 @@
         reseed: [
           "The engine doesn't wake up so much as remember how. Something moves through the dead " +
             "rock overhead that hasn't moved in this world's favor in longer than anyone alive can " +
-            "measure — not fast, not dramatic, just patient the way growing things are patient.",
+            "measure, not fast, not dramatic, just patient the way growing things are patient.",
           "It'll be generations before anyone calls this world green again, and the squad already " +
             "knows they won't live to see it finished. That was never really the point. The corps " +
             "threw this place away because it stopped being profitable to want. Wanting it back for " +
             "free is the whole answer.",
           "Out past Sol's dark, the Breach doesn't care what you chose. It's open regardless, and " +
             "something is going to come through it eventually. But that's a fight for whoever's still " +
-            "standing when it happens — not a reason to let this one go unfinished."
+            "standing when it happens, not a reason to let this one go unfinished."
         ],
         destroy: [
           "The Loom doesn't scream when it dies. It just stops being a question anyone can ask " +
-            "again — no seed, no scour, no second Chancellor with a better rig and a worse reason. " +
+            "again, no seed, no scour, no second Chancellor with a better rig and a worse reason. " +
             "The chamber goes dark in a way that feels less like an ending and more like a door " +
             "finally shutting all the way.",
           "Earth stays dead. That was always going to be true either way, whether the squad wrecked " +
@@ -1166,16 +1177,16 @@
             "flag-planter who thinks they'll be the one who finally controls it right.",
           "Out past Sol's dark, the Breach doesn't care what you chose. It's already open, a wound " +
             "with no engine left on this end to ever close it again. That's someone else's problem " +
-            "now — the squad just made sure it isn't also someone's weapon."
+            "now, the squad just made sure it isn't also someone's weapon."
         ],
         deny: [
           "Nobody throws a switch. Nobody plants a flag, and nobody detonates anything either. The " +
             "squad just walks back out the way they came, and leaves the Loom exactly as they found " +
-            "it — patient, buried, undecided, the one thing in this whole system nobody gets to own " +
+            "it, patient, buried, undecided, the one thing in this whole system nobody gets to own " +
             "because nobody took it.",
           "It's the smallest possible ending, and it might be the only honest one. Every hand that's " +
-            "ever reached for this thing — the precursors, both corps, Phthora's whole lineage, " +
-            "Kredex right up until it wasn't his hand anymore — reached for it wanting something. " +
+            "ever reached for this thing, the precursors, both corps, Phthora's whole lineage, " +
+            "Kredex right up until it wasn't his hand anymore, reached for it wanting something. " +
             "The squad is the first to walk away wanting nothing at all.",
           "Out past Sol's dark, the Breach doesn't care what you chose. It's open either way, waiting " +
             "on something the squad never met and can't un-open. But whatever comes through it, it " +
@@ -1535,7 +1546,7 @@
       // Prologue nodes carry their own flavor line (enterText); Sector 1
       // nodes fall back to the original generic lines.
       log(node.enterText || (node.type === "boss" ? "The Warden activates!" :
-          node.type === "unknown" ? "An ambush — this one wasn't a false alarm!" :
+          node.type === "unknown" ? "An ambush. This one wasn't a false alarm!" :
           "Hostiles engage!"), true);
       const order = turnOrder(living(allCombatants()));
       log("Turn order (by Speed): " +
