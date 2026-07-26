@@ -1359,28 +1359,28 @@
         ".....OJHHHHHHHHHHJO.....",
         ".....OHHHHHHHHHHHHO.....",
         ".....OSSSSSSSSSSSSO.....",
-        ".....OSSDDSSSSDDSSO.....",
-        ".....OSSSSSSSSSSSSO.....",
-        ".....OSSVVSSSSWESSO.....",
+        ".....OSSDDSSSSDKSSO.....",
+        ".....OSSSDSSSSDSSSO.....",
+        ".....OSSSWESSEWSSSO.....",
         ".....OSSSSSSSSSSSSO.....",
         "......OSSSSIISSSSO......",
         "......OSSSSSSSSSSO......",
-        "......OSSDDDDDDSSO......",
-        "......OYYSSSSSSYYO......",
+        "......ODDDDDDDDDDO......",
+        "......OYYYYYYYYYYO......",
         ".......OYYYYYYYYO.......",
         "........OZZZZZZO........",
         "......ORRZZZZZZRRO......",
-        "...OMMMMLBBBBBBAMMMMO...",
-        "...OAAOLBBBBBBBAPPPN....",
-        "...OAAOLBBBBBAXXPPPNBO..",
-        "...OSSOBBBBBXXPPPNBBO...",
-        "...OSSOBBMMMMPPNBBBBO...",
-        "...OSSMMQQQMMNBBBBBO....",
-        "...OSQQQMMBBBBBBBBBO....",
-        "...OXXXMMNBBBBBBBBBO....",
-        "...OXXXXBBBBBBBBBBBO....",
-        "...ONNNNNNBBBBBBBBBO....",
-        "...ONNNNNNBBBBBBBBBO....",
+        "...OAAAALBBBBBBAAAANPO..",
+        "...OOAAOBBBBBOSKOBNPO...",
+        "...OOAAOBBBOSSOBBNPOO...",
+        "...OOSSOBOSSOMMMMMMOO...",
+        "...OOSSOBBBBOMMMMMMOO...",
+        "...OOSSONNNNBOQQOBBBO...",
+        "...OOSSONNNNBOQQOBBBO...",
+        "...OOSSSONNNNOQQOBBBO...",
+        "...OONNNNNNNNOBBBBBBO...",
+        "...OONNNNNNNNOBBBBBBO...",
+        "...OCCCCCCCCCCCCCCCCO...",
         "...OCCCCCCCCCCCCCCCO....",
         "....OTTTTTTOOTTTTTTO....",
         "....OTTTTTTOOTTTTTTO....",
@@ -1403,8 +1403,8 @@
         "......OHHHHHHHHHHO......",
         ".....OHHHHHHHHHHHHO.....",
         ".....OHHSSSSSSSSHHO.....",
-        ".....OHSSSSSSSSSSHO.....",
-        ".....OHSVVSSSSVVSHO.....",
+        ".....OHSSDDSSDDSSHO.....",
+        ".....OHSSVVSSVVSSHO.....",
         ".....OHSSSSDDSSSSHO.....",
         ".....OHKSSSSSSSSKHO.....",
         ".....OHSSSDDDDSSSHO.....",
@@ -1414,12 +1414,12 @@
         ".....OHHHO....OHHHO.....",
         "......OABBBBBBBBAO......",
         "......OABBBBBBBBAO......",
-        ".....OSABBVVVVBBASO.....",
-        ".....OSABBVVVVBBASO.....",
-        "......OABBVVVVBBAO......",
+        ".....OBBBBVVVVBBBBO.....",
+        ".....OBBBBVVVVBBBBO.....",
         "........OBBVVBBO........",
-        "......OBBBBVVBBBBO......",
-        ".....OBBBBBVVBBBBBO.....",
+        ".........OBVVBO.........",
+        ".....OABBBVVVVBBBAO.....",
+        ".....OABBBVVVVVBBAO.....",
         ".....OTTTTOOOOTTTTO.....",
         ".....OTTTTOOOOTTTTO.....",
         ".....OTTTUOOOOUTTTO.....",
@@ -1431,35 +1431,40 @@
         "........................",
         "........................"
       ],
-      heroDread: [      // tank: horned great-helm, red T-visor, heavy plate, front greatsword
-        "..................",
-        ".......OMMO.......",
-        "......OMPPMO......",
-        ".....OMPMMPMO.....",
-        "....OMMMMMMMMO....",
-        "...OMMPMMMMPMMO...",
-        "...OMMMMMMMMMMO...",
-        "...OMMMVVVVMMMO...",
-        "...OMMMVVVVMMMO...",
-        "...OMMMMVVMMMMO...",
-        "...OMPMMMMMMPMO...",
-        "....OMMMMMMMMO....",
-        "..ONMMMPPMMMMNO...",
-        ".OMPMMMPPMMMMPMO..",
-        ".OMPMMBPPBBMMPMO..",
-        ".ONMMBBPPBBBMMNO..",
-        "..OMMBBPPBBBMMO...",
-        "...OMBOPPOBBMO....",
-        "...OMBBOOBBBMO....",
-        "....OBBBBBBBO.....",
-        "....OCBBBBBCO.....",
-        "....OMMMOOMMMO....",
-        "....OMMMOOMMMO....",
-        "....OMMUOOUMMO....",
-        "....OFFFOOFFFO....",
-        "...OFFFO..OFFFO...",
-        "..................",
-        ".................."
+      heroDread: [      // tank: literal exposed skull (glowing red eye-sockets), giant
+                         // slab greatsword resting on the shoulder, tip past the head
+        "................ONPPMO..",
+        "................NPPM....",
+        "..........OKKO..NPPM....",
+        "........OKKKKKKONPPM....",
+        ".......OKKKKKKKKOPM.....",
+        "......OKKKKKKKKKKO......",
+        "......OKKKKKKKKKKO......",
+        "......OJJJKKKKJJJO......",
+        "......OJVJKKKKJVJO......",
+        "......OJJJDDKKJJJO......",
+        "......OKKKKJJKKKKO......",
+        ".......ODDDDDDDDO.......",
+        "........OKJKJKJKO.......",
+        "........ONNNNNNO........",
+        "...OMMMMMNNNNNNMMMMMO...",
+        "...OPPPPNNNNNNNNPPPPO...",
+        "....OMMMNPPMMMMMMMMO....",
+        "....OMMMMMMMMMMMMMMO....",
+        "....OMMNPPMMMMMMMMMO....",
+        "....OMMONNNNOMMMMMMO....",
+        "....OOKKOOKKOMMMMMMO....",
+        "....OMBBBBBBBBBBBBMO....",
+        ".....OBBBBBBBBBBBBO.....",
+        ".....OCCCCCCCCCCCCO.....",
+        "......OMUUMOOMUUMO......",
+        "......OMMMMOOMMMMO......",
+        "......OMMMMOOMMMMO......",
+        "......OMMMMOOMMMMO......",
+        "......OFFFFOOFFFFO......",
+        "......OFFFFOOFFFFO......",
+        "........................",
+        "........................"
       ],
       // Mech Runner (Torque von Bram) — REDRAWN 24x32 as a HUMAN FACE + FULL MECH BODY
       // (per user direction: "more mech than human body"). A small human head
@@ -1469,8 +1474,8 @@
       // joints (R), thick mech legs + big feet. Reads as "the machine" of the
       // party vs. the Merc's human body — the two are now clearly different.
       heroMech: [
-        "........................",
-        "......OHHHHHHHHHHO......",
+        ".........OHHHHO.........",
+        ".......OHHHHHHHHO.......",
         "......OHSSSSSSSSHO......",
         "......OSSDDDDDDSSO......",
         "......OSWESSSSWESO......",
@@ -1478,23 +1483,23 @@
         "......OKSSSSSSSSKO......",
         "......OSSDDDDDDSSO......",
         ".......OKSSSSSSKO.......",
-        "........OCCCCCCO........",
-        ".....ORMMMMMMMMMMRO.....",
-        "..OMMMMMMMMMMMMMMMMMMO..",
-        "..OMPMMORMMMMMMRMOMMPMO.",
-        "..OMMMMOMAAAAAAAAMOMMMMO",
-        "..OMMMMOMAAAVVAAAMOMMMMO",
-        "..OMPMMOMAAAVVAAAMOMMPMO",
-        "..OMMMMOMAAAAAAAAMOMMNNN",
-        "..OMMMMOMMMMMMMMMMOMMNNN",
-        "...ORROMMMMMMMMMMORRO...",
-        "...OMMMOMMMMMMMMOMMMO...",
-        "...OXXMOMMMMMMMMOMXXO...",
-        "....OMMMMMMMMMMMMMMO....",
+        "......ONNNNNNNNNNO......",
+        "....OMMMMONNNNOMMMMO....",
+        "..ORRRROMMMMMMMMORRRRO..",
+        "..OMMMMOOAAAAAAOOMMMMO..",
+        "..OMMMMOOAAAAAAOOMMMMO..",
+        "..OMMMMOOAAAVVAOOMMMMO..",
+        "..OMMMMOOAAAVVAOOMMMMO..",
+        "..OMMMMOOAAAAAAOOMMMMO..",
+        "..OMMMMOMMMMMMMMONNNNNO.",
+        "..ORRRROMMMMMMMMONNNNNO.",
+        "..OMMMMOMMMMMMMMONNNNNO.",
+        "..OXXXOOMMMMMMMMONNNNO..",
+        ".......OMMMMMMMMONNNO...",
         "....OMMMNMMOOMMNMMMO....",
         "....OMMMMMMOOMMMMMMO....",
         "....ORMMMMMOORMMMMMRO...",
-        "....OMMMNMMOOMMNMMMO....",
+        "....RRRRRMMOOMMRRRRR....",
         "....OMMMMMMOOMMMMMMO....",
         "....ONMMMMNOONMMMMNO....",
         "...OFFFFFFFOOFFFFFFFO...",
@@ -1503,34 +1508,75 @@
         "........................"
       ],
       heroMentalist: [  // psion: staff + orb, deep hood, two glowing purple eyes, runed robe
-        "..................",
-        "..V......OOOO.....",
-        ".VVO...OOJHHJOO...",
-        ".OMO..OJHHHHHHJO..",
-        ".OMO.OJHHHHHHHHJO.",
-        ".OMO.OHHHHHHHHHHO.",
-        ".OMO.OHHOOOOOOHHO.",
-        ".OMO.OHOSSSSSSOHO.",
-        ".NMO.OHOSSSSSSOHO.",
-        ".OMO.OHOVVSSVVOHO.",
-        ".OMO.OHOSSSSSSOHO.",
-        ".OMO.OHOKSDDSKOHO.",
-        ".NMO.OHHOOOOOOHHO.",
-        ".OMO..OHHHHHHHHO..",
-        ".OMO..OAHBBBBHAO..",
-        ".NMO.OABBBBBBBBAO.",
-        ".OMO.OABBRRRRBBAO.",
-        ".OO..OBBBRRRRBBBO.",
-        "....OBBBBRRRRBBBBO",
-        "....OBBBBBRRBBBBBO",
-        "....OABBBBRRBBBBAO",
-        "...OABBBBBBBBBBBAO",
-        "...OABBBBBBBBBBBAO",
-        "..OAABBBBBBBBBBAAO",
-        "..OAABBBBBBBBBBAAO",
-        "..OOAAAAAAAAAAAAO.",
-        "...OOOOOOOOOOOOO..",
-        ".................."
+                         // resized 18x28 -> 24x32 to match the other heroes; staff now
+                         // has a visible gripping hand instead of floating detached
+        "........................",
+        "........................",
+        "...........OHHO.........",
+        ".........OHHHHHHO.......",
+        "........OHHHHHHHHO......",
+        ".......OHHHHHHHHHHO.....",
+        ".......OHHHHHHHHHHO.....",
+        ".......OHSSSSSSSSHO.....",
+        ".......OHSSSSSSSSHO.....",
+        ".......OHSSSVVSSSHO.....",
+        ".......OHVVVSSVVVHO.....",
+        ".......OHSSSSSSSSHO.....",
+        ".......OHKKKDDKKKHO.....",
+        ".......OHHHHHHHHHHO.....",
+        "........OHHHHHHHHO......",
+        "......OAAHBBBBBBHAAOOV..",
+        ".....OBBBBBBBBBBBBBO.R..",
+        ".....OBBBBVVVVBBBBO..R..",
+        "....OBBBBBVVVVBBBBBOOSO.",
+        "....OBBBBBRRRRBBBBBO.R..",
+        "...OBBBBBBBRRBBBBBBBOR..",
+        "...OBBBBBBBBBBBBBBBBOR..",
+        "..OBBBBBBBBBBBBBBBBBBO..",
+        "..OBBBBBBBBBBBBBBBBBBO..",
+        ".OBBBBBBBBBBBBBBBBBBBBO.",
+        ".OBBBBBBBBBBBBBBBBBBBBO.",
+        ".....AAAAAAAAAAAAAA..R..",
+        ".....OOOOOOOOOOOOOO.....",
+        "........................",
+        "........................",
+        "........................",
+        "........................"
+      ],
+      heroSaboteur: [   // Sexias: Vossmark deserter, scavenged corroded gear, bandana,
+                         // asymmetric armor (one pauldron, one bare), acid-green blade
+        "........................",
+        "........................",
+        "..........OHHHO.........",
+        "........OHHHHHHHO.......",
+        ".......OHHHHHHHHHO......",
+        ".......OHHSSSSSHHO......",
+        "......OSSSWDDWSSSO......",
+        "......OSSSSSSSSSSO......",
+        "......OCCCCCCCCCCO......",
+        ".......OCCCCCCCCO.......",
+        "........ODDDDDDO........",
+        ".....OBBBBBOSSSSORRO....",
+        "....OLLLLLLOBBBBOBBO....",
+        "...OBBBBBBBBBBBBBO..GVO.",
+        "...OBBBBBGGGGBBBBO.GVO..",
+        "...OBBRRRBBBBBBBBOGV....",
+        "...OBBBBBAAABBBBBGV.....",
+        "...OBRRRBBBBBBBGVO......",
+        "...OBBBBBBBBBBGVBO......",
+        "...OAAAAAAAAAAAAAO......",
+        "...OAAAAAAAAAAAAAO......",
+        "....OCCCCCCCCCCCO.......",
+        ".....OTTTTOOBBBBO.......",
+        ".....OTTTTOOBBBBO.......",
+        ".....ORRTTOOBAABO.......",
+        ".....OTTTTOOBBBBO.......",
+        ".....OTTTTOOBBBBO.......",
+        ".....OFFFFOOFFFFO.......",
+        ".....OFFFFOOFFFFO.......",
+        "........................",
+        "........................",
+        "........................"
       ],
       // Spider Drone — a mechanical spider (not a blob): a rounded metal chassis
       // (B) with highlights (P) and a glowing red optic band (E), and six clearly
@@ -2169,10 +2215,13 @@
     };
 
     const SPRITES = {
-      // Merc — "Poster Ready" v2 (§SPRITE_SHAPES heroMerc): warm skin, green
-      // cyber-augment eye (Human Augmented lore), red collar accent, olive
-      // vest with real highlight/shadow, gunmetal rifle w/ a distinct
-      // magazine (Q) + squared buttstock (N) so it reads as a gun not a blade.
+      // Merc — "Poster Ready" v3 (§SPRITE_SHAPES heroMerc): warm skin, both
+      // eyes now plain/mirror-symmetric (dropped the cyborg-eye detail per
+      // direction), a brow scar + fuller jaw stubble for a rugged look, red
+      // collar accent, olive vest. Rifle rebuilt with deliberate right-angle
+      // breaks and light/dark value contrast between parts (straight barrel
+      // -> lighter-grey receiver -> dark magazine at a different angle ->
+      // squared stock) instead of one smooth same-tone taper.
       merc:        { shape: "heroMerc",  palette: {
         O: "#0d1016",
         S: "#d09a63", K: "#f4c890", D: "#8a5a30", I: "#a06c3a",   // skin base/light / brow-shadow / nose-shadow
@@ -2188,8 +2237,11 @@
         T: "#35402f", U: "#232b1e", F: "#1a1f16"       // pants / pants-shadow / boot
       } },
       // Netrunner — synthetic hacker (per CLASSES.netrunner.nature): cool
-      // pale-grey "skin," dark teal hair, BOTH eyes glowing cyan (no whites —
-      // it's a machine), a cyan circuit-spine running down the bodysuit (V).
+      // pale-grey "skin," dark teal hair, BOTH eyes glowing cyan with a real
+      // lid-shadow crease (was a flat plain square), a cyan circuit-spine (V)
+      // that now follows a deliberate hourglass torso taper (narrows sharply
+      // at the waist, flares to the hip) instead of sitting in a fixed
+      // straight-sided rectangle.
       netrunner:   { shape: "heroNetrunner",  palette: {
         O: "#0a0f13",
         S: "#b8c2c6", K: "#dbe4e6", D: "#7f8b90",      // pale synthetic "skin"
@@ -2198,21 +2250,27 @@
         B: "#1f3640", L: "#2f4e5a", A: "#142027",      // bodysuit base/light/shadow
         C: "#101a1f", T: "#182b32", U: "#101c21", F: "#0c151a"
       } },
-      // Dread Knight — fully helmed tank (no bare face by design): dark steel
-      // plate (M/P/N), a glowing red T-visor (V), a maroon underlayer (B/L/A),
-      // and a pale steel greatsword blade held down the center front (the PP
-      // column). "Voidborn" reads as grim black-and-red.
+      // Dread Knight — literal exposed skull (bone-white cranium K/D, hollow
+      // eye sockets J with the red glow V now read as embers inside them,
+      // visible teeth) over dark steel plate (M/P/N), maroon underlayer
+      // (B/L/A), and a giant slab greatsword (4px wide, resting on the
+      // shoulder, tip past the head) instead of a centerline blade.
       dreadKnight: { shape: "heroDread",  palette: {
         O: "#0a0a0c",
         M: "#4a4e56", P: "#8f96a0", N: "#2a2d33",      // steel base/gleam/shadow (P also = sword blade)
-        V: "#ff3b30",                                   // red visor glow
+        V: "#ff3b30",                                   // red glow (visor lore, now the eye-socket embers)
         B: "#3a2226", L: "#4d2e33", A: "#241417",      // maroon underarmor
+        K: "#d3c9a8", D: "#8f8568", J: "#170808",       // bone base / bone shadow / eye-socket interior
         C: "#16161a", U: "#34383e", F: "#1a1a1e"
       } },
-      // Mech Runner (Torque von Bram) — HUMAN FACE + FULL MECH BODY. Weathered human skin
-      // on the face only; the body is gunmetal mech (M/P/N) with dark chest
-      // panels (A), rust joints (R), a glowing amber power core (V), a mech
-      // hand (X) and cannon arm (N). No cloth/pants — it's a machine.
+      // Mech Runner (Torque von Bram) — HUMAN FACE + FULL MECH BODY. Rounded/
+      // tapered hairline (was a flat rectangle -- the actual "Frankenstein"
+      // cue) plus a wide metal gorget collar bolting the head to the body.
+      // Segmented shoulder pauldrons + chest side-plates with real outline
+      // seams; rust (R) relocated to the actual joint seams (shoulder/elbow/
+      // knee) instead of scattered random dots. The cannon arm (N) is now
+      // visibly thicker/darker than the normal arm with a tapered muzzle and
+      // a kept frame-edge margin (was clipped before).
       mechRunner:  { shape: "heroMech",  palette: {
         O: "#0d0d0f",
         S: "#c88a55", K: "#e8b078", D: "#8a5a30",      // face skin base/light/shadow
@@ -2228,6 +2286,8 @@
       // shadow with two glowing purple eyes (V), purple robe (B/L/A) with gold
       // runes (R) down the front, and a wooden staff topped with a psi-orb
       // (V) held at the side. The classic FF mage silhouette, re-skinned.
+      // Resized 18x28 -> 24x32 to match the other heroes; staff now has a
+      // visible gripping hand (was fully detached/floating).
       mentalist:   { shape: "heroMentalist",  palette: {
         O: "#0c0812",
         S: "#8a7a9a", K: "#a595b5", D: "#5f5075",      // shadowed in-hood skin
@@ -2236,6 +2296,25 @@
         B: "#4b3866", L: "#5e4a7e", A: "#33254a",      // robe base/light/shadow
         R: "#ffe08a",                                   // gold runes
         M: "#7a5a3a", N: "#4a3624"                      // staff wood
+      } },
+      // Saboteur (Sexias) — Vossmark deserter fighting with scavenged,
+      // corroded ex-Vossmark gear (armor-stripping/Sunder kit, Corrosive
+      // damage type). Asymmetric armor (one intact pauldron L, one bare
+      // shoulder -- scavenged gear, not a matched uniform), a bandana (C)
+      // across the lower face, rust (R) patches breaking up the olive
+      // Vossmark base (B/A), an acid-green glowing corroded blade (G/V) --
+      // not a gun, matching "corrodedEdge" as his base skill -- and
+      // mismatched legs (one cloth-wrapped T, one armored B).
+      saboteur:    { shape: "heroSaboteur",  palette: {
+        O: "#0d1210",
+        S: "#a8825c", K: "#c9a17a", D: "#6b4d34",      // weathered skin base/light/shadow
+        H: "#2e2a20", J: "#1c1912",                    // scruffy hair
+        E: "#141414", W: "#d8d0b8",                    // eyes
+        B: "#4d5140", A: "#383c2e", L: "#63684f",      // olive Vossmark armor base/shadow/highlight
+        R: "#6b4023", Y: "#8a5a30",                    // rust decay base/light
+        G: "#7ae05a", V: "#9cff6b",                     // acid corrosion stain / glowing blade edge
+        C: "#232018", T: "#33362a", U: "#1e2018",      // rag wrap / cloth-wrapped leg / boot trim
+        F: "#141610"
       } },
       // Spider Drone — gunmetal chassis, red optic band, darker jointed legs.
       spiderDrone: { shape: "spiderDrone",   palette: {

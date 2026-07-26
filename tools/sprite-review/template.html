@@ -213,10 +213,22 @@
     draw(c1, shapeRows, palette, Math.min(scale, 4));
 
     const c2 = document.createElement("canvas");
+    // Heroes get scaleX(-1) in the real battle screen (ui.js: hero canvases
+    // get the "flip" class, enemies don't -- heroes sit in the right-hand
+    // column facing left toward the enemy column). Mirroring this preview
+    // too means what's reviewed here matches what actually ships, instead
+    // of silently showing the pre-flip / mirror-image orientation.
+    if (e.kind === "hero") c2.style.transform = "scaleX(-1)";
     stage.appendChild(c2);
     draw(c2, shapeRows, palette, scale * 1.6);
 
     card.appendChild(stage);
+    if (e.kind === "hero") {
+      const cap = document.createElement("div");
+      cap.className = "meta";
+      cap.innerHTML = '<span>left: as-authored &middot; right: battle view (flipped, faces the enemy column)</span>';
+      card.appendChild(cap);
+    }
 
     const meta = document.createElement("div");
     meta.className = "meta";
