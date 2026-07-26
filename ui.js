@@ -206,7 +206,7 @@
       lastTownMessage = "";
       sector1BriefingShown = false;
       lastCheckpointScene = "map";
-      showNaming();
+      showWorldIntro();
     }
 
     function onContinueClicked() {
@@ -223,25 +223,31 @@
 
 
     /* ----------------------------------------------------------------
-       NAME-YOUR-HERO SCREEN (Phase H2). Shown once, right after Start on
-       a brand-new game. Creates the starting Merc with the player's chosen
-       call-sign and adds them to the (empty) roster, then moves on to the
-       squad-builder. This same "name it" step is reused later for recruit
-       events (Phase H3) — new companions get named the same way.
+       NAME-YOUR-HERO SCREEN (Phase H2). Shown once, right after the world-
+       intro screen on a brand-new game — this only ever fires for the
+       starting Merc; every later companion (Torque von Bram, Nyx, Six,
+       Moro, Sexias) is a fixed-name story recruit via resolveRecruitNode(),
+       not this screen. The field comes pre-filled with the default call-
+       sign (still fully editable) instead of an empty box with a
+       placeholder, since the world-intro screen already established who
+       this is; naming is a confirm-or-adjust step, not a blank prompt.
+       Creates the starting Merc with the player's chosen call-sign and adds
+       them to the (empty) roster, then moves on to the squad-builder.
        ---------------------------------------------------------------- */
 
     function renderNamingScreen() {
       const el = document.getElementById("naming-scene");
       el.innerHTML =
-        "<p class='select-help'>Name your operative. A Merc, freshly off a supply run, " +
-        "about to have a very bad day.</p>" +
+        "<p class='select-help'>A Young Man Awakens on Kharon's Reach.</p>" +
         "<div id='naming-box'>" +
-          "<input type='text' id='name-input' maxlength='16' placeholder='e.g. " + HERO_NAMES[0] + "'>" +
+          "<label for='name-input'>Character Name:</label>" +
+          "<input type='text' id='name-input' maxlength='16' value='" + HERO_NAMES[0] + "'>" +
           "<button id='confirm-name-btn'>Confirm</button>" +
         "</div>";
 
       const input = document.getElementById("name-input");
       input.focus();
+      input.select();   // pre-filled text starts selected, so typing replaces it in one go
       // Enter key confirms too, same as clicking the button.
       input.onkeydown = function (e) { if (e.key === "Enter") onConfirmName(); };
       document.getElementById("confirm-name-btn").onclick = onConfirmName;
@@ -257,25 +263,67 @@
 
 
     /* ----------------------------------------------------------------
-       PROLOGUE INTRO (Phase H3, §5.2). Kharon's Reach — a Vossmark asteroid
-       mining colony. The hero's brother Dez is executed by Foreman Voss for
-       sabotaging a haul-quota terminal; while Voss turns to radio it in, the
-       hero kills him and takes his rifle. This is the literal opening of the
-       game. No combat here — it's an ambush, not a fair fight, so playing it
-       out as combat would undercut it (matches the locked H3 decision).
-       Continuing skips the squad-builder entirely (only one possible pick —
-       solo, forced) and drops straight into the prologue dungeon.
+       WORLD INTRO (added in the story-tightening pass, 2026-07-25). Fires
+       once, right after "Start," before the naming screen — establishes the
+       setting (dead Earth, the off-world sprawl, Vossmark's empire-by-
+       momentum) at system scale before narrowing to Kharon's Reach and one
+       person's death. Reuses the same showStoryScene component as every
+       other narrative beat; no new screen/CSS needed. Plants "the Vossmark
+       Directorate" here specifically so Chancellor Kredex's title (§9.4)
+       lands as a payoff of something the player was told on minute one,
+       not a fact introduced cold in the finale.
+       ---------------------------------------------------------------- */
+
+    function showWorldIntro() {
+      showStoryScene([
+        "No one alive remembers real weather. Real gravity that wasn't a machine's decision. " +
+          "Water you didn't have to earn, air you didn't have to buy back one ration at a time.",
+        "Earth is dead. Scoured, stripped bare, and quarantined behind beacons that still " +
+          "broadcast a warning nobody bothers to listen for anymore. What's left of humanity is " +
+          "scattered across whatever still holds pressure: hollowed asteroids, tin-can stations, " +
+          "moons with borrowed atmospheres, all of it kept alive by contracts nobody signed and " +
+          "nobody can leave.",
+        "Vossmark Industries built half of it. Not from vision. From momentum. A company that " +
+          "outlived the world it was chartered to supply, that kept right on expanding long after " +
+          "there was a reason to. It holds the deeds on most of the breathable air and drinkable " +
+          "water left in the system, and sells both back one contract at a time to the very " +
+          "colonies it's supposed to be supplying. Its own administrative arm, the Vossmark " +
+          "Directorate, ended up running more of Sol than any government left standing to object. " +
+          "Nobody calls it an empire. Nobody has to. It just runs like one.",
+        "Kharon's Reach is one of its smaller debts, a mining colony bored into a dead rock, " +
+          "gravity held on by a ring generator older than anyone working the tunnels. Everyone " +
+          "born here owes it before they take their first breath. One of them is about to stop " +
+          "paying."
+      ], "Continue.", function () {
+        showNaming();
+      });
+    }
+
+    /* ----------------------------------------------------------------
+       PROLOGUE INTRO (Phase H3, §5.2; rewritten in the story-tightening
+       pass, 2026-07-25). Kharon's Reach — a Vossmark asteroid mining
+       colony. The hero's brother Dez is executed by Foreman Thiel for
+       skimming life-support rations for a sick friend; Thiel spits on the
+       body and turns to radio the Prison AI (the first mention of what
+       becomes Sector 1's finale boss, The Warden — planted here so it isn't
+       cold when the player finally meets it), and the hero kills him before
+       the call connects. This is the literal opening of the game. No combat
+       here — it's an ambush, not a fair fight, so playing it out as combat
+       would undercut it (matches the locked H3 decision). Continuing skips
+       the squad-builder entirely (only one possible pick — solo, forced)
+       and drops straight into the prologue dungeon.
        ---------------------------------------------------------------- */
 
     function showIntroScene(hero) {
       showStoryScene([
-        "Kharon's Reach never had exits, only debts. You were born owing Vossmark before " +
-          "you ever saw daylight, same as every serf on this rock, same as your brother Dez.",
-        "Dez rerouted a haul-quota terminal today so the gang could get one rest shift " +
-          "instead of another death march. Foreman Voss made an example of him for it, " +
-          "right in front of everyone.",
-        "Voss turned away to call it in before he'd even checked the crowd. He didn't get " +
-          "the chance to finish; " + hero.name + " was already moving.",
+        "Kharon's Reach was barely an existence. Only a daily burn to pay down your debt " +
+          "and earn your life-support rations.",
+        "Your brother Dez was caught skimming extra rations for a friend too sick to work " +
+          "her shift. Foreman Thiel made an example of him for it, right there on the " +
+          "floor, in front of everyone.",
+        "Foreman Thiel spat on Dez's body before he even turned away, already keying in a " +
+          "channel to the Prison AI that runs this rock's ledgers. He didn't get a word " +
+          "out. The shot took him in the throat before the connection ever opened.",
         "The rifle is still warm in your hands, and somewhere above you the alarms are " +
           "starting up. The only way off Kharon's Reach runs through the hangar bay, and " +
           "Overseer Voraxx has no intention of opening that door for you."
@@ -823,6 +871,13 @@
       const node = DUNGEONS[currentDungeonKey].nodes[nodeId];
 
       const companion = createHero(node.recruitClass, node.recruitName);
+      // Catch the recruit up to the current party's level (§ engine.js
+      // fastForwardHeroToLevel) — joining a run already in progress used to
+      // mean starting at Lv 1 no matter how far in the party already was.
+      if (party.length > 0) {
+        const partyLevel = Math.max.apply(null, party.map(function (h) { return h.level; }));
+        fastForwardHeroToLevel(companion, partyLevel);
+      }
       roster.push(companion);
       // Cap 3 (§2) — if the party's already full, the companion joins the
       // ROSTER only for now; showSquadSwapPrompt (below) offers an immediate

@@ -1509,10 +1509,18 @@ remaining arc is content authored as data (new `DUNGEONS` entries, `ENEMIES`, st
 reusing the map/backdrop/sprite/combat systems shipped in Phase I.*
 
 ### 9.0 The one-sentence spine
-In a dying **Sol system**, two megacorps fight a resource war that is secretly a race to control an
-**ancient precursor engine buried inside dead Earth** — one corp trying to *cage* alien power with
-machines, the other to *merge* with it through flesh — and a crew of escaped debt-serfs becomes the
-only force that doesn't want to own it.
+*(Rewritten 2026-07-25, same tightening pass as the Talos retcon's other continuity fixes: the
+original wording below dates to before that retcon and calls Talos a "corp" fighting a "resource
+war" — no longer accurate now that Talos is a lineage, not a company, with no corporate rival to
+Vossmark left in-fiction. Old wording kept here, struck through only in spirit — see §13 if the
+literal prior sentence is ever needed — this doc's usual "don't erase history" discipline applies to
+dated log entries, not to a definitional spine sentence that was simply wrong after the retcon.)*
+
+In a dying **Sol system**, an unrivaled megacorp's momentum has curdled into a de facto empire — the
+**Vossmark Directorate** — racing a horror-touched human lineage (**Talos**) to control an **ancient
+precursor engine buried inside dead Earth**: Vossmark to *cage* alien power with machines, Talos to
+*merge* with it through flesh — and a crew of escaped debt-serfs becomes the only force that doesn't
+want to own it.
 
 ### 9.1 Premise, scope & tone (locked)
 - **Scope: one solar system (Sol), not a galaxy** (locked 2026-07-23). Tighter, stronger, and fits
@@ -1520,9 +1528,13 @@ only force that doesn't want to own it.
   hive, dead Earth — sits inside a used-up Sol.
 - **Dystopia:** Earth is *already dead* when the game opens — strip-mined and scorched generations
   ago, abandoned and off-limits. Humanity lives in the off-world sprawl (stations, asteroid colonies,
-  moon bases) under two megacorps who inherited the wreckage. Resources are scarce; the cold war is
-  turning hot. **Debt-bondage** (Kharon's Reach) is how the corps own the labor — this is established,
-  not new.
+  moon bases) under **the Vossmark Directorate** — Vossmark Industries' governing arm, an empire in
+  practice that never needed the title (named in the game's opening world-intro screen, added in the
+  same tightening pass that fixed §9.0). Resources are scarce; unrivaled corporate momentum is
+  hardening into something closer to a state. **Debt-bondage** (Kharon's Reach) is how it owns the
+  labor — this is established, not new. Talos, off in its own territory, isn't a rival for the
+  Directorate's throne — it's a horror the Directorate wants to conquer and consume the technology
+  of, not negotiate with as a peer.
 - **The crew** are the dispossessed — escaped debt-serfs, defectors, the people both corps grind up.
   They are the story's *third force*: the only faction not trying to own the prize.
 
@@ -1616,8 +1628,10 @@ dungeon), not pre-designed in the abstract.
     Helios seal finally breaking as a direct consequence of that confrontation (§5.4c).
 
 **Named human antagonists (LOCKED 2026-07-25 — see §5.4c for full detail, this is the pointer):**
-**Chancellor Kredex au Ra** (Vossmark's supreme leader — a title escalated past Director/Overseer to
-reflect a debt-empire that's become closer to a state than a corporation) and **Phthora, the
+**Chancellor Kredex au Ra** (Vossmark's supreme leader — heads **the Vossmark Directorate** (§9.0/§9.1,
+named in the game's opening world-intro screen), a title escalated past Director/Overseer to reflect a
+debt-empire that's become closer to a state than a corporation — the player is told this on minute
+one, so Kredex's title lands as a payoff, not a cold fact) and **Phthora, the
 Fleshspring** (Talos's actual leader/origin-point — not a second Proteus; Proteus already paid off
 "the Talos figure" beat in Dungeon 4). Their arcs deliberately mirror and invert each other: Kredex
 (cage doctrine) becomes the vessel for the very power he tried to control; Phthora (merge doctrine)

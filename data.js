@@ -2050,7 +2050,7 @@
         nextDungeonKey: "sector1",
         nodes: {
           p1: { id: "p1", type: "combat", depth: 1, connectsTo: ["p2"],
-                enterText: "Security drones scramble to Voss's last position!" },
+                enterText: "Security drones scramble to Thiel's last position!" },
           p2: { id: "p2", type: "combat", depth: 2, connectsTo: ["p3"],
                 enterText: "Guards flood the shaft ahead!" },
           // recruit: a non-combat story beat, not drawn from ENEMY_POOLS —
@@ -2059,7 +2059,7 @@
                 recruitClass: "mechRunner", recruitName: "Torque von Bram", recruitButtonLabel: "Move out.",
                 recruitText: [
                   "A side tunnel, half-collapsed. Torque is elbow-deep in a stalled loader rig, " +
-                    "muttering about Vossmark's maintenance budget.",
+                    "sweating over a jam that won't clear.",
                   "They see the rifle in your hands and the alarm lights just starting to strobe " +
                     "red down the shaft, and they don't ask a single question.",
                   "\"Hangar bay,\" Torque says, already pulling a salvaged mining laser off the " +

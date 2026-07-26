@@ -667,6 +667,30 @@
           " ATK, +" + g.defense + " DEF) — +" + SP_PER_LEVEL + " Skill Point", true);
     }
 
+    // A new recruit used to always join at Lv 1, which made them the squad's
+    // dead weight for the rest of a run recruited deep into a dungeon (no
+    // mid-dungeon squad-builder to bench them until the whole thing ends —
+    // see resolveRecruitNode's comment). Fast-forwards a freshly created
+    // hero to match the current party's level, applying the same per-level
+    // growth/SP a real level-up would, just silently and all at once — no
+    // battle-log spam, since this fires from the map/story flow, not combat.
+    // XP/xpToNext are left at their fresh-hero defaults; the recruit still
+    // earns real XP the normal way past this catch-up point.
+    function fastForwardHeroToLevel(hero, targetLevel) {
+      const g = CLASSES[hero.classKey].growth;
+      while (hero.level < targetLevel) {
+        hero.level += 1;
+        hero.sp += SP_PER_LEVEL;
+        hero.stats.maxHp += g.hp;   hero.stats.hp += g.hp;
+        hero.stats.maxEn += g.en;   hero.stats.en += g.en;
+        hero.stats.attack += g.attack;
+        hero.stats.defense += g.defense;
+        hero.stats.speed += g.speed;
+      }
+      hero.xpToNext = xpForNext(hero.level);
+      hero.subtitle = hero.className + " · Lv " + hero.level;
+    }
+
     // --- Skill tree spending (Phase E) ---
 
     // Can this hero learn this tree node right now?
