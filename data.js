@@ -1683,10 +1683,11 @@
         "................",
         "................"
       ],
-      // Heavy mech — Security Mech, the Warden (boss — same shape, bigger via
-      // tier scale, own palette): a blocky armored robot, one wide visor band
-      // (no separate eyes, unlike the organic officer shape), a shoulder
-      // cannon reading as the heavy weapon.
+      // Heavy mech — Security Mech: a blocky armored robot, one wide visor
+      // band (no separate eyes, unlike the organic officer shape), a
+      // shoulder cannon reading as the heavy weapon. (The Warden used to
+      // share this shape recolored — replaced 2026-07-25 by its own bespoke
+      // wardenCore shape, see below.)
       heavyMech: [
         "................",
         "....OHHHHHHO....",
@@ -1704,6 +1705,41 @@
         "..LLLL....LLLL..",
         "..FFFF....FFFF..",
         "................"
+      ],
+      // Warden Core — "AI Sentinel Core" redesign (2026-07-25 sprite pass):
+      // no longer the same heavyMech chassis as Security Mech. A hovering
+      // core orb — antenna, a blazing lens set in a wide red sensor band,
+      // four asymmetric mechanical tendrils instead of legs (two short
+      // outer, two longer inner, one with a spark accent) — reads as "the
+      // station's mind," not a bigger trooper. 22x22, rendered smaller than
+      // the default boss tier scale via SHAPE_SCALE_OVERRIDE so its wider
+      // grid doesn't dwarf the other bosses.
+      // Legend: O outline | X antenna tip | P dome highlight H dome N dome-shadow
+      //   V sensor band (red) E lens core (hot white) | C vents
+      //   A tendril B tendril-shadow(S) G tendril-tip/glow R spark accent
+      wardenCore: [
+        "......................",
+        "..........XX..........",
+        ".........OXXO.........",
+        ".......OPPPPPPO.......",
+        ".....OPPHHHHHHPPO.....",
+        "....OHHHHHHHHHHHHO....",
+        "...ONNHHHHHHHHHHNNO...",
+        "...OVVVVVVVVVVVVVVO...",
+        "...OVVVVVEEEEVVVVVO...",
+        "...ONNHHHHHHHHHHNNO...",
+        "....OHHHCHHHHCHHHO....",
+        ".....OHHHHHHHHHHO.....",
+        "......OHHHHHHHHO......",
+        "......A..A..A..A......",
+        "......A..S..S..A......",
+        "......G..S..S..G......",
+        ".........S..S.........",
+        ".........S..R.........",
+        ".........G..S.........",
+        "............S.........",
+        "............G.........",
+        "......................"
       ],
       // Hive brute — Erebus Warrior (standard) + Erebus Armored Warrior
       // (elite, same shape + an armor-plate accent color): upright insectoid
@@ -1748,60 +1784,348 @@
         "OKKKKKKKKKKKKKKO",
         "................"
       ],
-      // Hive lord — the Broodmarshal (boss): the biggest, most ornate hive
-      // shape — jagged crown spikes, a wide glowing multi-eye band, claws
-      // both sides. Its palette (below) gives one collar patch a cold metal
-      // tone — the fused Vossmark control rig from its story canon (§5.3) —
-      // without needing extra geometry.
+      // Hive lord — the Broodmarshal (boss). REDESIGNED 2026-07-26: a
+      // Starship Troopers-style "Reared Warrior Bug" — genuinely insectoid
+      // rather than the original humanoid-with-bug-features silhouette.
+      // Compound eyes, crossing mandibles, segmented chitin plates on the
+      // thorax/abdomen, big raised scythe-claws flanking the body
+      // (attaching flush at the thorax — core padding zeroed at rows 10-12
+      // specifically so the claw touches, same discipline Chthon's wings
+      // needed a second pass to learn), smaller jointed flanking legs
+      // lower down, two hind legs planted at the base. Its palette still
+      // gives one collar patch a cold-metal tone — the fused Vossmark
+      // control rig from its story canon (§5.3) — same detail as before,
+      // just carried over into the new silhouette.
+      // Legend: O outline | H chitin base K chitin highlight J chitin shadow
+      //   E compound eye F eye facet-highlight M mandible C cold-metal rig collar
+      //   S claw blade X claw edge highlight L leg segment
       hiveLord: [
-        "................",
-        "....OH.HH.HO....",
-        "...OHHHHHHHHO...",
-        "..OOHHVVVVHHOO..",
-        "..OHHHHHHHHHHO..",
-        "..OOCCCCCCCCOO..",
-        "OAAABBBBBBBBAAAO",
-        "WOAABBBBBBBBAAOW",
-        "OAABBBBBBBBBBAAO",
-        "OAABBBBBBBBBBWGO",
-        "BBBBBBBBBBBBWWWW",
-        "BBBBBBBBBBBB.WWW",
-        "..OOKKKKKKKKOO..",
-        ".OLLLLLLLLLLLLO.",
-        "OLLLLLLLLLLLLLLO",
-        "OKKKKKKKKKKKKKKO"
+        "........................................",
+        "..................OHHO..................",
+        ".................OHHHHO.................",
+        "...............OHHKKKKHHO...............",
+        "..............OEEEHHHHEEEO..............",
+        ".............OFFEHHHHHHEFFO.............",
+        "........X....OHHHHHHHHHHHHO....X........",
+        ".......XX....OMMMMHHHHMMMMO....XX.......",
+        ".....XSSX..OCCCCCCCCCCCCCCCCO..XSSX.....",
+        "...XSSSSX.OHHHHHHHHHHHHHHHHHHO.XSSSSX...",
+        ".XSSSSSSXOKKJJJJJJJJJJJJJJJJKKOXSSSSSSX.",
+        "XSSSSSSSXOHHHHHHHHHHHHHHHHHHHHOXSSSSSSSX",
+        "XSSSSSSSXOHHHHHHHHHHHHHHHHHHHHOXSSSSSSSX",
+        "..XSSSSSX.OKKJJJJJJJJJJJJJJKKO.XSSSSSX..",
+        "..........OHHHHHHHHHHHHHHHHHHO..........",
+        "...........OHHHHHHHHHHHHHHHHO...........",
+        "......OLL....OKJJJJJJJJJJKO....LLO......",
+        ".....OLL....OHHHHHHHHHHHHHHO....LLO.....",
+        "....OLL.......OKJJJJJJJJKO.......LLO....",
+        "...............OHHHHHHHHO...............",
+        "................OHHHHHHO................",
+        "...............LL.HHHH.LL...............",
+        "..............LLL..HH..LLL..............",
+        "..............LLL......LLL.............."
       ],
-      // Overseer Voraxx (boss) — a bespoke fat, jowly tyrant in an officer's coat,
-      // cracking a whip overhead. Small capped head, huge belly straining a red
-      // sash, stubby legs; the lash (N) arcs up from his raised grip (W) and
-      // curls at the top-right. 22x22, rendered a touch bigger than other bosses
-      // via a scale override (§ui SHAPE_SCALE_OVERRIDE).
-      // Legend: O outline | P cap V gold-brim | S skin D jowl-shadow E eye M mustache
-      //   C collar | B coat A coat-shadow/arm | R red sash | W whip-grip N whip-lash
-      //   L coat-hem T pants F boot
+      // Overseer Voraxx (boss) — "Ledger & Lash" redesign (2026-07-25 sprite pass,
+      // v2 — replaces the original whip-overhead version). A jowly, mustached
+      // tyrant in an officer's coat: gold-trimmed cap, rank tufts on the
+      // shoulders, a chest medal, a haul-quota ledger gripped in his left hand
+      // and a coiled whip held (not mid-crack) in his right — ties into his
+      // established "annoyed at the paperwork" lore beat rather than a generic
+      // action pose. 32x24, widened from the original 23x22 so the arm/prop
+      // geometry gets real space instead of fighting the belly for pixels;
+      // rendered via a scale override (§ui SHAPE_SCALE_OVERRIDE, now 4x not 5x).
+      // Legend: O outline | P cap crown, Q cap brim gold, V cap band gold
+      //   S skin, K forehead highlight, D jowl-shadow, E eye, W eye-white, M mustache
+      //   H shoulder tufts, C collar/medal (gold)
+      //   B coat base, L coat highlight, A coat shadow
+      //   J ledger cover, I ledger page-edge | G whip grip, N whip coil (rope)
+      //   R red sash | T pants U boot-shadow
       voraxxFat: [
-        "...............NNN....",
-        "......OPPPPPPPPO..N.N.",
-        "......OPPPPPPPPO...N.N",
-        ".....OVVVVVVVVVVO...N.",
-        ".....OSSSSSSSSSSO..N..",
-        ".....OSSEESSEESSO.N...",
-        ".....OSSSSDDSSSSON....",
-        ".....OMMMMMMMMMMWN....",
-        ".....OSDDDDDDDDSWO....",
-        "....OSDDDDDDDDDDSO....",
-        "....OCCCCCCCCCCCCO....",
-        "..OAABBBBBBBBBBBBAAO..",
-        ".OABBBBBBBBBBBBBBBBBAO",
-        ".OABBBBBBBBBBBBBBBBBAO",
-        ".ORRRRRRRRRRRRRRRRRRO.",
-        ".OABBBBBBBBBBBBBBBBAO.",
-        "..OBBBBBBBBBBBBBBBBO..",
-        "..OLLLLLLLLLLLLLLLLO..",
-        "...OTTTTTTOOTTTTTTO...",
-        "...OTTTTTTOOTTTTTTO...",
-        "...OFFFFFFOOFFFFFFO...",
-        "......................"
+        "................................",
+        "............OPPPPPPO............",
+        "..........OPPQQQQQQPPO..........",
+        ".........OVVVVVVVVVVO...........",
+        ".........OSSKKKKKKSSO...........",
+        "........OSSDEWSSWEDSSO..........",
+        "........OSSSSSSSSSSSSO..........",
+        ".......OSSMMMMMMMMMMSSO.........",
+        ".......ODDDSSSSSSSSDDDO.........",
+        "......ODDDDSSSSSSSSDDDDO........",
+        "......OHHCCCCCCCCCCCCCCCCHHO....",
+        ".....OLLBBBBBBBBBBBBBBBBAAO.....",
+        "..BLOLLLBBBBBBBBBBBBBBBBAAAOLB..",
+        ".BLLOLLLBBBBBBCCCCBBBBBBAAAOLLB.",
+        "OJJJOLLLBBBBBBBBBBBBBBBBAAAOGGGO",
+        "OJIJOLLLBBBBBBBBBBBBBBBBAAAONNGO",
+        "OJJJOBBBBBBBBBBBBBBBBBBBBBBONNNO",
+        "OJJJ.OBBBBBBBBBBBBBBBBBBBBO..NGO",
+        "O....ORRRRRRRRRRRRRRRRRRRRO....O",
+        "......OBBBBBBBBBBBBBBBBBBO......",
+        ".......OLLLLLLLLLLLLLLLLO.......",
+        "........OTTTTTTTTTTTTTTO........",
+        ".........OTTTTTOOTTTTTO.........",
+        ".........OUUUUUOOUUUUUO........."
+      ],
+      // Proteus (D4 boss) — "Open Bloom" v2 (2026-07-25 sprite pass, revised
+      // once per feedback: taller/detailed face, torso-to-mass transition
+      // broken up with asymmetric jagged growth instead of a clean skirt-
+      // like cone, and both the wrong-arm and lower limbs made bigger/
+      // clawed). A half-transcended bio-executive: composed human face over
+      // an open suit jacket, chest already peeled around a glowing
+      // bio-plasma core (his "Proteus Bloom" special, made a permanent
+      // visual signature), one arm replaced by a maroon chitin claw
+      // ("something that used to be an arm"), lower body an amorphous
+      // asymmetric bio-mass with differentiated clawed limbs instead of legs.
+      // Legend: O outline | H hair S skin D brow/jaw-shadow E eye M mouth C collar
+      //   L lapel highlight B suit/jacket A jacket-shadow
+      //   P peeled chest plate G bloom glow (amber, ties to his Thermal Bloom)
+      //   W wrong-arm chitin X arm highlight N claw-tip/dark accent
+      //   T bio-mass U bio-mass shadow R vein accent
+      proteusBloom: [
+        ".................................",
+        "...........OHHO..................",
+        ".........OHHHHHHO................",
+        "........OHHSSSSHHO...............",
+        ".......OSDDDDDDDDSO..............",
+        ".......OSSESSSESSO...............",
+        ".......OSSSSDSSSSO...............",
+        ".......OSSSMMMSSSO...............",
+        ".......ODDSSSSSSDDO..............",
+        ".......OCCCSSSSCCCO..............",
+        ".......OLLBBBBBBBBBBBBLLO.BWW....",
+        ".......OLLBBBPPPPPPBBBLLO.WWWWW..",
+        ".......OBBBBPPGGGGPPBBBBO.WXXXW..",
+        ".......OBBBBPPPGGPPPBBBBO.WWNWW..",
+        ".....OAAAPPPPPPPPPPPPAAAO.WNNNW..",
+        ".....OAAABBBBBBBBBBBBAAAO..WNNW..",
+        ".....OAABBBBBBBBBBBBBBAAO..WNO...",
+        "..TTOBBBBBBBBBBBBBBBBO......NO...",
+        ".TTTOTTBBBBBBBBBBBBTTO......N....",
+        ".TTTOTTTTBBBBBBBBTTTTOT..........",
+        ".TTTOTTTTTTBBBBBTTTTTTOTT........",
+        ".TTTOTTTTTTTTTTTTTTTTTTTOT.......",
+        ".TTOTTTTTTTTTTTTTTTTTTOTTT.......",
+        "..TTTTT...TTTTTTTT...TTTTT.......",
+        "...TTTT....TTTTTTT.....TTT.......",
+        "....UUU.....TTTTTT......TT.......",
+        ".............TTTTT.......T.......",
+        ".............UUUU........T......."
+      ],
+      // Void Soul Eater (D5 double-boss, gatekeeper half) — "Wrong-Angle
+      // Maw" v2 (2026-07-25 sprite pass, revised once per feedback: the jaw
+      // now visibly flares via a bone-toned bridge connecting hood to mouth
+      // instead of reading as two disconnected pieces, teeth are chunkier/
+      // tighter interlocking blocks, added a brow ridge + nose-bridge hint,
+      // and the robe has real fold-shadow/rim-light dimension). A near-
+      // featureless hooded void-wraith whose jaw flares wider than its own
+      // hood into a jagged sawtooth maw — direct payoff of its own skill
+      // flavor text ("a maw that shouldn't fit inside its own silhouette").
+      // Tattered cloth streamers instead of legs, uneven lengths, no clean hem.
+      // Legend: O outline | H hood K hood-highlight J hood-interior/shadow
+      //   R brow-ridge V/E eyes (asymmetric) N jaw bone-tone
+      //   M teeth (dark) G mouth-glow interior | C collar
+      //   B robe base L robe rim-light A robe-shadow D fold-shadow accent
+      //   T tattered hem U hem-shadow
+      voidSoulEaterMaw: [
+        "............................",
+        "...........OHHHHO...........",
+        ".........OHHKKKKHHO.........",
+        ".......OHHKKKKKKKKHHO.......",
+        "........OJRRJJJJRRJO........",
+        ".......OJJVVJJJEJJO.........",
+        "........OJJJKKJJJO..........",
+        "......ONNJJJJJJNNO..........",
+        "....ONNNJJJJJJJJNNNO........",
+        "..ONNNNJJJJJJJJJJJJJJNNNNO..",
+        "..OMMMGGGMMMGGGMMMGGGMMMGO..",
+        ".OGGGGGGGGGGGGGGGGGGGGGGGGO.",
+        "..OGGGMMMGGGMMMGGGMMMGGGMO..",
+        "......ONNNJJJJJJJJNNNO......",
+        "........OCCCCCCCCCCO........",
+        ".........OCCCCCCCCO.........",
+        ".......OLLBBBBBBBBBBBBAAO...",
+        "......OLLBBBDDDDDDDDBBBAAO..",
+        ".....OLLBBBBBBBBBBBBBBAAAO..",
+        "....OLBBBBDDDDDDDDBBBAAAO...",
+        "...OBBBBBBBBBBBBBBBBBBBBAAAO",
+        "..OBBBDDDDDDDDDDBBBBBBAAAO..",
+        ".OAAABBBBBBBBBBBBBBBBBBAAAAO",
+        "OAAAABBBBBBBBBBBBBBBBAAAAAAO",
+        "TTOAAABBBBBBBBBBBBBBAAAAAOTT",
+        "TTT.OBBBBBBBBBBBBBBBBO.TTTTT",
+        ".....TTT...TTTT....TTTT...TT",
+        ".....UUU...TTT......TTT...TT"
+      ],
+      // Sun God (D5 double-boss, corrupted-regulator half) — "Eclipse Face"
+      // v2 (2026-07-25 sprite pass, revised once per feedback: the head is
+      // now a literal circular ring with a floating black disc inside it
+      // and a visible gap between them, replacing the fused oval-band v1;
+      // also added real body dimension — asymmetric shoulder highlights, a
+      // fold-shadow band, the dark seam accent). A blazing solar corona
+      // (jagged ray crown, golden ring) surrounds a face that's just an
+      // eclipsed black disc — no god there, just light hiding a hole.
+      // Bronze statuesque body with a subtle dark seam (the "it's a
+      // machine" tell — Eclipse Protocol's Disable is the mechanical
+      // reveal) and flame-lick tendrils instead of legs, distinct from Void
+      // Soul Eater's cloth streamers despite sharing the double-boss slot.
+      // Legend: O outline | Y corona ring gold W corona hot-core R ray-shading
+      //   K eclipsed disc (black) | C neck/collar
+      //   B statue body base L body rim-light A body-shadow
+      //   N machine-seam accent D fold-shadow | F flame-lick base U flame-shadow
+      sunGodEclipse: [
+        "............................",
+        "............Y..Y............",
+        "..........Y..YY..YY..Y......",
+        "..........OYYYYYYO..........",
+        ".........OYYYYYYYYO.........",
+        "........OYYYYYYYYYYO........",
+        ".......OYYY......YYYO.......",
+        ".......OYY........YYO.......",
+        "......OYY...OKKO...YYO......",
+        "......OYY..OKKKKO..YYO......",
+        "......OYY..OKKKKO..YYO......",
+        "......OYY..OKKKKO..YYO......",
+        "......OYY...OKKO...YYO......",
+        ".......OYY........YYO.......",
+        ".......OYYY......YYYO.......",
+        "........OYYYYYYYYYYO........",
+        ".........OYYYYYYYYO.........",
+        "..........OYYYYYYO..........",
+        ".........OCCCCCCCCO.........",
+        "........OCCCCCCCCCCO........",
+        ".....OLLFFBBBNNNNBBBFFLLO...",
+        "....OLLBBBBDDNNDDBBBBAAAO...",
+        "....OLLBBBBBBDDDDBBBBBBAAO..",
+        "...OLLBBBBBBBBBBBBBBBBBAAO..",
+        "....OBBBDDDBBBBBBBDDDBBBO...",
+        ".....OBBBBBBBBBBBBBBBBAO....",
+        "......OBBBBBBBBBBBBBBO......",
+        ".......OFFFFFFFFFFFFO.......",
+        ".......FOFFFUUUUUFFFOF......",
+        ".........FF..FFFF....FFFF..F"
+      ],
+      // Phthora, the Fleshspring (D6 boss, Talos's leader/origin-point) —
+      // "The Reaching Wreck" (2026-07-25/26 sprite pass). A gaunt, hollow-
+      // eyed figure frozen mid-ritual, both arms outstretched (one ending
+      // in an open hand, the other a half-formed hybrid tip — "hands still
+      // deciding what they want to be"), a wide bioluminescent-green
+      // rupture across the chest ("ruptures into something that was never
+      // meant to finish becoming"), and root-tendrils fusing him to the
+      // ground instead of legs — kneeling/rooted at the ritual site rather
+      // than standing. Deliberately differentiated from Proteus (D4's
+      // already-shipped "humanoid + wrong limb" boss): cooler decayed
+      // tones instead of warm amber, TWO reaching arms instead of one,
+      // rooted/kneeling base instead of clawed mobile limbs.
+      // Legend: O outline | H patchy hair S gaunt skin D sunken-cheek shadow E hollow eye
+      //   C ritual wrap/collar | B torso base A torso/lower shadow
+      //   P rupture-edge G bioluminescent glow (green)
+      //   W/X arm skin+highlight M hand tip N hybrid "still deciding" tip
+      //   R root tendril U root shadow
+      phthoraWreck: [
+        "..................................",
+        "..............OHHHHO..............",
+        ".............OHHSSHHO.............",
+        "............OSDESSEDSO............",
+        "...........ODDSSSSSSDDO...........",
+        "...........ODDDSSSSDDDO...........",
+        "............OCCCCCCCCO............",
+        "...WWBOCCBBBBBBBBBBBBBBBBCCOBWW...",
+        "...WWWOBBBBBBBBBBBBBBBBBBBBOWWW...",
+        "...WXWOBBBBPGGGGGGGGGGPBBBBOWXW...",
+        "...MMOOBBBPGGGGGGGGGGGGPBBBONNO...",
+        "....MOOAAAAAAAPGGGGPAAAAAAAOON....",
+        "........OAAAAAAAAAAAAAAAAO........",
+        ".........OAAAAAAAAAAAAAAO.........",
+        "..........OAAAAAAAAAAAAO..........",
+        "..........ROAAAAAAAAAAOR..........",
+        "..........RROAAAAAAAAORR..........",
+        "..........RRROAAAAAAORRR..........",
+        ".......RRRRUU..AAAA..UURRRR.......",
+        ".......RRRRRUUU....UUURRRRR......."
+      ],
+      // The Caged God (D6b double-boss, phase 1) — "The Cracking Cocoon"
+      // (2026-07-26 sprite pass). A large crystalline-organic containment
+      // shell, cracked and glowing from within (void-purple wisps, two
+      // glimpse-glow windows where something vast peeks through — pays off
+      // its own "lashes out with something that hasn't fully arrived yet"
+      // flavor), held down by mechanical restraint bands with amber
+      // warning-light accents ("widens a crack in whatever was holding
+      // it"). Deliberately non-humanoid, unlike every other boss so far —
+      // sets up Chthon (phase 2, §SPRITE_SHAPES chthonBreach) shattering
+      // this cocoon open and fusing with Kredex.
+      // Legend: O outline | H shell base K shell-facet-highlight J shell-shadow
+      //   C crack-glow (void-purple) G glimpse-glow (near-white, "the vast thing")
+      //   B restraint band A band-shadow V warning-light (amber) N chain-stub anchor
+      cagedGodCocoon: [
+        "..........................",
+        "..........OHHHHO..........",
+        "........OHHKKKKHHO........",
+        "......OHHCCKKKKKKHHO......",
+        ".....OHHHCKKKCHHHKKKO.....",
+        "...OHHGGGCKKKKHHHHCHHO....",
+        "...OHHHCHHHHHHCKKKCHHO....",
+        "...OKKKKCHHHHGGGGCHHHO....",
+        "...OHHHHHCHHHHHHHHCKKKO...",
+        "..OKKKCHHHHHHHHHHHHHHCHO..",
+        "...OHHHHHHHHHHHHHHHHHHO...",
+        "....OJJHHHHHHHHHHHHJJO....",
+        ".....OJJJHHHHHHHHJJJO.....",
+        "......OJJJJJJJJJJJJO......",
+        "..N.BBAAVBBBBBBBBVAABB.N..",
+        "...N.BBBBBBBBBBBBBBBB.N...",
+        ".......BBBBBBBBBBBB.......",
+        "...N.BBVAAAAAAAAAAVBB.N...",
+        "....N.BBBBBBBBBBBBBB.N....",
+        ".......NN........NN......."
+      ],
+      // Chthon, God of the Breach (D6b double-boss, phase 2 — the TRUE
+      // final boss of the whole game) — "Dimension-Dragon" v3 (2026-07-26
+      // sprite pass, 2 revision rounds). Evolves directly from the Caged
+      // God: a draconic head (asymmetric glowing eyes — the "almost human
+      // fighting for control" tell), Kredex's broken ritual rig worn as a
+      // collar (same restraint-band motif/palette as the Caged God's
+      // bindings, now a trophy instead of a cage), a single clean glowing
+      // chest crack, and shattered cocoon shell shards at the base. Big
+      // rib-striped, jagged-edged void-tear wings flow directly into the
+      // shoulders at zero padding (rows 9-17 widened to 0 leading/trailing
+      // specifically so the wing membrane visibly touches the body — v1/v2
+      // had the wings floating because the body rows kept blank padding
+      // even at full wing width; width alone doesn't guarantee a visual
+      // touch, the body-side padding has to close too).
+      // Legend: O outline | Z horn H head-crest D eye-socket-shadow R eye (red-orange)
+      //   M/T jaw+teeth (T is its own color, deliberately NOT shared with the chest-crack G)
+      //   J neck | N/B/A/V broken rig collar (reused from cagedGodCocoon's restraint bands)
+      //   A body-shadow (void-black) G chest-crack glow (single streak) K/H shell-shard debris
+      //   K/W (in the wing) rib/membrane striping | C wing-tip glow accent (only 2 rows, not scattered)
+      chthonBreach: [
+        "............................................................",
+        "............................Z..Z............................",
+        "...........................ZZ..ZZ...........................",
+        "..............OK.........OHHHHHHHHO.........KO..............",
+        ".............OKW........OHHDDHHDDHHO........WKO.............",
+        "..........OKWWKK.......OHHRRRRHHRRHHO.......KKWWKO..........",
+        ".........OKWWKKW.....OHHHHHHHHHHHHHHHHO.....WKKWWKO.........",
+        "......OKWWKKWWKK....OMMTTMMTTMMTTMMTTMMO....KKWWKKWWKO......",
+        ".....OKWWKKWWKKW....OJJJJJJJJJJJJJJJJJJO....WKKWWKKWWKO.....",
+        "..CKWWKKWWKKWWKKOJJJJJJJJJJJJJJJJJJJJJJJJJJOKKWWKKWWKKWWKC..",
+        "...OKWWKKWWKKWWKOJJJJJJJJJJJJJJJJJJJJJJJJJJOKWWKKWWKKWWKO...",
+        "OKWWKKWWKKWWKKWWOJJJJJJJJJJJJJJJJJJJJJJJJJJOWWKKWWKKWWKKWWKO",
+        "..OKWWKKWWKKWWKKOJJJJJJJJJJJJJJJJJJJJJJJJJJOKKWWKKWWKKWWKO..",
+        "....OKWWKKWWKKWWN.BBAAVBBBBBBBBBBBBBBVAABB.NWWKKWWKKWWKO....",
+        "..OKWWKKWWKKWWKKN.BBBBBBBBBBBBBBBBBBBBBBBB.NKKWWKKWWKKWWKO..",
+        "CKWWKKWWKKWWKKWWBBBBBBBBBBBBBBBBBBBBBBBBBBBBWWKKWWKKWWKKWWKC",
+        "..OKWWKKWWKKWWKKN.BBVAAAAAAAAAAAAAAAAAAVBB.NKKWWKKWWKKWWKO..",
+        "....OKWWKKWWKKWWOAAAAAAAAAAAAAAAAAAAAAAAAAAOWWKKWWKKWWKO....",
+        ".......OKWWKKWWK.OAAAAAAAAAAAAAAAAAAAAAAAAO.KWWKKWWKO.......",
+        "........OKWWKKWW.OAAAAAAAAAAAGGAAAAAAAAAAAO.WWKKWWKO........",
+        "..........OKWWKKOAAAAAAAAAAAAGGAAAAAAAAAAAAOKKWWKO..........",
+        "...........OKWWK.OAAAAAAAAAAAGGAAAAAAAAAAAO.KWWKO...........",
+        "..............OK..OAAAAAAAAAAGGAAAAAAAAAAO..KO..............",
+        "....................OAAAAAAAAAAAAAAAAAAO....................",
+        ".....................OAAAAAAAAAAAAAAAAO.....................",
+        "......................OAAAAAAAAAAAAAAO......................",
+        "......................OHHHHAAAAAAHHHHO......................",
+        ".........................KKK....KKK........................."
       ],
       blob: [   // generic fallback (spriteFor()) — nature-colored, no bespoke shape yet
         "................",
@@ -1922,11 +2246,15 @@
         O: "#14140f", H: "#3f3f30", V: "#8a8f6a", S: "#c9a071", C: "#2e2e22",
         A: "#454533", B: "#565640", W: "#c9ccd1", G: "#c9a071", K: "#6b2b22", L: "#3d3d2c", F: "#1e1e15"
       } },
-      // The Warden — corrupted station AI core: same heavy-mech chassis as
-      // Security Mech, gone dark and glowing red (malfunction), boss scale.
-      warden:       { shape: "heavyMech",        palette: {
-        O: "#0a0a0b", H: "#2c2f33", V: "#e0533d", C: "#222426", A: "#383b3f",
-        B: "#43474c", W: "#1c1e21", G: "#383b3f", K: "#e0533d", L: "#2c2f33", F: "#17181a"
+      // The Warden — "AI Sentinel Core" v1 (§SPRITE_SHAPES wardenCore): a
+      // hovering core orb with a blazing red-banded lens and asymmetric
+      // mechanical tendrils, no longer a recolored Security Mech chassis.
+      warden:       { shape: "wardenCore",       palette: {
+        O: "#0a0a0c", X: "#e0533d",
+        P: "#4a5158", H: "#33383d", N: "#22262a",
+        V: "#e0533d", E: "#fff2c0",
+        C: "#1c1e21",
+        A: "#3a3f45", S: "#282c30", G: "#e0533d", R: "#ffcc33"
       } },
 
       // ---------- TALOS SYSTEMS (§5.1) ----------
@@ -1945,6 +2273,20 @@
         O: "#0d0808", H: "#3a1418", V: "#ff4d4d", S: "#b5773f", C: "#2a1012",
         A: "#4a1c1f", B: "#5c1f24", W: "#d94f4f", G: "#b5773f", K: "#1a1010", L: "#3a1418", F: "#1a0d0e"
       } },
+      // Proteus — "Open Bloom" v2 (§SPRITE_SHAPES proteusBloom): half-
+      // transcended bio-executive, composed human face over a peeled-open
+      // chest revealing a glowing bio-plasma core, one arm already a maroon
+      // chitin claw, lower body an amorphous asymmetric bio-mass.
+      proteus:      { shape: "proteusBloom",     palette: {
+        O: "#0b0808",
+        H: "#2a221c",
+        S: "#c08a5c", D: "#8a5f3c", E: "#141210", M: "#5c3a28",
+        C: "#1c1614",
+        B: "#3a3d42", L: "#4d5158", A: "#26282c",
+        P: "#26140f", G: "#ff8a3d",
+        W: "#6b2426", X: "#8f3a2e", N: "#2a1210",
+        T: "#4a1f1c", U: "#33130f", R: "#c9503a"
+      } },
 
       // ---------- KHARON'S REACH (§5.2a) ----------
       // Quota Enforcer — rough militia enforcer: dull worn brown armor + tan
@@ -1958,16 +2300,18 @@
         M: "#6b6158", V: "#d9a94e",                               // baton shaft / amber glow
         T: "#4a3c2a", U: "#2e2418", F: "#1a140d"                  // greaves / boots
       } },
-      // Overseer Voraxx — chief overseer, boss scale: a fat, jowly tyrant in a
-      // brown/gold officer coat with a deep-red sash, cracking a leather whip.
-      // Bespoke voraxxFat shape (§SPRITE_SHAPES).
+      // Overseer Voraxx — "Ledger & Lash" v2 (§SPRITE_SHAPES voraxxFat): a fat,
+      // jowly tyrant in an olive-drab officer's coat with a deep-red sash,
+      // gold cap/collar trim, a ledger in one hand and a coiled whip in the other.
       voraxx:        { shape: "voraxxFat",         palette: {
-        O: "#0c0a08", P: "#2a2318", V: "#ffcf5c",                 // cap / gold brim
-        S: "#d8a878", D: "#b07850", E: "#141414", M: "#3a2c1c",   // ruddy skin / jowls / beady eyes / mustache
-        C: "#4a3520",                                             // collar
-        B: "#6b5238", A: "#4a3820", R: "#8a1f1f",                 // coat / coat-shadow / red sash
-        W: "#c9a05a", N: "#3a2410",                               // whip grip / lash (leather)
-        L: "#4a3820", T: "#3f3020", F: "#221a12"                  // hem / pants / boots
+        O: "#0c0a08", P: "#5a1e1e", Q: "#c9a53d", V: "#8a2f2f",   // cap crown (maroon) / brim gold / band
+        S: "#c9a071", K: "#e0b98a", D: "#8a6b45",                 // skin base / forehead highlight / jowl shadow
+        E: "#141414", W: "#eef0ea", M: "#3a2a1a",                 // pupil / eye-white / mustache
+        H: "#c9a53d", C: "#c9a53d",                               // shoulder tufts / collar+medal (gold)
+        B: "#565640", L: "#7a7a5c", A: "#3d3d2c",                 // coat base / highlight / shadow
+        J: "#3a2e1c", I: "#c9b98a",                               // ledger cover / page-edge
+        G: "#5a4530", N: "#a68a5a",                               // whip grip (leather) / coil (rope)
+        R: "#8a2f2f", T: "#3d3d2c", U: "#2a2a1e"                  // sash / pants / boot-shadow
       } },
 
       // ---------- SITE EREBUS (§5.3) ----------
@@ -1999,9 +2343,17 @@
       // band, and a cold-metal collar patch — the fused, non-functional
       // Vossmark control rig from its story canon (§5.3), no extra geometry
       // needed, just one palette key reading as metal instead of chitin.
+      // The Broodmarshal — "Reared Warrior Bug" (§SPRITE_SHAPES hiveLord):
+      // genuinely insectoid Starship Troopers-style redesign, cold-metal
+      // collar patch still marking the fused, never-worked control rig.
       broodmarshal: { shape: "hiveLord",         palette: {
-        O: "#0a0806", H: "#6b4423", V: "#ffcf5c", C: "#5a6169", A: "#5a3d1e",
-        B: "#7a8f3a", W: "#9aa84a", G: "#5a3d1e", K: "#3a2812", L: "#4a3018"
+        O: "#0e1206",
+        H: "#3a4a1e", K: "#5c7028", J: "#242e10",
+        E: "#1a1408", F: "#e0c94a",
+        M: "#1c1408",
+        C: "#6b7078",
+        S: "#6b5a20", X: "#a68a3a",
+        L: "#3a4a1e"
       } },
       // --- Boss-support adds (2026-07-24): reuse existing shapes, recolored.
       // (Placeholder art — flag for bespoke sprites later if desired.)
@@ -2018,6 +2370,70 @@
         B: "#26262b", A: "#1a1a1e", X: "#0e0e10",
         M: "#6b6158", V: "#f4f8ff",
         T: "#26262b", U: "#141416", F: "#0a0a0c"
+      } },
+
+      // ---------- HELIOS STATION / DUNGEON 5 (§5.4b) ----------
+      // Void Soul Eater — "Wrong-Angle Maw" v2 (§SPRITE_SHAPES
+      // voidSoulEaterMaw): hooded void-wraith, jaw flared wide into a
+      // jagged sawtooth maw, tattered robe streamers instead of legs.
+      voidSoulEater: { shape: "voidSoulEaterMaw", palette: {
+        O: "#0d0812",
+        H: "#2e1f3d", K: "#3d2a52",
+        J: "#1a1226",
+        R: "#5c4270",
+        V: "#c9a8ff", E: "#8a6fc9",
+        N: "#5c4a70",
+        M: "#120a1a", G: "#d8f5e0",
+        C: "#251a33",
+        B: "#3d2a52", L: "#57406e", A: "#241832", D: "#2e2040",
+        T: "#2e1f3d", U: "#1a1226"
+      } },
+      // The Sun God — "Eclipse Face" v2 (§SPRITE_SHAPES sunGodEclipse):
+      // blazing corona ring around an eclipsed black disc, bronze
+      // statuesque body, flame-lick base.
+      sunGod: { shape: "sunGodEclipse", palette: {
+        O: "#1a0e05",
+        Y: "#f4b12e", W: "#fff2c0", R: "#e07a1e",
+        K: "#0c0810",
+        C: "#3a2410",
+        B: "#8a5a20", L: "#c98a3a", A: "#5c3a14", F: "#e0682e",
+        N: "#4a1e3a", D: "#5c3a14",
+        U: "#5c2410"
+      } },
+      // Phthora, the Fleshspring — "The Reaching Wreck" (§SPRITE_SHAPES
+      // phthoraWreck): gaunt origin-figure, two mismatched reaching arms,
+      // a glowing green chest rupture, rooted to the ground.
+      phthora: { shape: "phthoraWreck", palette: {
+        O: "#100a08",
+        H: "#4a3830", S: "#a8896a", D: "#6b4d3a", E: "#1a1410",
+        C: "#2a1e18",
+        B: "#5c4030", A: "#3a281e",
+        P: "#1a3020", G: "#7ae0a0",
+        W: "#a8896a", X: "#c9a880", M: "#4a3830",
+        N: "#6b5548",
+        R: "#4a3020", U: "#2a1810"
+      } },
+      // The Caged God — "The Cracking Cocoon" (§SPRITE_SHAPES
+      // cagedGodCocoon): a cracked containment shell restrained by
+      // mechanical bands, glowing void-purple from within.
+      cagedGod: { shape: "cagedGodCocoon", palette: {
+        O: "#0a0812",
+        H: "#3a2c50", K: "#5c4880", J: "#241a38",
+        C: "#c9a8ff", G: "#f0e8ff",
+        B: "#5a5a62", A: "#33333a", V: "#e0a83a",
+        N: "#3a3a40"
+      } },
+      // Chthon, God of the Breach — "Dimension-Dragon" v3 (§SPRITE_SHAPES
+      // chthonBreach): draconic head, void-tear wings flowing into the
+      // shoulders, Kredex's broken rig worn as a collar.
+      chthon: { shape: "chthonBreach", palette: {
+        O: "#0a0812",
+        Z: "#1c1420",
+        H: "#3a2c50", K: "#5c4880", J: "#1a1226", D: "#241a38",
+        R: "#e0533d",
+        M: "#120a1a", T: "#7ae0a0", G: "#c9a8ff",
+        N: "#3a3a40", B: "#5a5a62", A: "#33333a", V: "#e0a83a",
+        C: "#a888e0", W: "#241832"
       } }
     };
 

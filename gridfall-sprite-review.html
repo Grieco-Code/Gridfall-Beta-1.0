@@ -1,0 +1,336 @@
+<title>Gridfall — Sprite Review</title>
+<style>
+  :root {
+    --bg: #0b0d12;
+    --bg-raised: #12151d;
+    --bg-card: #171b25;
+    --line: #262c3a;
+    --ink: #e4e7ee;
+    --ink-dim: #8991a5;
+    --ink-faint: #5b6274;
+    --accent: #e8b04a;
+    --accent-dim: #7a5f2c;
+    --ok: #6bbf7a;
+    --warn: #d9a53f;
+    --bad: #c4574a;
+    --canvas-bg: #05060a;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  :root[data-theme="light"] {
+    --bg: #eef0f4; --bg-raised: #ffffff; --bg-card: #ffffff; --line: #d7dbe4;
+    --ink: #1a1d27; --ink-dim: #5b6274; --ink-faint: #8991a5;
+    --accent: #a5730f; --accent-dim: #e8b04a;
+    --ok: #2f8a42; --warn: #a5730f; --bad: #a5342a; --canvas-bg: #f4f5f8;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #eef0f4; --bg-raised: #ffffff; --bg-card: #ffffff; --line: #d7dbe4;
+      --ink: #1a1d27; --ink-dim: #5b6274; --ink-faint: #8991a5;
+      --accent: #a5730f; --accent-dim: #e8b04a;
+      --ok: #2f8a42; --warn: #a5730f; --bad: #a5342a; --canvas-bg: #f4f5f8;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--ink); font-family: var(--font-sans);
+    margin: 0; padding: 40px 28px 100px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 10px;
+  }
+  h1 { font-size: 28px; margin: 0 0 12px; letter-spacing: -0.01em; text-wrap: balance; }
+  header p { color: var(--ink-dim); max-width: 680px; line-height: 1.55; font-size: 14.5px; margin: 0 0 6px; }
+  .regen {
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-faint);
+    background: var(--bg-raised); border: 1px solid var(--line); border-radius: 6px;
+    padding: 8px 12px; display: inline-block; margin-top: 10px;
+  }
+
+  .stats { display: flex; gap: 12px; flex-wrap: wrap; margin: 22px 0 8px; }
+  .stat {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 16px; min-width: 150px;
+  }
+  .stat .n { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stat .l { font-size: 11.5px; color: var(--ink-dim); margin-top: 2px; }
+
+  nav.tabs {
+    display: flex; gap: 4px; margin: 30px 0 20px; border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; background: var(--bg); padding-top: 8px; z-index: 5;
+  }
+  nav.tabs button {
+    font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0.04em;
+    text-transform: uppercase; background: none; border: none; color: var(--ink-faint);
+    padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent;
+  }
+  nav.tabs button.active { color: var(--ink); border-bottom-color: var(--accent); }
+  nav.tabs button:hover { color: var(--ink); }
+
+  section.panel { display: none; }
+  section.panel.active { display: block; }
+
+  .subhead {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-faint); margin: 30px 0 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .subhead:first-child { margin-top: 6px; }
+  .subhead::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px;
+  }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px; display: flex; flex-direction: column; gap: 11px;
+  }
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .card-name { font-size: 14.5px; font-weight: 600; line-height: 1.3; }
+  .card-role { font-size: 11.5px; color: var(--ink-dim); margin-top: 2px; }
+  .tags { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+  .tag {
+    font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 3px 7px; border-radius: 5px; white-space: nowrap;
+  }
+  .tag-ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+  .tag-warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+  .tag-bad { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
+  .tag-neutral { background: color-mix(in srgb, var(--ink-faint) 18%, transparent); color: var(--ink-dim); }
+
+  .stage {
+    background: var(--canvas-bg); border: 1px solid var(--line); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    height: 150px; overflow: hidden;
+  }
+  .stage canvas { image-rendering: pixelated; }
+
+  .meta {
+    font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-faint);
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .meta span b { color: var(--ink-dim); font-weight: 500; }
+
+  .callout {
+    font-size: 13px; color: var(--ink-dim); line-height: 1.5; border-left: 2px solid var(--accent-dim);
+    padding: 10px 14px; background: var(--bg-raised); border-radius: 0 6px 6px 0; margin: 14px 0;
+  }
+  .empty { color: var(--ink-faint); font-size: 13px; font-family: var(--font-mono); padding: 20px 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Gridfall · sprite pass</p>
+    <h1>Boss, Hero &amp; Mob sprite status</h1>
+    <p>Every card below is rendered straight from the live <code>SPRITE_SHAPES</code>/<code>SPRITES</code>
+      data in <code>data.js</code> — status, grid size, and render scale are all derived at build time,
+      not hand-tracked, so this can't drift out of sync with the actual game.</p>
+    <div class="regen">regenerate: <code>python3 tools/sprite-review/build.py</code></div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <section class="panel" id="panel-bosses">
+    <div class="grid" id="grid-bosses"></div>
+  </section>
+  <section class="panel" id="panel-heroes">
+    <div class="grid" id="grid-heroes"></div>
+  </section>
+  <section class="panel" id="panel-mobs"></section>
+  <section class="panel" id="panel-candidates">
+    <div id="candidates-body"></div>
+  </section>
+</div>
+
+<script>
+  const DATA = {"bosses": [{"key": "voraxx", "kind": "enemy", "name": "Overseer Voraxx", "role": "Kharon's Reach chief overseer", "nature": "organic", "tier": "boss", "status": "bespoke", "shapeKey": "voraxxFat", "dims": {"w": 32, "h": 24}, "sharedWith": [], "palette": {"O": "#0c0a08", "P": "#5a1e1e", "Q": "#c9a53d", "V": "#8a2f2f", "S": "#c9a071", "K": "#e0b98a", "D": "#8a6b45", "E": "#141414", "W": "#eef0ea", "M": "#3a2a1a", "H": "#c9a53d", "C": "#c9a53d", "B": "#565640", "L": "#7a7a5c", "A": "#3d3d2c", "J": "#3a2e1c", "I": "#c9b98a", "G": "#5a4530", "N": "#a68a5a", "R": "#8a2f2f", "T": "#3d3d2c", "U": "#2a2a1e"}}, {"key": "warden", "kind": "enemy", "name": "The Warden", "role": "Penal Colony AI", "nature": "synthetic", "tier": "boss", "status": "bespoke", "shapeKey": "wardenCore", "dims": {"w": 22, "h": 22}, "sharedWith": [], "palette": {"O": "#0a0a0c", "X": "#e0533d", "P": "#4a5158", "H": "#33383d", "N": "#22262a", "V": "#e0533d", "E": "#fff2c0", "C": "#1c1e21", "A": "#3a3f45", "S": "#282c30", "G": "#e0533d", "R": "#ffcc33"}}, {"key": "broodmarshal", "kind": "enemy", "name": "The Broodmarshal", "role": "hive leadership caste", "nature": "organic", "tier": "boss", "status": "bespoke", "shapeKey": "hiveLord", "dims": {"w": 40, "h": 24}, "sharedWith": [], "palette": {"O": "#0e1206", "H": "#3a4a1e", "K": "#5c7028", "J": "#242e10", "E": "#1a1408", "F": "#e0c94a", "M": "#1c1408", "C": "#6b7078", "S": "#6b5a20", "X": "#a68a3a", "L": "#3a4a1e"}}, {"key": "proteus", "kind": "enemy", "name": "Proteus", "role": "Talos bio-executive, mid-transcendence", "nature": "organic", "tier": "boss", "status": "bespoke", "shapeKey": "proteusBloom", "dims": {"w": 33, "h": 28}, "sharedWith": [], "palette": {"O": "#0b0808", "H": "#2a221c", "S": "#c08a5c", "D": "#8a5f3c", "E": "#141210", "M": "#5c3a28", "C": "#1c1614", "B": "#3a3d42", "L": "#4d5158", "A": "#26282c", "P": "#26140f", "G": "#ff8a3d", "W": "#6b2426", "X": "#8f3a2e", "N": "#2a1210", "T": "#4a1f1c", "U": "#33130f", "R": "#c9503a"}}, {"key": "voidSoulEater", "kind": "enemy", "name": "Void Soul Eater", "role": "Helios's gatekeeper", "nature": "void", "tier": "boss", "status": "bespoke", "shapeKey": "voidSoulEaterMaw", "dims": {"w": 28, "h": 28}, "sharedWith": [], "palette": {"O": "#0d0812", "H": "#2e1f3d", "K": "#3d2a52", "J": "#1a1226", "R": "#5c4270", "V": "#c9a8ff", "E": "#8a6fc9", "N": "#5c4a70", "M": "#120a1a", "G": "#d8f5e0", "C": "#251a33", "B": "#3d2a52", "L": "#57406e", "A": "#241832", "D": "#2e2040", "T": "#2e1f3d", "U": "#1a1226"}}, {"key": "sunGod", "kind": "enemy", "name": "The Sun God", "role": "Helios regulator core, corrupted", "nature": "synthetic", "tier": "boss", "status": "bespoke", "shapeKey": "sunGodEclipse", "dims": {"w": 28, "h": 30}, "sharedWith": [], "palette": {"O": "#1a0e05", "Y": "#f4b12e", "W": "#fff2c0", "R": "#e07a1e", "K": "#0c0810", "C": "#3a2410", "B": "#8a5a20", "L": "#c98a3a", "A": "#5c3a14", "F": "#e0682e", "N": "#4a1e3a", "D": "#5c3a14", "U": "#5c2410"}}, {"key": "phthora", "kind": "enemy", "name": "Phthora, the Fleshspring", "role": "Talos's origin, mid-failed-transcendence", "nature": "organic", "tier": "boss", "status": "bespoke", "shapeKey": "phthoraWreck", "dims": {"w": 34, "h": 20}, "sharedWith": [], "palette": {"O": "#100a08", "H": "#4a3830", "S": "#a8896a", "D": "#6b4d3a", "E": "#1a1410", "C": "#2a1e18", "B": "#5c4030", "A": "#3a281e", "P": "#1a3020", "G": "#7ae0a0", "W": "#a8896a", "X": "#c9a880", "M": "#4a3830", "N": "#6b5548", "R": "#4a3020", "U": "#2a1810"}}, {"key": "cagedGod", "kind": "enemy", "name": "The Caged God", "role": "the Loom's true occupant, still bound", "nature": "void", "tier": "boss", "status": "bespoke", "shapeKey": "cagedGodCocoon", "dims": {"w": 26, "h": 20}, "sharedWith": [], "palette": {"O": "#0a0812", "H": "#3a2c50", "K": "#5c4880", "J": "#241a38", "C": "#c9a8ff", "G": "#f0e8ff", "B": "#5a5a62", "A": "#33333a", "V": "#e0a83a", "N": "#3a3a40"}}, {"key": "chthon", "kind": "enemy", "name": "Chthon, God of the Breach", "role": "the Loom, fully escaped, wearing what's left of Kredex", "nature": "void", "tier": "boss", "status": "bespoke", "shapeKey": "chthonBreach", "dims": {"w": 60, "h": 28}, "sharedWith": [], "palette": {"O": "#0a0812", "Z": "#1c1420", "H": "#3a2c50", "K": "#5c4880", "J": "#1a1226", "D": "#241a38", "R": "#e0533d", "M": "#120a1a", "T": "#7ae0a0", "G": "#c9a8ff", "N": "#3a3a40", "B": "#5a5a62", "A": "#33333a", "V": "#e0a83a", "C": "#a888e0", "W": "#241832"}}], "heroes": [{"key": "merc", "kind": "hero", "name": "Merc", "role": "Gun DPS \u00b7 Aimed Shot + AoE", "nature": "organic", "tier": null, "status": "bespoke", "shapeKey": "heroMerc", "dims": {"w": 24, "h": 32}, "sharedWith": [], "palette": {"O": "#0d1016", "S": "#d09a63", "K": "#f4c890", "D": "#9c6b3d", "H": "#4a3a28", "G": "#6b5238", "J": "#2e2418", "E": "#141414", "W": "#eef0ea", "V": "#6cff9e", "B": "#3a4a3d", "A": "#26332a", "M": "#727880", "P": "#a2a8b0", "N": "#2e333a", "C": "#201c18", "X": "#2a2a2c", "T": "#35402f", "U": "#232b1e", "F": "#1a1f16"}, "nonstandardSize": false}, {"key": "mechRunner", "kind": "hero", "name": "Mech Runner", "role": "Heavy weapons \u00b7 Burn", "nature": "organic", "tier": null, "status": "bespoke", "shapeKey": "heroMech", "dims": {"w": 24, "h": 32}, "sharedWith": [], "palette": {"O": "#0d0d0f", "S": "#c88a55", "K": "#e8b078", "D": "#8a5a30", "H": "#3a2a1a", "E": "#141414", "W": "#e8e0d0", "M": "#6b7078", "P": "#9aa0a8", "N": "#33383e", "A": "#3a3d42", "R": "#8a5a2c", "V": "#ffb347", "C": "#241c14", "X": "#565c64", "F": "#1a1a1e"}, "nonstandardSize": false}, {"key": "netrunner", "kind": "hero", "name": "Netrunner", "role": "Hacker \u00b7 anti-machine + Disable", "nature": "synthetic", "tier": null, "status": "bespoke", "shapeKey": "heroNetrunner", "dims": {"w": 24, "h": 32}, "sharedWith": [], "palette": {"O": "#0a0f13", "S": "#b8c2c6", "K": "#dbe4e6", "D": "#7f8b90", "H": "#1c2b33", "G": "#2f4650", "J": "#121c22", "V": "#3dd6e0", "B": "#1f3640", "L": "#2f4e5a", "A": "#142027", "C": "#101a1f", "T": "#182b32", "U": "#101c21", "F": "#0c151a"}, "nonstandardSize": false}, {"key": "mentalist", "kind": "hero", "name": "Mentalist", "role": "Psion \u00b7 damage + debuff + heal", "nature": "organic", "tier": null, "status": "bespoke", "shapeKey": "heroMentalist", "dims": {"w": 18, "h": 28}, "sharedWith": [], "palette": {"O": "#0c0812", "S": "#8a7a9a", "K": "#a595b5", "D": "#5f5075", "H": "#3a2c52", "J": "#281c3a", "V": "#c77dff", "B": "#4b3866", "L": "#5e4a7e", "A": "#33254a", "R": "#ffe08a", "M": "#7a5a3a", "N": "#4a3624"}, "nonstandardSize": true}, {"key": "dreadKnight", "kind": "hero", "name": "Dread Knight", "role": "Tank \u00b7 Guard + heavy hits", "nature": "organic", "tier": null, "status": "bespoke", "shapeKey": "heroDread", "dims": {"w": 18, "h": 28}, "sharedWith": [], "palette": {"O": "#0a0a0c", "M": "#4a4e56", "P": "#8f96a0", "N": "#2a2d33", "V": "#ff3b30", "B": "#3a2226", "L": "#4d2e33", "A": "#241417", "C": "#16161a", "U": "#34383e", "F": "#1a1a1e"}, "nonstandardSize": true}, {"key": "saboteur", "kind": "hero", "name": "Saboteur", "role": "Corrosive specialist \u00b7 armor-strip + AoE", "nature": "organic", "tier": null, "status": "blob", "shapeKey": null, "dims": null, "sharedWith": [], "nonstandardSize": false}], "mobs": [{"key": "chimeraSpecimen", "kind": "enemy", "name": "Chimera Specimen", "role": "Talos chimeric specimen", "nature": "organic", "tier": "elite", "status": "blob", "shapeKey": null, "dims": null, "sharedWith": []}, {"key": "demon", "kind": "enemy", "name": "Void Demon", "role": "Helios burning horror", "nature": "void", "tier": "elite", "status": "blob", "shapeKey": null, "dims": null, "sharedWith": []}, {"key": "devil", "kind": "enemy", "name": "Void Devil", "role": "Helios tormentor caste", "nature": "void", "tier": "elite", "status": "blob", "shapeKey": null, "dims": null, "sharedWith": []}, {"key": "erebusArmoredWarrior", "kind": "enemy", "name": "Erebus Armored Warrior", "role": "hive heavy", "nature": "organic", "tier": "elite", "status": "shared", "shapeKey": "hiveBrute", "dims": {"w": 16, "h": 16}, "sharedWith": ["erebusWarrior"], "palette": {"O": "#0c0a08", "H": "#5a5f66", "V": "#a8f7c8", "C": "#3a3d42", "A": "#454a50", "B": "#565c63", "W": "#7a8f3a", "G": "#454a50", "K": "#2c2e30", "L": "#3a3d42", "F": "#1e2023"}}, {"key": "securityMech", "kind": "enemy", "name": "Security Mech", "role": "Vossmark heavy unit", "nature": "synthetic", "tier": "elite", "status": "bespoke", "shapeKey": "heavyMech", "dims": {"w": 16, "h": 16}, "sharedWith": [], "palette": {"O": "#0e1012", "H": "#454b52", "V": "#ffcc33", "C": "#33383d", "A": "#4a5158", "B": "#5a6169", "W": "#2b2f33", "G": "#4a5158", "K": "#b23a2e", "L": "#454b52", "F": "#262a2d"}}, {"key": "talosVanguard", "kind": "enemy", "name": "Talos Vanguard", "role": "Talos heavy operative", "nature": "organic", "tier": "elite", "status": "shared", "shapeKey": "humanoidOfficer", "dims": {"w": 16, "h": 16}, "sharedWith": ["vossmarkOfficer"], "palette": {"O": "#0d0808", "H": "#3a1418", "V": "#ff4d4d", "S": "#b5773f", "C": "#2a1012", "A": "#4a1c1f", "B": "#5c1f24", "W": "#d94f4f", "G": "#b5773f", "K": "#1a1010", "L": "#3a1418", "F": "#1a0d0e"}}, {"key": "voidHorror", "kind": "enemy", "name": "Void Horror", "role": "Helios abyssal", "nature": "void", "tier": "elite", "status": "blob", "shapeKey": null, "dims": null, "sharedWith": []}, {"key": "vossmarkOfficer", "kind": "enemy", "name": "Vossmark Officer", "role": "field officer", "nature": "organic", "tier": "elite", "status": "shared", "shapeKey": "humanoidOfficer", "dims": {"w": 16, "h": 16}, "sharedWith": ["talosVanguard"], "palette": {"O": "#14140f", "H": "#3f3f30", "V": "#8a8f6a", "S": "#c9a071", "C": "#2e2e22", "A": "#454533", "B": "#565640", "W": "#c9ccd1", "G": "#c9a071", "K": "#6b2b22", "L": "#3d3d2c", "F": "#1e1e15"}}, {"key": "arcSentinel", "kind": "enemy", "name": "Arc Sentinel", "role": "Vossmark arc drone", "nature": "synthetic", "tier": "standard", "status": "shared", "shapeKey": "sentryBot", "dims": {"w": 16, "h": 16}, "sharedWith": ["securityTurret"], "palette": {"O": "#14140a", "V": "#fff27a", "E": "#ffcc33", "B": "#55524a", "A": "#6b6a5e"}}, {"key": "bioTank", "kind": "enemy", "name": "Bio-Tank", "role": "Talos containment specimen", "nature": "organic", "tier": "standard", "status": "blob", "shapeKey": null, "dims": null, "sharedWith": []}, {"key": "erebusShaman", "kind": "enemy", "name": "Erebus Shaman", "role": "hive-mind caste", "nature": "organic", "tier": "standard", "status": "bespoke", "shapeKey": "hiveMystic", "dims": {"w": 16, "h": 16}, "sharedWith": [], "palette": {"O": "#0d0a12", "H": "#4a3820", "V": "#c77dff", "A": "#5a4a26", "B": "#6b5a2e", "W": "#d9b8ff", "G": "#5a4a26", "K": "#3a2e18"}}, {"key": "erebusWarrior", "kind": "enemy", "name": "Erebus Warrior", "role": "hive bruiser", "nature": "organic", "tier": "standard", "status": "shared", "shapeKey": "hiveBrute", "dims": {"w": 16, "h": 16}, "sharedWith": ["erebusArmoredWarrior"], "palette": {"O": "#100d08", "H": "#6b4423", "V": "#a8f7c8", "C": "#4a3018", "A": "#5a3d1e", "B": "#7a8f3a", "W": "#9aa84a", "G": "#5a3d1e", "K": "#3a2812", "L": "#4a3018", "F": "#241a0d"}}, {"key": "riotEnforcer", "kind": "enemy", "name": "Riot Enforcer", "role": "Kharon's Reach riot squad", "nature": "organic", "tier": "standard", "status": "shared", "shapeKey": "guardTrooper", "dims": {"w": 24, "h": 32}, "sharedWith": ["vossmarkGrunt", "quotaEnforcer"], "palette": {"O": "#080808", "P": "#2a2a2e", "G": "#3a3a40", "S": "#c9a071", "K": "#e0b98a", "D": "#7a5330", "W": "#e8e8e8", "E": "#141414", "C": "#18181c", "H": "#dfe8ff", "B": "#26262b", "A": "#1a1a1e", "X": "#0e0e10", "M": "#6b6158", "V": "#f4f8ff", "T": "#26262b", "U": "#141416", "F": "#0a0a0c"}}, {"key": "securityTurret", "kind": "enemy", "name": "Sentry Turret", "role": "Station defense emplacement", "nature": "synthetic", "tier": "standard", "status": "shared", "shapeKey": "sentryBot", "dims": {"w": 16, "h": 16}, "sharedWith": ["arcSentinel"], "palette": {"O": "#0c0e10", "V": "#e0533d", "E": "#ff5a44", "B": "#4a5058", "A": "#5a6169"}}, {"key": "shade", "kind": "enemy", "name": "Void Shade", "role": "Helios wraith", "nature": "void", "tier": "standard", "status": "blob", "shapeKey": null, "dims": null, "sharedWith": []}, {"key": "solAcolyte", "kind": "enemy", "name": "Sol's Acolyte", "role": "Helios cult-thrall", "nature": "void", "tier": "standard", "status": "blob", "shapeKey": null, "dims": null, "sharedWith": []}, {"key": "talosPhantom", "kind": "enemy", "name": "Talos Phantom", "role": "Talos stealth operative", "nature": "organic", "tier": "standard", "status": "shared", "shapeKey": "stealthHumanoid", "dims": {"w": 16, "h": 16}, "sharedWith": ["talosWraith"], "palette": {"O": "#0d1216", "H": "#1c2731", "E": "#5fd6ff", "B": "#2a3742", "C": "#24303a", "L": "#1c2731"}}, {"key": "terror", "kind": "enemy", "name": "Void Terror", "role": "Helios dread-caste", "nature": "void", "tier": "standard", "status": "blob", "shapeKey": null, "dims": null, "sharedWith": []}, {"key": "vossmarkGrunt", "kind": "enemy", "name": "Vossmark Grunt", "role": "trooper", "nature": "organic", "tier": "standard", "status": "shared", "shapeKey": "guardTrooper", "dims": {"w": 24, "h": 32}, "sharedWith": ["quotaEnforcer", "riotEnforcer"], "palette": {"O": "#12140f", "P": "#4d5140", "G": "#6b7052", "S": "#c9a071", "K": "#e0b98a", "D": "#7a5f38", "W": "#eef0ea", "E": "#141414", "C": "#24241a", "H": "#5a5f45", "B": "#565640", "A": "#3d3d2c", "X": "#2a2a24", "M": "#7a828a", "V": "#8fe36b", "T": "#4a4a36", "U": "#2e2e20", "F": "#1a1a12"}}, {"key": "erebusRoach", "kind": "enemy", "name": "Erebus Roach", "role": "hive swarmer", "nature": "organic", "tier": "fodder", "status": "shared", "shapeKey": "hiveCrawler", "dims": {"w": 16, "h": 16}, "sharedWith": ["hullRoach"], "palette": {"A": "#5a6b2e", "H": "#6b4423", "O": "#3a2812", "B": "#7a8f3a", "L": "#4a3618"}}, {"key": "hullRoach", "kind": "enemy", "name": "Hull Roach", "role": "hull vermin", "nature": "organic", "tier": "fodder", "status": "shared", "shapeKey": "hiveCrawler", "dims": {"w": 16, "h": 16}, "sharedWith": ["erebusRoach"], "palette": {"A": "#6b5a4a", "H": "#5c4a3a", "O": "#3a3128", "B": "#7a6a55", "L": "#4a3f30"}}, {"key": "poltergeist", "kind": "enemy", "name": "Void Poltergeist", "role": "restless Helios echo", "nature": "void", "tier": "fodder", "status": "blob", "shapeKey": null, "dims": null, "sharedWith": []}, {"key": "quotaEnforcer", "kind": "enemy", "name": "Quota Enforcer", "role": "Kharon's Reach enforcer", "nature": "organic", "tier": "fodder", "status": "shared", "shapeKey": "guardTrooper", "dims": {"w": 24, "h": 32}, "sharedWith": ["vossmarkGrunt", "riotEnforcer"], "palette": {"O": "#100d0a", "P": "#5c4a34", "G": "#7a6547", "S": "#c9a071", "K": "#e0b98a", "D": "#7a5330", "W": "#c9c6be", "E": "#141414", "C": "#2e2318", "H": "#4a3c2a", "B": "#5c4a34", "A": "#3f3222", "X": "#241a12", "M": "#6b6158", "V": "#d9a94e", "T": "#4a3c2a", "U": "#2e2418", "F": "#1a140d"}}, {"key": "repairDrone", "kind": "enemy", "name": "Repair Drone", "role": "Station maintenance unit", "nature": "synthetic", "tier": "fodder", "status": "shared", "shapeKey": "spiderDrone", "dims": {"w": 16, "h": 16}, "sharedWith": ["spiderDrone"], "palette": {"E": "#5affa0", "O": "#1a2a22", "B": "#3a6b52", "P": "#7ad6a8", "L": "#2a4a3a"}}, {"key": "spiderDrone", "kind": "enemy", "name": "Spider Drone", "role": "Vossmark security bot", "nature": "synthetic", "tier": "fodder", "status": "shared", "shapeKey": "spiderDrone", "dims": {"w": 16, "h": 16}, "sharedWith": ["repairDrone"], "palette": {"E": "#ff5a44", "O": "#2f353c", "B": "#6b7580", "P": "#9aa5b0", "L": "#454d56"}}, {"key": "spliceHusk", "kind": "enemy", "name": "Splice Husk", "role": "failed Talos specimen", "nature": "organic", "tier": "fodder", "status": "blob", "shapeKey": null, "dims": null, "sharedWith": []}, {"key": "talosWraith", "kind": "enemy", "name": "Talos Wraith", "role": "Talos infiltrator", "nature": "organic", "tier": "fodder", "status": "shared", "shapeKey": "stealthHumanoid", "dims": {"w": 16, "h": 16}, "sharedWith": ["talosPhantom"], "palette": {"O": "#0d0808", "H": "#3a1418", "E": "#ff4d4d", "B": "#5c1f24", "C": "#d94f4f", "L": "#3a1418"}}], "spriteShapes": {"heroMerc": ["........................", ".........JOOOOJ.........", ".......OJHHHHHHJO.......", "......OJHHHHHHHHJO......", ".....OJHHGGHHGGHHJO.....", ".....OHHHHHHHHHHHHO.....", ".....OHSSSSSSSSSSHO.....", ".....OHSSKSSSSKSSHO.....", ".....OSSDDSSSSDDSSO.....", ".....OSSVVSSSSWESSO.....", ".....OSSSSSDDSSSSSO.....", ".....OKSSSSSSSSSSKO.....", ".....OSSSSDDDDSSSSO.....", ".....OKSSSSSSSSSSKO.....", "......OKSSSSSSSSKO......", "........OCCCCCCO........", "...OMMMMBBBBBBBBMMMMO...", "...OAAOBBBBBBBBBBOAAO...", "...OSAOBBBBBBBBBBOASO...", "...OSSOBBBBBBBBBBOSSO...", "...OXXMMMMMMMMMMXXMNNNNN", "...OBBBBBBBBBBBBBBBBO...", "...OCCCCCCCCCCCCCCCCO...", "....OTTTTTTOOTTTTTTO....", "....OTTTTTTOOTTTTTTO....", "....OTTTUTTOOTTUTTTO....", "....OTTTTTTOOTTTTTTO....", "....OUTTTTUOOUTTTTUO....", "....OFFFFFFOOFFFFFFO....", "....OFFFFFFOOFFFFFFO....", "....OFFFFFOOOOFFFFFO....", "........................"], "heroNetrunner": ["........................", ".......OHHHHHHHHO.......", "......OHHHHHHHHHHO......", ".....OHHHHHHHHHHHHO.....", ".....OHHSSSSSSSSHHO.....", ".....OHSSSSSSSSSSHO.....", ".....OHSVVSSSSVVSHO.....", ".....OHSSSSDDSSSSHO.....", ".....OHKSSSSSSSSKHO.....", ".....OHSSSDDDDSSSHO.....", ".....OHHSSSSSSSSHHO.....", "......OHHKSSSSKHHO......", "......OHHHOOOOHHHO......", ".....OHHHO....OHHHO.....", "......OABBBBBBBBAO......", "......OABBBBBBBBAO......", ".....OSABBVVVVBBASO.....", ".....OSABBVVVVBBASO.....", "......OABBVVVVBBAO......", "........OBBVVBBO........", "......OBBBBVVBBBBO......", ".....OBBBBBVVBBBBBO.....", ".....OTTTTOOOOTTTTO.....", ".....OTTTTOOOOTTTTO.....", ".....OTTTUOOOOUTTTO.....", ".....OTTTTOOOOTTTTO.....", "......OTTTOOOOTTTO......", "......OFFFOOOOFFFO......", "......OFFFOOOOFFFO......", "......OFFFO..OFFFO......", "........................", "........................"], "heroDread": ["..................", ".......OMMO.......", "......OMPPMO......", ".....OMPMMPMO.....", "....OMMMMMMMMO....", "...OMMPMMMMPMMO...", "...OMMMMMMMMMMO...", "...OMMMVVVVMMMO...", "...OMMMVVVVMMMO...", "...OMMMMVVMMMMO...", "...OMPMMMMMMPMO...", "....OMMMMMMMMO....", "..ONMMMPPMMMMNO...", ".OMPMMMPPMMMMPMO..", ".OMPMMBPPBBMMPMO..", ".ONMMBBPPBBBMMNO..", "..OMMBBPPBBBMMO...", "...OMBOPPOBBMO....", "...OMBBOOBBBMO....", "....OBBBBBBBO.....", "....OCBBBBBCO.....", "....OMMMOOMMMO....", "....OMMMOOMMMO....", "....OMMUOOUMMO....", "....OFFFOOFFFO....", "...OFFFO..OFFFO...", "..................", ".................."], "heroMech": ["........................", "......OHHHHHHHHHHO......", "......OHSSSSSSSSHO......", "......OSSDDDDDDSSO......", "......OSWESSSSWESO......", "......OSSSSDDSSSSO......", "......OKSSSSSSSSKO......", "......OSSDDDDDDSSO......", ".......OKSSSSSSKO.......", "........OCCCCCCO........", ".....ORMMMMMMMMMMRO.....", "..OMMMMMMMMMMMMMMMMMMO..", "..OMPMMORMMMMMMRMOMMPMO.", "..OMMMMOMAAAAAAAAMOMMMMO", "..OMMMMOMAAAVVAAAMOMMMMO", "..OMPMMOMAAAVVAAAMOMMPMO", "..OMMMMOMAAAAAAAAMOMMNNN", "..OMMMMOMMMMMMMMMMOMMNNN", "...ORROMMMMMMMMMMORRO...", "...OMMMOMMMMMMMMOMMMO...", "...OXXMOMMMMMMMMOMXXO...", "....OMMMMMMMMMMMMMMO....", "....OMMMNMMOOMMNMMMO....", "....OMMMMMMOOMMMMMMO....", "....ORMMMMMOORMMMMMRO...", "....OMMMNMMOOMMNMMMO....", "....OMMMMMMOOMMMMMMO....", "....ONMMMMNOONMMMMNO....", "...OFFFFFFFOOFFFFFFFO...", "...OFFFFFFFOOFFFFFFFO...", "...OFFFFFFOOOOFFFFFFO...", "........................"], "heroMentalist": ["..................", "..V......OOOO.....", ".VVO...OOJHHJOO...", ".OMO..OJHHHHHHJO..", ".OMO.OJHHHHHHHHJO.", ".OMO.OHHHHHHHHHHO.", ".OMO.OHHOOOOOOHHO.", ".OMO.OHOSSSSSSOHO.", ".NMO.OHOSSSSSSOHO.", ".OMO.OHOVVSSVVOHO.", ".OMO.OHOSSSSSSOHO.", ".OMO.OHOKSDDSKOHO.", ".NMO.OHHOOOOOOHHO.", ".OMO..OHHHHHHHHO..", ".OMO..OAHBBBBHAO..", ".NMO.OABBBBBBBBAO.", ".OMO.OABBRRRRBBAO.", ".OO..OBBBRRRRBBBO.", "....OBBBBRRRRBBBBO", "....OBBBBBRRBBBBBO", "....OABBBBRRBBBBAO", "...OABBBBBBBBBBBAO", "...OABBBBBBBBBBBAO", "..OAABBBBBBBBBBAAO", "..OAABBBBBBBBBBAAO", "..OOAAAAAAAAAAAAO.", "...OOOOOOOOOOOOO..", ".................."], "spiderDrone": ["................", "..O..........O..", "..OL........LO..", "...OL......LO...", "....OL....LO....", ".....OBBBBO.....", "..OL.BPPPPB.LO..", ".OLLOBPEEPBOLLO.", ".OLLOBPEEPBOLLO.", "..OL.BPPPPB.LO..", ".....OBBBBO.....", "....OL....LO....", "...OL......LO...", "..OL........LO..", "..O..........O..", "................"], "stealthHumanoid": ["................", "................", "......OHHO......", "......OEEO......", ".....OHHHHO.....", "....OBBBBBBO....", "...CBBBBBBBBC...", "...CBBBBBBBBC...", "....BBBBBBBB....", "....BBBBBBBB....", ".....BBBBBB.....", "......LL..LL....", "......LL..LL....", "......LL..LL....", "................", "................"], "hiveCrawler": ["................", "................", "....AA....AA....", "......OHHO......", ".....OHHHHO.....", "....OOBBBBOO....", "...OBBBBBBBBO...", "..LOBBBBBBBBOL..", "..LOBBBBBBBBOL..", "...OBBBBBBBBO...", "....OOBBBBOO....", "....OLL..LLO....", "................", "................", "................", "................"], "humanoidGrunt": ["................", ".....OHHHHO.....", "....OSVVVVSO....", ".....OSSSSO.....", "....OOCCCCOO....", ".OAABBBBBBBBAAO.", ".OAABBBBBBBBWGO.", "..BBBBBBBBWWWW..", "..BBBBBBBB.WW...", "....OOKKKKOO....", "....LLL..LLL....", "....LLL..LLL....", "....LLL..LLL....", "....FFF..FFF....", "................", "................"], "guardTrooper": ["...VV...................", "...MM...OPPPPPPO........", "...MM..OPPPPPPPPO.......", "..XMM.OPPPPPPPPPPO......", ".XXX.OGGGGGGGGGGGGO.....", ".XXX.OPSSSSSSSSSSPO.....", ".SXX.OSDDDDDDDDDSO......", ".SSX.OSEESSSSEESSO......", ".SSA.OSSSSSDDSSSSO......", ".AAA.OKSSSSSSSSSKO......", "..AA.OSDWWWWWWWDSO......", "..AA.OKSSSSSSSSSKO......", "...A..OKSSSSSSKO........", ".....OGGGGGGGGGGO.......", "......OCCCCCCCCO........", "....OHHHHHHHHHHHHHHO....", "...OHHBBBBBBBBBBBBHHO...", "...OHBBBBBBBBBBBBBBAO...", "...OBBBBVVBBVVBBBBXAO...", "...OBBBBBBBBBBBBBBXAO...", "...OABBBBBBBBBBBBBAO....", "...OCCCCCCCCCCCCCCO.....", "...OTTTTTTOOTTTTTTO.....", "..OTTTTTOOOOTTTTTO......", "..OTTTTO....OTTTTO......", "..OTTTUO....OUTTTO......", "..OTTTTO....OTTTTO......", "..OTTTTO....OTTTTO......", "..OFFFFO....OFFFFO......", "..OFFFFO....OFFFFO......", "..OFFFO......OFFFO......", "........................"], "humanoidOfficer": ["................", "....OHHHHHHO....", "...OHVVVVVVHO...", "....OSSSSSSO....", "...OOCCCCCCOO...", ".OAAABBBBBBAAAO.", ".OAABBBBBBBBAAO.", ".OAABBBBBBBBWGO.", "..BBBBBBBBWWWWWW", "..BBBBBBBB.WWWW.", "...OOKKKKKKOO...", "..OLLLLLLLLLLO..", "...LLLL..LLLL...", "...LLLL..LLLL...", "...FFFF..FFFF...", "................"], "sentryBot": ["................", "......OOOO......", ".......VV.......", "......OEEO......", ".....OEEEEO.....", "....OOOOOOOO....", "...OBBBBBBBBO...", "..OBBBBBBBBBBO..", "..ABBBBBBBBBBA..", "...ABBBBBBBBA...", "....OOOOOOOO....", ".....OVVVVO.....", "................", "................", "................", "................"], "heavyMech": ["................", "....OHHHHHHO....", "...OHVVVVVVHO...", "....OHHHHHHO....", "...OOCCCCCCOO...", ".OAAABBBBBBAAAO.", "OAABBBBBBBBBBAAO", "OAABBBBBBBWWWWGO", "BBBBBBBBBBWWWWWW", "BBBBBBBBBB.WWWW.", "..OOKKKKKKKKOO..", ".OLLLLLLLLLLLLO.", "..LLLL....LLLL..", "..LLLL....LLLL..", "..FFFF....FFFF..", "................"], "wardenCore": ["......................", "..........XX..........", ".........OXXO.........", ".......OPPPPPPO.......", ".....OPPHHHHHHPPO.....", "....OHHHHHHHHHHHHO....", "...ONNHHHHHHHHHHNNO...", "...OVVVVVVVVVVVVVVO...", "...OVVVVVEEEEVVVVVO...", "...ONNHHHHHHHHHHNNO...", "....OHHHCHHHHCHHHO....", ".....OHHHHHHHHHHO.....", "......OHHHHHHHHO......", "......A..A..A..A......", "......A..S..S..A......", "......G..S..S..G......", ".........S..S.........", ".........S..R.........", ".........G..S.........", "............S.........", "............G.........", "......................"], "hiveBrute": ["................", "......OHHO......", ".....OHVVHO.....", "....OHHHHHHO....", "...OOCCCCCCOO...", ".OAAABBBBBBAAAO.", "WOAABBBBBBBBAAOW", ".OAABBBBBBBBAAO.", "..BBBBBBBBBBBB..", "..BBBBBBBBBBBB..", "...OOKKKKKKOO...", "..OLLLLLLLLLLO..", "...LLLL..LLLL...", "...LLLL..LLLL...", "...FFFF..FFFF...", "................"], "hiveMystic": ["................", ".......HH.......", ".....OHHHHO.....", "....OOHVVHOO....", "...OHHHHHHHHO...", "..OHHHHHHHHHHO..", ".OAABBBBBBBBAAO.", ".OAABBBBBBBBWGO.", "..BBBBBBBBWWWW..", "..BBBBBBBB.WW...", "..OBBBBBBBBBBO..", "..OBBBBBBBBBBO..", ".OBBBBBBBBBBBBO.", "OBBBBBBBBBBBBBBO", "OKKKKKKKKKKKKKKO", "................"], "hiveLord": ["........................................", "..................OHHO..................", ".................OHHHHO.................", "...............OHHKKKKHHO...............", "..............OEEEHHHHEEEO..............", ".............OFFEHHHHHHEFFO.............", "........X....OHHHHHHHHHHHHO....X........", ".......XX....OMMMMHHHHMMMMO....XX.......", ".....XSSX..OCCCCCCCCCCCCCCCCO..XSSX.....", "...XSSSSX.OHHHHHHHHHHHHHHHHHHO.XSSSSX...", ".XSSSSSSXOKKJJJJJJJJJJJJJJJJKKOXSSSSSSX.", "XSSSSSSSXOHHHHHHHHHHHHHHHHHHHHOXSSSSSSSX", "XSSSSSSSXOHHHHHHHHHHHHHHHHHHHHOXSSSSSSSX", "..XSSSSSX.OKKJJJJJJJJJJJJJJKKO.XSSSSSX..", "..........OHHHHHHHHHHHHHHHHHHO..........", "...........OHHHHHHHHHHHHHHHHO...........", "......OLL....OKJJJJJJJJJJKO....LLO......", ".....OLL....OHHHHHHHHHHHHHHO....LLO.....", "....OLL.......OKJJJJJJJJKO.......LLO....", "...............OHHHHHHHHO...............", "................OHHHHHHO................", "...............LL.HHHH.LL...............", "..............LLL..HH..LLL..............", "..............LLL......LLL.............."], "voraxxFat": ["................................", "............OPPPPPPO............", "..........OPPQQQQQQPPO..........", ".........OVVVVVVVVVVO...........", ".........OSSKKKKKKSSO...........", "........OSSDEWSSWEDSSO..........", "........OSSSSSSSSSSSSO..........", ".......OSSMMMMMMMMMMSSO.........", ".......ODDDSSSSSSSSDDDO.........", "......ODDDDSSSSSSSSDDDDO........", "......OHHCCCCCCCCCCCCCCCCHHO....", ".....OLLBBBBBBBBBBBBBBBBAAO.....", "..BLOLLLBBBBBBBBBBBBBBBBAAAOLB..", ".BLLOLLLBBBBBBCCCCBBBBBBAAAOLLB.", "OJJJOLLLBBBBBBBBBBBBBBBBAAAOGGGO", "OJIJOLLLBBBBBBBBBBBBBBBBAAAONNGO", "OJJJOBBBBBBBBBBBBBBBBBBBBBBONNNO", "OJJJ.OBBBBBBBBBBBBBBBBBBBBO..NGO", "O....ORRRRRRRRRRRRRRRRRRRRO....O", "......OBBBBBBBBBBBBBBBBBBO......", ".......OLLLLLLLLLLLLLLLLO.......", "........OTTTTTTTTTTTTTTO........", ".........OTTTTTOOTTTTTO.........", ".........OUUUUUOOUUUUUO........."], "proteusBloom": [".................................", "...........OHHO..................", ".........OHHHHHHO................", "........OHHSSSSHHO...............", ".......OSDDDDDDDDSO..............", ".......OSSESSSESSO...............", ".......OSSSSDSSSSO...............", ".......OSSSMMMSSSO...............", ".......ODDSSSSSSDDO..............", ".......OCCCSSSSCCCO..............", ".......OLLBBBBBBBBBBBBLLO.BWW....", ".......OLLBBBPPPPPPBBBLLO.WWWWW..", ".......OBBBBPPGGGGPPBBBBO.WXXXW..", ".......OBBBBPPPGGPPPBBBBO.WWNWW..", ".....OAAAPPPPPPPPPPPPAAAO.WNNNW..", ".....OAAABBBBBBBBBBBBAAAO..WNNW..", ".....OAABBBBBBBBBBBBBBAAO..WNO...", "..TTOBBBBBBBBBBBBBBBBO......NO...", ".TTTOTTBBBBBBBBBBBBTTO......N....", ".TTTOTTTTBBBBBBBBTTTTOT..........", ".TTTOTTTTTTBBBBBTTTTTTOTT........", ".TTTOTTTTTTTTTTTTTTTTTTTOT.......", ".TTOTTTTTTTTTTTTTTTTTTOTTT.......", "..TTTTT...TTTTTTTT...TTTTT.......", "...TTTT....TTTTTTT.....TTT.......", "....UUU.....TTTTTT......TT.......", ".............TTTTT.......T.......", ".............UUUU........T......."], "voidSoulEaterMaw": ["............................", "...........OHHHHO...........", ".........OHHKKKKHHO.........", ".......OHHKKKKKKKKHHO.......", "........OJRRJJJJRRJO........", ".......OJJVVJJJEJJO.........", "........OJJJKKJJJO..........", "......ONNJJJJJJNNO..........", "....ONNNJJJJJJJJNNNO........", "..ONNNNJJJJJJJJJJJJJJNNNNO..", "..OMMMGGGMMMGGGMMMGGGMMMGO..", ".OGGGGGGGGGGGGGGGGGGGGGGGGO.", "..OGGGMMMGGGMMMGGGMMMGGGMO..", "......ONNNJJJJJJJJNNNO......", "........OCCCCCCCCCCO........", ".........OCCCCCCCCO.........", ".......OLLBBBBBBBBBBBBAAO...", "......OLLBBBDDDDDDDDBBBAAO..", ".....OLLBBBBBBBBBBBBBBAAAO..", "....OLBBBBDDDDDDDDBBBAAAO...", "...OBBBBBBBBBBBBBBBBBBBBAAAO", "..OBBBDDDDDDDDDDBBBBBBAAAO..", ".OAAABBBBBBBBBBBBBBBBBBAAAAO", "OAAAABBBBBBBBBBBBBBBBAAAAAAO", "TTOAAABBBBBBBBBBBBBBAAAAAOTT", "TTT.OBBBBBBBBBBBBBBBBO.TTTTT", ".....TTT...TTTT....TTTT...TT", ".....UUU...TTT......TTT...TT"], "sunGodEclipse": ["............................", "............Y..Y............", "..........Y..YY..YY..Y......", "..........OYYYYYYO..........", ".........OYYYYYYYYO.........", "........OYYYYYYYYYYO........", ".......OYYY......YYYO.......", ".......OYY........YYO.......", "......OYY...OKKO...YYO......", "......OYY..OKKKKO..YYO......", "......OYY..OKKKKO..YYO......", "......OYY..OKKKKO..YYO......", "......OYY...OKKO...YYO......", ".......OYY........YYO.......", ".......OYYY......YYYO.......", "........OYYYYYYYYYYO........", ".........OYYYYYYYYO.........", "..........OYYYYYYO..........", ".........OCCCCCCCCO.........", "........OCCCCCCCCCCO........", ".....OLLFFBBBNNNNBBBFFLLO...", "....OLLBBBBDDNNDDBBBBAAAO...", "....OLLBBBBBBDDDDBBBBBBAAO..", "...OLLBBBBBBBBBBBBBBBBBAAO..", "....OBBBDDDBBBBBBBDDDBBBO...", ".....OBBBBBBBBBBBBBBBBAO....", "......OBBBBBBBBBBBBBBO......", ".......OFFFFFFFFFFFFO.......", ".......FOFFFUUUUUFFFOF......", ".........FF..FFFF....FFFF..F"], "phthoraWreck": ["..................................", "..............OHHHHO..............", ".............OHHSSHHO.............", "............OSDESSEDSO............", "...........ODDSSSSSSDDO...........", "...........ODDDSSSSDDDO...........", "............OCCCCCCCCO............", "...WWBOCCBBBBBBBBBBBBBBBBCCOBWW...", "...WWWOBBBBBBBBBBBBBBBBBBBBOWWW...", "...WXWOBBBBPGGGGGGGGGGPBBBBOWXW...", "...MMOOBBBPGGGGGGGGGGGGPBBBONNO...", "....MOOAAAAAAAPGGGGPAAAAAAAOON....", "........OAAAAAAAAAAAAAAAAO........", ".........OAAAAAAAAAAAAAAO.........", "..........OAAAAAAAAAAAAO..........", "..........ROAAAAAAAAAAOR..........", "..........RROAAAAAAAAORR..........", "..........RRROAAAAAAORRR..........", ".......RRRRUU..AAAA..UURRRR.......", ".......RRRRRUUU....UUURRRRR......."], "cagedGodCocoon": ["..........................", "..........OHHHHO..........", "........OHHKKKKHHO........", "......OHHCCKKKKKKHHO......", ".....OHHHCKKKCHHHKKKO.....", "...OHHGGGCKKKKHHHHCHHO....", "...OHHHCHHHHHHCKKKCHHO....", "...OKKKKCHHHHGGGGCHHHO....", "...OHHHHHCHHHHHHHHCKKKO...", "..OKKKCHHHHHHHHHHHHHHCHO..", "...OHHHHHHHHHHHHHHHHHHO...", "....OJJHHHHHHHHHHHHJJO....", ".....OJJJHHHHHHHHJJJO.....", "......OJJJJJJJJJJJJO......", "..N.BBAAVBBBBBBBBVAABB.N..", "...N.BBBBBBBBBBBBBBBB.N...", ".......BBBBBBBBBBBB.......", "...N.BBVAAAAAAAAAAVBB.N...", "....N.BBBBBBBBBBBBBB.N....", ".......NN........NN......."], "chthonBreach": ["............................................................", "............................Z..Z............................", "...........................ZZ..ZZ...........................", "..............OK.........OHHHHHHHHO.........KO..............", ".............OKW........OHHDDHHDDHHO........WKO.............", "..........OKWWKK.......OHHRRRRHHRRHHO.......KKWWKO..........", ".........OKWWKKW.....OHHHHHHHHHHHHHHHHO.....WKKWWKO.........", "......OKWWKKWWKK....OMMTTMMTTMMTTMMTTMMO....KKWWKKWWKO......", ".....OKWWKKWWKKW....OJJJJJJJJJJJJJJJJJJO....WKKWWKKWWKO.....", "..CKWWKKWWKKWWKKOJJJJJJJJJJJJJJJJJJJJJJJJJJOKKWWKKWWKKWWKC..", "...OKWWKKWWKKWWKOJJJJJJJJJJJJJJJJJJJJJJJJJJOKWWKKWWKKWWKO...", "OKWWKKWWKKWWKKWWOJJJJJJJJJJJJJJJJJJJJJJJJJJOWWKKWWKKWWKKWWKO", "..OKWWKKWWKKWWKKOJJJJJJJJJJJJJJJJJJJJJJJJJJOKKWWKKWWKKWWKO..", "....OKWWKKWWKKWWN.BBAAVBBBBBBBBBBBBBBVAABB.NWWKKWWKKWWKO....", "..OKWWKKWWKKWWKKN.BBBBBBBBBBBBBBBBBBBBBBBB.NKKWWKKWWKKWWKO..", "CKWWKKWWKKWWKKWWBBBBBBBBBBBBBBBBBBBBBBBBBBBBWWKKWWKKWWKKWWKC", "..OKWWKKWWKKWWKKN.BBVAAAAAAAAAAAAAAAAAAVBB.NKKWWKKWWKKWWKO..", "....OKWWKKWWKKWWOAAAAAAAAAAAAAAAAAAAAAAAAAAOWWKKWWKKWWKO....", ".......OKWWKKWWK.OAAAAAAAAAAAAAAAAAAAAAAAAO.KWWKKWWKO.......", "........OKWWKKWW.OAAAAAAAAAAAGGAAAAAAAAAAAO.WWKKWWKO........", "..........OKWWKKOAAAAAAAAAAAAGGAAAAAAAAAAAAOKKWWKO..........", "...........OKWWK.OAAAAAAAAAAAGGAAAAAAAAAAAO.KWWKO...........", "..............OK..OAAAAAAAAAAGGAAAAAAAAAAO..KO..............", "....................OAAAAAAAAAAAAAAAAAAO....................", ".....................OAAAAAAAAAAAAAAAAO.....................", "......................OAAAAAAAAAAAAAAO......................", "......................OHHHHAAAAAAHHHHO......................", ".........................KKK....KKK........................."], "blob": ["................", "................", "................", "......XXXX......", ".....XXXXXX.....", "....XXXXXXXX....", "...XXXXXXXXXX...", "...XXXXXXXXXX...", "...XXXXXXXXXX...", "....XXXXXXXX....", ".....XXXXXX.....", "......XXXX......", "................", "................", "................", "................"]}, "genericPalettes": {"organic": {"X": "#6b7a3a"}, "synthetic": {"X": "#5a6b7a"}, "void": {"X": "#4a2f5e"}}, "scale": {"base": 4, "heroBattle": 3, "byTier": {"fodder": 4, "standard": 4, "elite": 5, "boss": 6}, "overrideByShape": {"guardTrooper": 3, "voraxxFat": 4, "wardenCore": 4, "proteusBloom": 3, "voidSoulEaterMaw": 4, "sunGodEclipse": 4, "phthoraWreck": 3, "cagedGodCocoon": 4, "chthonBreach": 3, "hiveLord": 3}}, "standardHeroDims": {"w": 24, "h": 32}, "candidates": [], "counts": {"bossesDone": 9, "bossesTotal": 9, "mobsBlob": 10, "mobsTotal": 27, "heroesNonstandard": 2}};
+
+  function draw(canvas, shapeRows, palette, scale) {
+    const w = shapeRows[0].length, h = shapeRows.length;
+    canvas.width = w * scale; canvas.height = h * scale;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    shapeRows.forEach(function (line, row) {
+      for (let col = 0; col < line.length; col++) {
+        const ch = line[col];
+        if (ch === ".") continue;
+        ctx.fillStyle = palette[ch] || "#ff00ff";
+        ctx.fillRect(col * scale, row * scale, scale, scale);
+      }
+    });
+  }
+
+  function scaleForEntry(e) {
+    if (e.kind === "hero") return DATA.scale.heroBattle;
+    if (e.shapeKey && DATA.scale.overrideByShape[e.shapeKey]) return DATA.scale.overrideByShape[e.shapeKey];
+    return DATA.scale.byTier[e.tier] || DATA.scale.base;
+  }
+
+  function statusTag(e) {
+    if (e.status === "blob") return { cls: "tag-bad", text: "blob" };
+    if (e.status === "shared") {
+      return e.tier === "boss"
+        ? { cls: "tag-warn", text: "recolor" }
+        : { cls: "tag-neutral", text: "shared shape" };
+    }
+    return { cls: "tag-ok", text: "bespoke" };
+  }
+
+  function makeCard(e) {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const head = document.createElement("div");
+    head.className = "card-head";
+    const nameWrap = document.createElement("div");
+    nameWrap.innerHTML = '<div class="card-name">' + e.name + '</div>' +
+      '<div class="card-role">' + (e.role || "&nbsp;") + '</div>';
+    const tagsWrap = document.createElement("div");
+    tagsWrap.className = "tags";
+    const st = statusTag(e);
+    tagsWrap.innerHTML = '<span class="tag ' + st.cls + '">' + st.text + '</span>';
+    if (e.nonstandardSize) {
+      tagsWrap.innerHTML += '<span class="tag tag-warn">small grid</span>';
+    }
+    head.appendChild(nameWrap);
+    head.appendChild(tagsWrap);
+    card.appendChild(head);
+
+    const stage = document.createElement("div");
+    stage.className = "stage";
+    const shapeKey = e.shapeKey || "blob";
+    const shapeRows = DATA.spriteShapes[shapeKey];
+    const palette = e.palette || DATA.genericPalettes[e.nature || "organic"];
+    const scale = scaleForEntry(e);
+
+    const c1 = document.createElement("canvas");
+    stage.appendChild(c1);
+    draw(c1, shapeRows, palette, Math.min(scale, 4));
+
+    const c2 = document.createElement("canvas");
+    stage.appendChild(c2);
+    draw(c2, shapeRows, palette, scale * 1.6);
+
+    card.appendChild(stage);
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    let metaHtml = '<span><b>shape:</b> ' + shapeKey + '</span>';
+    if (e.dims) metaHtml += '<span><b>grid:</b> ' + e.dims.w + '×' + e.dims.h + '</span>';
+    metaHtml += '<span><b>scale:</b> ' + scale + 'x</span>';
+    if (e.sharedWith && e.sharedWith.length) {
+      metaHtml += '<span><b>shares shape w/</b> ' + e.sharedWith.join(", ") + '</span>';
+    }
+    meta.innerHTML = metaHtml;
+    card.appendChild(meta);
+
+    return card;
+  }
+
+  function renderFlatGrid(containerId, entries) {
+    const el = document.getElementById(containerId);
+    entries.forEach(function (e) { el.appendChild(makeCard(e)); });
+  }
+
+  renderFlatGrid("grid-bosses", DATA.bosses);
+  renderFlatGrid("grid-heroes", DATA.heroes);
+
+  // Mobs: grouped by tier with subheadings.
+  (function () {
+    const panel = document.getElementById("panel-mobs");
+    const order = ["elite", "standard", "fodder"];
+    const labels = { elite: "Elite", standard: "Standard", fodder: "Fodder" };
+    order.forEach(function (tier) {
+      const group = DATA.mobs.filter(function (m) { return m.tier === tier; });
+      if (!group.length) return;
+      const h = document.createElement("div");
+      h.className = "subhead";
+      h.textContent = labels[tier] + " (" + group.length + ")";
+      panel.appendChild(h);
+      const g = document.createElement("div");
+      g.className = "grid";
+      panel.appendChild(g);
+      group.forEach(function (e) { g.appendChild(makeCard(e)); });
+    });
+  })();
+
+  // Candidates: in-progress redesigns not yet in data.js, paired against
+  // their target roster entry when one's specified.
+  (function () {
+    const body = document.getElementById("candidates-body");
+    if (!DATA.candidates.length) {
+      body.innerHTML = '<p class="empty">No open candidates right now — the next one prototyped ' +
+        'in a review session will show up here automatically.</p>';
+      return;
+    }
+    const rosterByKey = {};
+    DATA.bosses.concat(DATA.heroes, DATA.mobs).forEach(function (e) { rosterByKey[e.key] = e; });
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    body.appendChild(grid);
+    DATA.candidates.forEach(function (c) {
+      const pseudo = {
+        key: c.key, name: c.label, role: c.note || "", tier: c.tier,
+        kind: c.tier === "hero" ? "hero" : "enemy",
+        status: "bespoke", shapeKey: c.key, dims: { w: c.shape[0].length, h: c.shape.length },
+        palette: c.palette, sharedWith: []
+      };
+      DATA.spriteShapes[c.key] = c.shape;
+      grid.appendChild(makeCard(pseudo));
+      if (c.targetKey && rosterByKey[c.targetKey]) {
+        grid.appendChild(makeCard(rosterByKey[c.targetKey]));
+      }
+    });
+  })();
+
+  // Stat strip.
+  (function () {
+    const s = document.getElementById("stats");
+    const c = DATA.counts;
+    const stats = [
+      [c.bossesDone + "/" + c.bossesTotal, "bosses bespoke"],
+      [c.mobsTotal - c.mobsBlob + "/" + c.mobsTotal, "mobs with a sprite"],
+      [c.heroesNonstandard, "heroes on a non-standard grid"],
+      [DATA.candidates.length, "open candidates"]
+    ];
+    stats.forEach(function (pair) {
+      const d = document.createElement("div");
+      d.className = "stat";
+      d.innerHTML = '<div class="n">' + pair[0] + '</div><div class="l">' + pair[1] + '</div>';
+      s.appendChild(d);
+    });
+  })();
+
+  // Tabs.
+  (function () {
+    const tabs = [
+      ["bosses", "Bosses (" + DATA.bosses.length + ")"],
+      ["heroes", "Heroes (" + DATA.heroes.length + ")"],
+      ["mobs", "Mobs (" + DATA.mobs.length + ")"],
+      ["candidates", "Candidates (" + DATA.candidates.length + ")"]
+    ];
+    const nav = document.getElementById("tabs");
+    function activate(key) {
+      tabs.forEach(function (t) {
+        document.getElementById("panel-" + t[0]).classList.toggle("active", t[0] === key);
+      });
+      Array.prototype.forEach.call(nav.children, function (btn) {
+        btn.classList.toggle("active", btn.dataset.key === key);
+      });
+    }
+    tabs.forEach(function (t, i) {
+      const btn = document.createElement("button");
+      btn.textContent = t[1];
+      btn.dataset.key = t[0];
+      btn.onclick = function () { activate(t[0]); };
+      nav.appendChild(btn);
+      if (i === 0) btn.classList.add("active");
+    });
+    activate("bosses");
+  })();
+</script>
