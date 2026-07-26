@@ -1331,44 +1331,65 @@
     //   E eye-pupil · W eye-white · V accent glow · B/L/A cloth base/light/shadow ·
     //   M/P/N metal base/gleam/shadow · C strap · T/U pants · F boot · R robe-rune
     const SPRITE_SHAPES = {
-      // Merc — REDRAWN 24x32 (Phase I "more human" pass): a gritty augmented
-      // human soldier with a full FF1-style face (hair, brows, two eyes — one
-      // a green cyber-augment (VV), one normal (WE) — nose, mouth, jaw), a
-      // space-tactical vest with a diagonal bandolier, and a rifle held across
-      // the body. The other 4 heroes are still 18x28 until this style is
-      // approved and rolled out to them. (Engine reads each grid's own size.)
+      // Merc — "Poster Ready" v2 (2026-07-26 sprite pass, redrawn from the
+      // ground up for real "lead actor" presence, 2 revision rounds). A
+      // classic action-poster silhouette: rifle held diagonally across the
+      // chest gripped by both hands, a distinct rectangular magazine + a
+      // squared-off buttstock (the detail that actually reads "gun," not
+      // just a barrel shape — a blade has no rectangular part sticking out
+      // of it, which is what the original straight-diagonal read as before
+      // this fix), a blunt muzzle cap poking past the shoulder instead of a
+      // tapering point. Face: brows sit directly over the eyes (previously
+      // misplaced at the temples, reading as random highlights), eyes have
+      // real temple buffer + a wide nose-bridge gap (previously nearly
+      // touching the face outline — read as lateral "gecko eyes"), a
+      // distinct nose and mouth with breathing room between them instead of
+      // one blended blob, and a new jaw-shadow band for a defined jawline
+      // instead of fading straight into the neck. Vest has a highlight
+      // column + shadow fold for real dimension, plus a red collar-strap
+      // accent so he doesn't blend into his own olive vest. Kept the
+      // established green cyber-eye (Human Augmented lore) and general
+      // color identity. 24x39 (taller than the old 24x32 — heroes render at
+      // a fixed battle scale regardless of grid height, so this is fine).
       heroMerc: [
         "........................",
         ".........JOOOOJ.........",
         ".......OJHHHHHHJO.......",
         "......OJHHHHHHHHJO......",
-        ".....OJHHGGHHGGHHJO.....",
+        ".....OJHHHHHHHHHHJO.....",
         ".....OHHHHHHHHHHHHO.....",
-        ".....OHSSSSSSSSSSHO.....",
-        ".....OHSSKSSSSKSSHO.....",
+        ".....OSSSSSSSSSSSSO.....",
         ".....OSSDDSSSSDDSSO.....",
+        ".....OSSSSSSSSSSSSO.....",
         ".....OSSVVSSSSWESSO.....",
-        ".....OSSSSSDDSSSSSO.....",
-        ".....OKSSSSSSSSSSKO.....",
-        ".....OSSSSDDDDSSSSO.....",
-        ".....OKSSSSSSSSSSKO.....",
-        "......OKSSSSSSSSKO......",
-        "........OCCCCCCO........",
-        "...OMMMMBBBBBBBBMMMMO...",
-        "...OAAOBBBBBBBBBBOAAO...",
-        "...OSAOBBBBBBBBBBOASO...",
-        "...OSSOBBBBBBBBBBOSSO...",
-        "...OXXMMMMMMMMMMXXMNNNNN",
-        "...OBBBBBBBBBBBBBBBBO...",
-        "...OCCCCCCCCCCCCCCCCO...",
+        ".....OSSSSSSSSSSSSO.....",
+        "......OSSSSIISSSSO......",
+        "......OSSSSSSSSSSO......",
+        "......OSSDDDDDDSSO......",
+        "......OYYSSSSSSYYO......",
+        ".......OYYYYYYYYO.......",
+        "........OZZZZZZO........",
+        "......ORRZZZZZZRRO......",
+        "...OMMMMLBBBBBBAMMMMO...",
+        "...OAAOLBBBBBBBAPPPN....",
+        "...OAAOLBBBBBAXXPPPNBO..",
+        "...OSSOBBBBBXXPPPNBBO...",
+        "...OSSOBBMMMMPPNBBBBO...",
+        "...OSSMMQQQMMNBBBBBO....",
+        "...OSQQQMMBBBBBBBBBO....",
+        "...OXXXMMNBBBBBBBBBO....",
+        "...OXXXXBBBBBBBBBBBO....",
+        "...ONNNNNNBBBBBBBBBO....",
+        "...ONNNNNNBBBBBBBBBO....",
+        "...OCCCCCCCCCCCCCCCO....",
         "....OTTTTTTOOTTTTTTO....",
         "....OTTTTTTOOTTTTTTO....",
         "....OTTTUTTOOTTUTTTO....",
         "....OTTTTTTOOTTTTTTO....",
         "....OUTTTTUOOUTTTTUO....",
         "....OFFFFFFOOFFFFFFO....",
-        "....OFFFFFFOOFFFFFFO....",
         "....OFFFFFOOOOFFFFFO....",
+        "........................",
         "........................"
       ],
       // Netrunner (Nyx) — REDRAWN 24x32 as a FEMALE synthetic/android. Female
@@ -2148,17 +2169,22 @@
     };
 
     const SPRITES = {
-      // Merc — augmented trooper: warm skin with a green cyber-augment eye
-      // (V, one side only — the "Human (Augmented)" fiction), brown hair,
-      // olive tactical vest with a dark bandolier, gunmetal rifle (M/N/P).
+      // Merc — "Poster Ready" v2 (§SPRITE_SHAPES heroMerc): warm skin, green
+      // cyber-augment eye (Human Augmented lore), red collar accent, olive
+      // vest with real highlight/shadow, gunmetal rifle w/ a distinct
+      // magazine (Q) + squared buttstock (N) so it reads as a gun not a blade.
       merc:        { shape: "heroMerc",  palette: {
         O: "#0d1016",
-        S: "#d09a63", K: "#f4c890", D: "#9c6b3d",      // skin base/light/shadow (D = brows/nose/mouth)
-        H: "#4a3a28", G: "#6b5238", J: "#2e2418",      // hair base/light/shadow
+        S: "#d09a63", K: "#f4c890", D: "#8a5a30", I: "#a06c3a",   // skin base/light / brow-shadow / nose-shadow
+        H: "#4a3a28", J: "#2e2418",                    // hair base / shadow
         E: "#141414", W: "#eef0ea", V: "#6cff9e",      // eye pupil / white / green augment glow
-        B: "#3a4a3d", A: "#26332a",                    // olive vest base / shadow (arms)
-        M: "#727880", P: "#a2a8b0", N: "#2e333a",      // rifle metal / gleam / dark
-        C: "#201c18", X: "#2a2a2c",                    // strap+belt+stock / glove
+        Y: "#9c6b3d",                                   // jaw shadow
+        Z: "#c9a071",                                   // neck
+        R: "#a8342a",                                   // collar accent (red)
+        B: "#3a4a3d", A: "#26332a", L: "#4c5c47",       // olive vest base / shadow / highlight
+        M: "#727880", P: "#a2a8b0", Q: "#20262c",       // rifle metal / gleam / magazine (dark)
+        C: "#201c18", X: "#d09a63",                     // strap+belt / hand-grip (skin)
+        N: "#171a20",                                    // rifle dark edge / buttstock
         T: "#35402f", U: "#232b1e", F: "#1a1f16"       // pants / pants-shadow / boot
       } },
       // Netrunner — synthetic hacker (per CLASSES.netrunner.nature): cool
