@@ -1393,43 +1393,61 @@
         "......OFFFFFOOFFFFFO....",
         "......OFFFFFOOFFFFFO...."
       ],
-      // Netrunner (Nyx) — REDRAWN 24x32 as a FEMALE synthetic/android. Female
-      // cues: long hair framing the face and falling to the shoulders, narrow
-      // shoulders + a waist taper (hourglass), slim limbs. Synthetic cues kept:
-      // glowing cyan eyes (both), cool pale skin, a cyan circuit line (V) down
-      // the bodysuit.
+      // Netrunner (Nyx) — TOTAL REBUILD 2026-07-27. Direct request: "do
+      // research... make an attempt at a complete rebuild... worst case,
+      // focus on making an attractive human female sprite as the
+      // baseline." Rendered the old shipped design directly first: the
+      // face was a flat pale oval with two horizontal cyan BARS for eyes
+      // (no lid curve), a grey smudge for a nose, a grey bar for a mouth —
+      // and the body was a straight-sided hooded mass with zero visible
+      // waist taper despite this same comment block always having claimed
+      // one. Real fixes this time: thin arched eyebrows, curved eyes with
+      // a real temple + nose-bridge gap (this session's own Vossmark
+      // Officer face lesson), small defined lips. The hourglass silhouette
+      // finally reads because the ARMS were fixed too — v1 self-QA found
+      // the torso numerically tapering at the waist while the arms sat at
+      // a constant distance from the body the whole way down, masking it
+      // completely; fixed by holding the arms roughly in place while the
+      // torso narrows underneath, opening a real wedge of background
+      // between arm and body that grows toward the waist and closes at
+      // the hip — confirmed via a cropped close-up render, since it wasn't
+      // obvious in the full-body view either. Kept: long hair framing the
+      // face and falling past the shoulders, cool pale synthetic skin,
+      // glowing cyan eyes + circuit-spine, dark bodysuit family. The
+      // previous build is preserved as the `netrunnerLegacy` candidate in
+      // tools/sprite-review/candidates.json, not deleted.
       heroNetrunner: [
-        "........................",
-        ".......OHHHHHHHHO.......",
-        "......OHHHHHHHHHHO......",
-        ".....OHHHHHHHHHHHHO.....",
-        ".....OHHSSSSSSSSHHO.....",
-        ".....OHSSDDSSDDSSHO.....",
-        ".....OHSSVVSSVVSSHO.....",
-        ".....OHSSSSDDSSSSHO.....",
-        ".....OHKSSSSSSSSKHO.....",
-        ".....OHSSSDDDDSSSHO.....",
-        ".....OHHSSSSSSSSHHO.....",
-        "......OHHKSSSSKHHO......",
-        "......OHHHOOOOHHHO......",
-        ".....OHHHO....OHHHO.....",
-        "......OABBBBBBBBAO......",
-        "......OABBBBBBBBAO......",
-        ".....OBBBBVVVVBBBBO.....",
-        ".....OBBBBVVVVBBBBO.....",
-        "........OBBVVBBO........",
-        ".........OBVVBO.........",
-        ".....OABBBVVVVBBBAO.....",
-        ".....OABBBVVVVVBBAO.....",
-        ".....OTTTTOOOOTTTTO.....",
-        ".....OTTTTOOOOTTTTO.....",
-        ".....OTTTUOOOOUTTTO.....",
-        ".....OTTTTOOOOTTTTO.....",
-        "......OTTTOOOOTTTO......",
-        "......OFFFOOOOFFFO......",
-        "......OFFFOOOOFFFO......",
-        "......OFFFO..OFFFO......",
-        "........................",
+        "..........OHHHO.........",
+        "........OGGHHHHHO.......",
+        ".......OGGHHHHHHHO......",
+        ".......OHHSSSSSSSO......",
+        ".......OHSSSSSSSSO......",
+        ".......OHDDDSSDDDO......",
+        ".......OHSSSSSSSSO......",
+        "......OHSDVSSVDSHO......",
+        ".......OSSKSSKSSSO......",
+        "........OSSDSSSSO.......",
+        "........OSSYYSSO........",
+        ".........ODDDDO.........",
+        "..........OSSO..........",
+        "......H..OSSSSO..H......",
+        ".....OHHBBBBBBBBHHO.....",
+        "....OOHHBBBBBBBBHHOO....",
+        "....H.OBBBBBBBBBBO.H....",
+        "....OB.OAAVVVVAAO.BO....",
+        "....OB..OBBBBBBO..BO....",
+        "....OB...OBBBBO...BO....",
+        "....OS...OVVVVO...SO....",
+        ".....OSOAABBBBAAOSO.....",
+        "......OAAAAAAAAAAO......",
+        ".......OAAAAAAAAO.......",
+        "........OTTOOTTO........",
+        "........OTTOOTTO........",
+        "........OUUOOUUO........",
+        "........OTTOOTTO........",
+        "........OFFOOFFO........",
+        "........OFFOOFFO........",
+        "........OFFOOFFO........",
         "........................"
       ],
       heroDread: [      // tank: literal exposed skull (glowing red eye-sockets), giant
@@ -1524,9 +1542,26 @@
         "....OFF..FO..OF..FFO....",
         "........................"
       ],
-      heroMentalist: [  // psion: staff + orb, deep hood, two glowing purple eyes, runed robe
-                         // resized 18x28 -> 24x32 to match the other heroes; staff now
-                         // has a visible gripping hand instead of floating detached
+      // Mentalist — REFINEMENT 2026-07-27 leaning into the traditional
+      // wizard/sage archetype (direct request + research: "emphasize the
+      // hat/robe edges," "iconic elements: staff and hat," a long beard as
+      // THE wizened-old-sage cue — also ties to the FF1 Black Mage
+      // reference shared this session, whose DNA this design already
+      // shared, just under-executed). Rendered the old shipped design
+      // directly first: the "eyes" were two thick 3px flat bars with no
+      // lid shape, no age/wisdom cue anywhere, and the staff was built
+      // entirely from the gold rune color with no wood tone and no real
+      // gripping hand despite this same comment block claiming one —
+      // same "claimed but not executed" gap as the old Netrunner
+      // hourglass. A refinement, not a redraw: hood silhouette, robe
+      // shape, rune emblem, and overall pose kept intentionally
+      // unchanged. Three fixes: (1) a visible beard poking out below the
+      // mouth; (2) two real eyes with a lid-crease and proper temple +
+      // nose-bridge gaps, replacing the old wide double-bar; (3) the
+      // staff rebuilt in actual wood tone (M, previously an unused
+      // palette leftover) with a real 2px gripping hand, replacing a
+      // single stray pixel sandwiched between two outline pixels.
+      heroMentalist: [
         "........................",
         "........................",
         "...........OHHO.........",
@@ -1535,25 +1570,25 @@
         ".......OHHHHHHHHHHO.....",
         ".......OHHHHHHHHHHO.....",
         ".......OHSSSSSSSSHO.....",
+        ".......OHDDSSSSDDHO.....",
+        ".......OHSVVSSVVSHO.....",
         ".......OHSSSSSSSSHO.....",
-        ".......OHSSSVVSSSHO.....",
-        ".......OHVVVSSVVVHO.....",
         ".......OHSSSSSSSSHO.....",
         ".......OHKKKDDKKKHO.....",
-        ".......OHHHHHHHHHHO.....",
-        "........OHHHHHHHHO......",
+        ".......OHHWWWWWWHHO.....",
+        "........OHHWWWWHHO......",
         "......OAAHBBBBBBHAAOOV..",
-        ".....OBBBBBBBBBBBBBO.R..",
-        ".....OBBBBVVVVBBBBO..R..",
-        "....OBBBBBVVVVBBBBBOOSO.",
-        "....OBBBBBRRRRBBBBBO.R..",
-        "...OBBBBBBBRRBBBBBBBOR..",
-        "...OBBBBBBBBBBBBBBBBOR..",
+        ".....OBBBBBBBBBBBBBO.M..",
+        ".....OBBBBVVVVBBBBO..M..",
+        "....OBBBBBVVVVBBBBBOSSO.",
+        "....OBBBBBRRRRBBBBBO.M..",
+        "...OBBBBBBBRRBBBBBBBOM..",
+        "...OBBBBBBBBBBBBBBBBOM..",
         "..OBBBBBBBBBBBBBBBBBBO..",
         "..OBBBBBBBBBBBBBBBBBBO..",
         ".OBBBBBBBBBBBBBBBBBBBBO.",
         ".OBBBBBBBBBBBBBBBBBBBBO.",
-        ".....AAAAAAAAAAAAAA..R..",
+        ".....AAAAAAAAAAAAAA..M..",
         ".....OOOOOOOOOOOOOO.....",
         "........................",
         "........................",
@@ -2940,19 +2975,19 @@
         X: "#22261e",                                     // gloved hand
         T: "#3a4a3d", U: "#26332a", F: "#171a20"        // pants / pants-shadow / boot
       } },
-      // Netrunner — synthetic hacker (per CLASSES.netrunner.nature): cool
-      // pale-grey "skin," dark teal hair, BOTH eyes glowing cyan with a real
-      // lid-shadow crease (was a flat plain square), a cyan circuit-spine (V)
-      // that now follows a deliberate hourglass torso taper (narrows sharply
-      // at the waist, flares to the hip) instead of sitting in a fixed
-      // straight-sided rectangle.
+      // Netrunner — synthetic hacker rebuild (§SPRITE_SHAPES heroNetrunner):
+      // thin arched brows, curved cyan-glow eyes with a real temple/nose-
+      // bridge gap, small defined lips (Y), cool pale-grey synthetic skin,
+      // dark teal hair falling past the shoulders, an hourglass torso taper
+      // now actually exposed by the arm positioning (not just claimed).
       netrunner:   { shape: "heroNetrunner",  palette: {
         O: "#0a0f13",
         S: "#b8c2c6", K: "#dbe4e6", D: "#7f8b90",      // pale synthetic "skin"
         H: "#1c2b33", G: "#2f4650", J: "#121c22",      // dark teal hair
         V: "#3dd6e0",                                   // cyan glow (eyes + circuits)
         B: "#1f3640", L: "#2f4e5a", A: "#142027",      // bodysuit base/light/shadow
-        C: "#101a1f", T: "#182b32", U: "#101c21", F: "#0c151a"
+        C: "#101a1f", T: "#182b32", U: "#101c21", F: "#0c151a",
+        Y: "#9e7f8a"                                     // lips
       } },
       // Dread Knight — literal exposed skull (bone-white cranium K/D, hollow
       // eye sockets J with the red glow V now read as embers inside them,
@@ -2981,12 +3016,11 @@
         V: "#ffb347",                                             // amber power core glow
         X: "#4a5058", F: "#20242a"                                // mech claw-hand / foot
       } },
-      // Mentalist — hooded psion (its own robe shape): face sunk in hood
-      // shadow with two glowing purple eyes (V), purple robe (B/L/A) with gold
-      // runes (R) down the front, and a wooden staff topped with a psi-orb
-      // (V) held at the side. The classic FF mage silhouette, re-skinned.
-      // Resized 18x28 -> 24x32 to match the other heroes; staff now has a
-      // visible gripping hand (was fully detached/floating).
+      // Mentalist — wizened sage refinement (§SPRITE_SHAPES heroMentalist):
+      // a real beard (W), two real eyes with a lid-crease and proper
+      // spacing, purple robe (B/L/A) with gold runes (R), and a wooden
+      // staff (M) with a visible gripping hand. The classic FF mage
+      // silhouette, leaned further into the traditional wizard archetype.
       mentalist:   { shape: "heroMentalist",  palette: {
         O: "#0c0812",
         S: "#8a7a9a", K: "#a595b5", D: "#5f5075",      // shadowed in-hood skin
@@ -2994,7 +3028,8 @@
         V: "#c77dff",                                   // purple glow (eyes + orb)
         B: "#4b3866", L: "#5e4a7e", A: "#33254a",      // robe base/light/shadow
         R: "#ffe08a",                                   // gold runes
-        M: "#7a5a3a", N: "#4a3624"                      // staff wood
+        M: "#7a5a3a", N: "#4a3624",                     // staff wood
+        W: "#c9c2d6"                                    // beard
       } },
       // Saboteur (Sexias) — Vossmark deserter fighting with scavenged,
       // corroded ex-Vossmark gear (armor-stripping/Sunder kit, Corrosive
