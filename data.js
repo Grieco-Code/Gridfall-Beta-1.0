@@ -1582,22 +1582,43 @@
       // (B) with highlights (P) and a glowing red optic band (E), and six clearly
       // jointed legs (upper/mid/lower pair) splayed out to feet. O = dark outline
       // + leg base, L = leg mid-segment.
+      // Spider Drone -- detail pass: small bladed leg-tips (security-bot
+      // read). Repair Drone now has its OWN shape below (one tool accent
+      // instead of a blade, reads as maintenance not combat).
       spiderDrone: [
         "................",
-        "..O..........O..",
+        ".E............E.",
         "..OL........LO..",
         "...OL......LO...",
         "....OL....LO....",
         ".....OBBBBO.....",
-        "..OL.BPPPPB.LO..",
-        ".OLLOBPEEPBOLLO.",
-        ".OLLOBPEEPBOLLO.",
-        "..OL.BPPPPB.LO..",
+        "..OLOPPPPPPOLO..",
+        ".OLLOPPEEPPOLLO.",
+        ".OLLOPPEEPPOLLO.",
+        "..OLOPPPPPPOLO..",
         ".....OBBBBO.....",
         "....OL....LO....",
         "...OL......LO...",
         "..OL........LO..",
-        "..O..........O..",
+        ".E............E.",
+        "................"
+      ],
+      spiderDroneRepair: [
+        "................",
+        ".O............O.",
+        "..OL........LO..",
+        "...OL......LO...",
+        "....OL....LO....",
+        ".....OBBBBO.....",
+        "..OLOPPPPPPOLO..",
+        ".OLLOPPEEPPOLLO.",
+        ".OLLOPPEEPPOLLO.",
+        "..OLOPPPPPPOLO..",
+        ".....OBBBBO.....",
+        "....OL....LO....",
+        "...OL......LM...",
+        "..OL........LM..",
+        ".O............O.",
         "................"
       ],
       // Stealth humanoid — Talos Wraith (fodder) + Talos Phantom (standard):
@@ -1623,20 +1644,25 @@
       ],
       // Hive crawler — Hull Roach + Erebus Roach: small swarming insectoid.
       // Upgraded from the original "roach" shape with an outline pass.
+      // Hive crawler — Erebus Roach + Hull Roach (same model, per direction:
+      // "use this model for all roaches, color change as needed for
+      // types"). Broodmarshal-DNA scaled to fodder size: antennae,
+      // mandibles, a ribbed/segmented abdomen (alternating H/J bands, the
+      // boss's signature chitin cue), real jointed legs off the sides/rear.
       hiveCrawler: [
-        "................",
-        "................",
-        "....AA....AA....",
+        "....A......A....",
+        ".....A....A.....",
         "......OHHO......",
         ".....OHHHHO.....",
-        "....OOBBBBOO....",
-        "...OBBBBBBBBO...",
-        "..LOBBBBBBBBOL..",
-        "..LOBBBBBBBBOL..",
-        "...OBBBBBBBBO...",
-        "....OOBBBBOO....",
-        "....OLL..LLO....",
-        "................",
+        "....KOEEEEOK....",
+        "...OHHHHHHHHO...",
+        "LOOJJJJJJJJJJOOL",
+        "..OHHHHHHHHHHO..",
+        "LOOJJJJJJJJJJOOL",
+        "...OHHHHHHHHO...",
+        "....OJJJJJJO....",
+        "...LO......OL...",
+        "..L..L....L..L..",
         "................",
         "................",
         "................"
@@ -1730,9 +1756,54 @@
         "...FFFF..FFFF...",
         "................"
       ],
-      // Sentry bot — Arc Sentinel: a small hovering drone/turret, single big
-      // optic, an emitter coil on top, stabilizer fins instead of legs.
-      sentryBot: [
+      // Humanoid officer, Vossmark — bespoke, split from the shared shape
+      // above (Talos Vanguard stays on humanoidOfficer until its own
+      // redesign). Anchored to the "Commissar Cap" archetype (oversized
+      // peaked cap, greatcoat with contrasting trim, gold insignia) at the
+      // hero-scale 24x32 grid for real detail: real pupils, angry V-brows,
+      // a stern mustache, gold epaulettes, a filled diagonal lapel,
+      // sleeved arms to visible hands, and a sheathed saber at the hip
+      // (sheathed, not drawn — avoids the floating-held-prop problem that
+      // failed on this character twice already).
+      humanoidOfficerVossmark: [
+        "..........OHHO..........",
+        "........OHHHHHHO........",
+        ".......OHHHHHHHHO.......",
+        "......OKKKNNNNKKKO......",
+        ".....OEEEEEEEEEEEEO.....",
+        "......OSSDSSSSSSDO......",
+        "......OSSSDDSSDDSO......",
+        "......OSSSWNSSNWSO......",
+        "......OSSSSSSSSSSO......",
+        "......OSSSSIISSSSO......",
+        ".......ODDDDDDDDO.......",
+        "........OYYYYYYO........",
+        "........ORRRRRRO........",
+        "....OKKKBBBBBBBBKKKO....",
+        "...OBBBBBBBBBBBBBBBBO...",
+        "...OOLLAAABRRBAAOLLAO...",
+        "...OOLLAAAARRAAAOLLAO...",
+        "...OOAAABAAKKAABOAAAO...",
+        "...OOAABBBBBBBBBBAAOO...",
+        "...OOSSBBBBKKBBBBSSOKO..",
+        "...OSSBBBBBBBBBBBBSSKO..",
+        "...OBBBBBBBKKBBBBBBOKKO.",
+        "..OAAAAAAAAAAAAAAAAOPPO.",
+        "..OAAAAAAAAAAAAAAAAOPPO.",
+        ".OAAAAAAAAACCAAAAAAOPPO.",
+        ".OLLLLLLLLLCCLLLLLLOPPO.",
+        "..OOOOOOOOO..OOOOOOOPPO.",
+        "......OLLLLOOLLLLO.OPPO.",
+        "......OLLLLOOLLLLO.OPPO.",
+        "......OLLLLOOLLLLO.OPPO.",
+        "......OFFFFOOFFFFO..OPO.",
+        "......OFFFFOOFFFFO...O.."
+      ],
+      // Sentry bot, mobile — Arc Sentinel: single big optic, a visible
+      // thruster glow spreading below the chassis so it clearly reads as
+      // an active hovering drone (Security Turret below is the planted
+      // counterpart -- same lens/body, a tripod mount instead of a glow).
+      sentryBotMobile: [
         "................",
         "......OOOO......",
         ".......VV.......",
@@ -1742,11 +1813,29 @@
         "...OBBBBBBBBO...",
         "..OBBBBBBBBBBO..",
         "..ABBBBBBBBBBA..",
-        "...ABBBBBBBBA...",
+        "...OBBBBBBBBO...",
         "....OOOOOOOO....",
-        ".....OVVVVO.....",
+        ".....VVVVVV.....",
+        "....EVVVVVVE....",
+        ".....EEEEEE.....",
         "................",
+        "................"
+      ],
+      sentryBotFixed: [
         "................",
+        "......OOOO......",
+        ".......VV.......",
+        "......OEEO......",
+        ".....OEEEEO.....",
+        "....OOOOOOOO....",
+        "....OBBBBBBO....",
+        "....OBBBBBBO....",
+        "....OBBBBBBO....",
+        ".....OAAAAO.....",
+        ".......OAO......",
+        ".....A.OA.A.....",
+        "....A..AA..A....",
+        "...OOOOOOOOOO...",
         "................",
         "................"
       ],
@@ -1755,22 +1844,29 @@
       // shoulder cannon reading as the heavy weapon. (The Warden used to
       // share this shape recolored — replaced 2026-07-25 by its own bespoke
       // wardenCore shape, see below.)
+      // Heavy mech — Security Mech, TOTAL REBUILD: no longer "a person in
+      // armor plate." A narrow hexagonal chassis (not a humanoid chest), a
+      // single glowing sensor lens (not a human-like visor face), a full
+      // boxy rocket pod (two tube openings) replacing one arm entirely, a
+      // bold triangular blade replacing the other, stubby wide tank legs,
+      // hazard-stripe accents. Rendered larger than default elite scale
+      // via SHAPE_SCALE_OVERRIDE (ui.js) — meant to look imposing.
       heavyMech: [
         "................",
-        "....OHHHHHHO....",
-        "...OHVVVVVVHO...",
-        "....OHHHHHHO....",
-        "...OOCCCCCCOO...",
-        ".OAAABBBBBBAAAO.",
-        "OAABBBBBBBBBBAAO",
-        "OAABBBBBBBWWWWGO",
-        "BBBBBBBBBBWWWWWW",
-        "BBBBBBBBBB.WWWW.",
-        "..OOKKKKKKKKOO..",
-        ".OLLLLLLLLLLLLO.",
-        "..LLLL....LLLL..",
-        "..LLLL....LLLL..",
-        "..FFFF....FFFF..",
+        "......ONNO......",
+        ".....OHHHHO.....",
+        ".....OHHVVO.....",
+        "OAAOOCCCCCCO....",
+        "OHHOHHHHHHHHOPPO",
+        "ONHOAAVVVVAAOPP.",
+        "OHHOHHHHHHHHOKP.",
+        "ONHOKKNNNNKKOK..",
+        "OAAOOAAAAAAOK...",
+        ".....OAAAAO.....",
+        "....ONN.NNO.....",
+        "....ONN.NNO.....",
+        "...OFFFFFFFO....",
+        "...OOOOOOOOO....",
         "................"
       ],
       // Warden Core — "AI Sentinel Core" redesign (2026-07-25 sprite pass):
@@ -1808,47 +1904,69 @@
         "............G.........",
         "......................"
       ],
-      // Hive brute — Erebus Warrior (standard) + Erebus Armored Warrior
-      // (elite, same shape + an armor-plate accent color): upright insectoid
-      // with compound eyes and claws out at shoulder height.
+      // Hive brute — Erebus Warrior (standard) ONLY now (Armored Warrior
+      // split into its own hiveBruteArmored shape below, per the "genuine
+      // silhouette per tier" direction). Broodmarshal DNA: glowing eyes,
+      // ribbed thorax, pincer claw-arms (pale highlight I + dark chitin K)
+      // pushed out from the body with a visible pincer opening.
       hiveBrute: [
         "................",
         "......OHHO......",
-        ".....OHVVHO.....",
-        "....OHHHHHHO....",
-        "...OOCCCCCCOO...",
-        ".OAAABBBBBBAAAO.",
-        "WOAABBBBBBBBAAOW",
-        ".OAABBBBBBBBAAO.",
-        "..BBBBBBBBBBBB..",
-        "..BBBBBBBBBBBB..",
-        "...OOKKKKKKOO...",
-        "..OLLLLLLLLLLO..",
-        "...LLLL..LLLL...",
-        "...LLLL..LLLL...",
-        "...FFFF..FFFF...",
+        ".....OHHHHO.....",
+        ".....OVHHVO.....",
+        ".....OCCCCO.....",
+        "..O.OHHHHHHOO...",
+        ".OIOCCCCCCCCOIO.",
+        "OKKOHHHHHHHHOKKO",
+        "IK.OCCCCCCCCO.KI",
+        "OK............KO",
+        "....OBBBBBBO....",
+        "....OBBBBBBO....",
+        ".....OAAAAO.....",
+        "....L.L..L.L....",
+        "................",
         "................"
       ],
-      // Hive mystic — Erebus Shaman: an insectoid caster, carapace flaring
-      // out like a mage's hood (the same silhouette trick as the Mentalist's
-      // mageRobe, in carapace instead of cloth), glowing psi eyes, a rune/
-      // staff hand.
-      hiveMystic: [
+      // Hive brute, armored — Erebus Armored Warrior (elite). Same fighter-
+      // caste DNA, visibly bulkier: wider plated shoulders, bigger pincers.
+      hiveBruteArmored: [
         "................",
-        ".......HH.......",
+        "......OHHO......",
         ".....OHHHHO.....",
-        "....OOHVVHOO....",
-        "...OHHHHHHHHO...",
-        "..OHHHHHHHHHHO..",
-        ".OAABBBBBBBBAAO.",
-        ".OAABBBBBBBBWGO.",
-        "..BBBBBBBBWWWW..",
-        "..BBBBBBBB.WW...",
+        ".....OVHHVO.....",
+        "....OCCCCCCO....",
+        "..OCCCCCCCCCCO..",
+        "OOHHHHHHHHHHHHO.",
+        "IOCCCCCCCCCCCCOI",
+        "KKOHHHHHHHHHHOKK",
+        "OIK..........KIO",
+        ".OK..........KO.",
+        "...OBBBBBBBBO...",
+        "...OAAAAAAAAO...",
+        "....OAAAAAAO....",
+        "...L..L..L..L...",
+        "................"
+      ],
+      // Hive mystic — Erebus Shaman: an insectoid caster, carapace mantle
+      // (not cloth) with big sweeping antennae -- the fighters have none,
+      // this is the "hive-sense" psionic-caste read -- mandibles peeking
+      // out from under the mantle, glowing psi orb (V) held to one side.
+      hiveMystic: [
+        "...A........A...",
+        "....A.OHHO.A....",
+        ".....OHHHHA.....",
+        "....OHHHHHHO....",
+        "....OKKVVKKO....",
+        "...OAAAAAAAAO...",
         "..OBBBBBBBBBBO..",
-        "..OBBBBBBBBBBO..",
-        ".OBBBBBBBBBBBBO.",
-        "OBBBBBBBBBBBBBBO",
-        "OKKKKKKKKKKKKKKO",
+        "..OAAKAAAAKAAO..",
+        ".OVOOBBBBBBO....",
+        "..OVOOBBBBO.....",
+        ".....OAAAAO.....",
+        ".....L.LL.L.....",
+        "....L......L....",
+        "................",
+        "................",
         "................"
       ],
       // Hive lord — the Broodmarshal (boss). REDESIGNED 2026-07-26: a
@@ -2316,7 +2434,8 @@
         C: "#232018", T: "#33362a", U: "#1e2018",      // rag wrap / cloth-wrapped leg / boot trim
         F: "#141610"
       } },
-      // Spider Drone — gunmetal chassis, red optic band, darker jointed legs.
+      // Spider Drone — gunmetal chassis, red optic band, bladed leg-tips
+      // (security-bot read, added in the detail pass).
       spiderDrone: { shape: "spiderDrone",   palette: {
         E: "#ff5a44", O: "#2f353c", B: "#6b7580", P: "#9aa5b0", L: "#454d56"
       } },
@@ -2325,10 +2444,13 @@
       // Hull Roach — unbranded pest, not Vossmark-issue; grimy grey/rust vs.
       // the hive's organic olive-green, so it still reads as "station vermin."
       hullRoach:    { shape: "hiveCrawler",     palette: {
-        A: "#6b5a4a", H: "#5c4a3a", O: "#3a3128", B: "#7a6a55", L: "#4a3f30"
+        A: "#6b5a4a", H: "#5c4a3a", O: "#3a3128", B: "#7a6a55", L: "#4a3f30",
+        J: "#2e2620", K: "#8a7a68", E: "#0f0d0a"                // rib-shadow / mandible-lt / eye-dark
       } },
-      // Arc Sentinel — small hovering shock-drone, amber/yellow arc glow.
-      arcSentinel:  { shape: "sentryBot",        palette: {
+      // Arc Sentinel — small hovering shock-drone, amber/yellow arc glow,
+      // now with a visible thruster glow (its own sentryBotMobile shape,
+      // split from Security Turret's fixed-mount sentryBotFixed).
+      arcSentinel:  { shape: "sentryBotMobile",        palette: {
         O: "#14140a", V: "#fff27a", E: "#ffcc33", B: "#55524a", A: "#6b6a5e"
       } },
       // Vossmark Grunt — rank-and-file enforcer: drab khaki armor + olive helmet,
@@ -2344,12 +2466,18 @@
       // Security Mech — armored heavy unit, warning-yellow visor + red belt trim.
       securityMech: { shape: "heavyMech",        palette: {
         O: "#0e1012", H: "#454b52", V: "#ffcc33", C: "#33383d", A: "#4a5158",
-        B: "#5a6169", W: "#2b2f33", G: "#4a5158", K: "#b23a2e", L: "#454b52", F: "#262a2d"
+        B: "#5a6169", W: "#2b2f33", G: "#4a5158", K: "#b23a2e", L: "#454b52", F: "#262a2d",
+        N: "#1c1e21", P: "#c9d0d6"                                 // deep vent shadow / blade gleam
       } },
-      // Vossmark Officer — field officer: richer khaki + a red rank sash.
-      vossmarkOfficer:   { shape: "humanoidOfficer",  palette: {
+      // Vossmark Officer — TOTAL REBUILD, own bespoke humanoidOfficerVossmark
+      // shape (research-anchored to the "Commissar Cap" archetype): oversized
+      // peaked cap w/ gold insignia, angry V-brows, mustache, epaulettes,
+      // greatcoat w/ lapels, sheathed saber. 24x32 hero-scale grid, needs
+      // HERO_BATTLE_SCALE in ui.js SHAPE_SCALE_OVERRIDE (same as guardTrooper).
+      vossmarkOfficer:   { shape: "humanoidOfficerVossmark",  palette: {
         O: "#14140f", H: "#3f3f30", V: "#8a8f6a", S: "#c9a071", C: "#2e2e22",
-        A: "#454533", B: "#565640", W: "#c9ccd1", G: "#c9a071", K: "#6b2b22", L: "#3d3d2c", F: "#1e1e15"
+        A: "#454533", B: "#565640", W: "#c9ccd1", G: "#c9a071", K: "#6b2b22", L: "#3d3d2c", F: "#1e1e15",
+        E: "#1a1810", D: "#7a5f3f", R: "#8a2f24", N: "#141410", I: "#5f4a2f", Y: "#3f2e1c", P: "#8f96a0"
       } },
       // The Warden — "AI Sentinel Core" v1 (§SPRITE_SHAPES wardenCore): a
       // hovering core orb with a blazing red-banded lens and asymmetric
@@ -2420,28 +2548,36 @@
       } },
 
       // ---------- SITE EREBUS (§5.3) ----------
+      // Erebus Roach — same hiveCrawler model as Hull Roach (per direction:
+      // one roach model, colors differentiate faction/type). Broodmarshal-
+      // DNA: antennae, mandibles, ribbed abdomen, jointed legs.
       erebusRoach:  { shape: "hiveCrawler",      palette: {
-        A: "#5a6b2e", H: "#6b4423", O: "#3a2812", B: "#7a8f3a", L: "#4a3618"
+        A: "#5a6b2e", H: "#6b4423", O: "#3a2812", B: "#7a8f3a", L: "#4a3618",
+        J: "#4a2f18", K: "#8a6b3f", E: "#1a0f08"                 // rib-shadow / mandible-lt / eye-dark
       } },
       // Erebus Warrior — standard hive bruiser: olive-green carapace, faint
-      // psi-green compound eyes.
+      // psi-green compound eyes, pincer claw-arms (Broodmarshal DNA).
       erebusWarrior:{ shape: "hiveBrute",        palette: {
         O: "#100d08", H: "#6b4423", V: "#a8f7c8", C: "#4a3018", A: "#5a3d1e",
-        B: "#7a8f3a", W: "#9aa84a", G: "#5a3d1e", K: "#3a2812", L: "#4a3018", F: "#241a0d"
+        B: "#7a8f3a", W: "#9aa84a", G: "#5a3d1e", K: "#3a2812", L: "#4a3018", F: "#241a0d",
+        I: "#c9f7d8"                                              // pale claw-edge highlight
       } },
       // Erebus Shaman — hive-mind caste, the psionic caster: the same
       // psi-purple glow as the Mentalist (deliberate echo — see §5.3/§5.1's
-      // Psionic-affinity design note) over an olive-brown carapace-hood.
+      // Psionic-affinity design note) over an olive-brown carapace mantle,
+      // now with big sweeping antennae distinguishing it from the fighters.
       erebusShaman: { shape: "hiveMystic",       palette: {
         O: "#0d0a12", H: "#4a3820", V: "#c77dff", A: "#5a4a26", B: "#6b5a2e",
-        W: "#d9b8ff", G: "#5a4a26", K: "#3a2e18"
+        W: "#d9b8ff", G: "#5a4a26", K: "#3a2e18", L: "#2e2410"
       } },
-      // Erebus Armored Warrior — the counter-pick elite: same hiveBrute
-      // silhouette as Warrior, but steel-grey armor plating over the
-      // carapace instead of bare olive chitin (the "armored" read).
-      erebusArmoredWarrior: { shape: "hiveBrute", palette: {
+      // Erebus Armored Warrior — the counter-pick elite: its OWN
+      // hiveBruteArmored shape now (split from Warrior per the "genuine
+      // silhouette per tier" direction) — steel-grey armor plating, wider
+      // shoulders, bigger pincers than the base Warrior.
+      erebusArmoredWarrior: { shape: "hiveBruteArmored", palette: {
         O: "#0c0a08", H: "#5a5f66", V: "#a8f7c8", C: "#3a3d42", A: "#454a50",
-        B: "#565c63", W: "#7a8f3a", G: "#454a50", K: "#2c2e30", L: "#3a3d42", F: "#1e2023"
+        B: "#565c63", W: "#7a8f3a", G: "#454a50", K: "#2c2e30", L: "#3a3d42", F: "#1e2023",
+        I: "#d8dce0"                                              // pale claw-edge highlight, cooler tone
       } },
       // The Broodmarshal — hive leadership caste, boss scale: same species
       // colors as Warrior/Roach (olive carapace), a commanding gold multi-eye
@@ -2462,11 +2598,16 @@
       } },
       // --- Boss-support adds (2026-07-24): reuse existing shapes, recolored.
       // (Placeholder art — flag for bespoke sprites later if desired.)
-      securityTurret: { shape: "sentryBot", palette: {   // gunmetal + red optic
+      // Security Turret — fixed emplacement (own sentryBotFixed shape,
+      // tripod mount instead of a hover glow): gunmetal + red optic.
+      securityTurret: { shape: "sentryBotFixed", palette: {
         O: "#0c0e10", V: "#e0533d", E: "#ff5a44", B: "#4a5058", A: "#5a6169"
       } },
-      repairDrone: { shape: "spiderDrone", palette: {    // medical green
-        E: "#5affa0", O: "#1a2a22", B: "#3a6b52", P: "#7ad6a8", L: "#2a4a3a"
+      // Repair Drone — own spiderDroneRepair shape (a small tool accent
+      // instead of Spider Drone's bladed tips): medical green.
+      repairDrone: { shape: "spiderDroneRepair", palette: {
+        E: "#5affa0", O: "#1a2a22", B: "#3a6b52", P: "#7ad6a8", L: "#2a4a3a",
+        M: "#9ad6b0"                                              // tool-accent highlight
       } },
       riotEnforcer: { shape: "guardTrooper", palette: {  // black armor / hot-white baton
         O: "#080808", P: "#2a2a2e", G: "#3a3a40",
