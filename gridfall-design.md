@@ -149,6 +149,80 @@ needs an affinity profile, every skill a type), so we keep the up-front set legi
 (two defense layers — Armor soaks Physical, Shields soak Energy — granted by equipment) is a
 planned *later* layer, introduced via character inventory/equipment (see §7).
 
+### 3.2a Damage-type consolidation: the 4-bucket rework (locked 2026-07-26)
+A dedicated planning session (multiple AskUserQuestion rounds + external research — Pokémon/Persona/
+Destiny/Mass Effect/Hollow Knight/Path of Exile precedent, see §3.7's research notes) audited every
+`affinities` table and `damageType` actually shipped (42 affinity tables, 7 types) rather than just the
+original design intent above, and found the system had drifted:
+- **Kinetic** (everyone's free basic Attack) was the single most commonly RESISTED type in the game and
+  never once rewarded (no enemy was ever weak to it) — the one move every hero always has was
+  structurally the worst one.
+- **Corrosive** (25 skills — the single biggest content investment of any type: Talos, Erebus, and
+  Sexias's whole class identity) had ZERO enemies ever weak to it — a dead resistance axis under a huge
+  amount of flavor text.
+- **Psionic** and **Cyber** were near-perfect mirrored hard binaries along the organic/synthetic line
+  (≈1.25–2.0× weak on one side, 0.2 hard-resist on the other) — a light switch, not a spectrum.
+- **Shock** and **Cyber** target almost the identical synthetic-only niche, and the "hacking" *mechanic*
+  (Disable) already lived entirely on Shock's skills — Cyber contributed only re-flavored damage on top
+  of it. This is what the user meant by "hacking could probably just be Shock."
+- **Void** had ZERO affinity entries anywhere in the game (always resolved at flat neutral 1.0×) and no
+  hero could ever deal it — a narrative damage skin, not a mechanical type.
+- **3 of 5 original hero classes** (Merc, Dread Knight, Mech Runner) had `affinities: {}` — empty — so
+  most of the roster never experienced being a target of the whole system.
+
+**The fix — decouple *flavor* (what a skill is called / how it reads in the log) from *math* (what
+resistance number it actually resolves against).** A skill's `damageType` field is UNCHANGED and keeps
+its full existing vocabulary and message text (`kinetic`, `corrosive`, `thermal`, `shock`, `cyber`,
+`psionic`, `void`, + new `gravity`) — **zero flavor-text rewrites, zero renamed skills.** What's new is
+a `DAMAGE_TYPE_CATEGORY` lookup that maps every flavor to one of **4 resistance buckets**, and
+`affinities` tables are authored against the bucket, not the raw flavor:
+
+| Bucket | Flavors that resolve into it | Owning class(es) |
+|---|---|---|
+| **Physical** | Kinetic, Corrosive | Merc, Dread Knight (Kinetic) · Saboteur (Corrosive) |
+| **Energy** | Thermal, Shock, Cyber | Mech Runner (Thermal) · Netrunner (Shock/Cyber — "hacking" IS Shock now, mechanically) |
+| **Mind** | Psionic | Mentalist |
+| **Exotic** | Void, Gravity (new) | no hero (reserved, as today) |
+
+This is a **7→4 cut in the numbers anyone has to track or author**, while every class keeps (or, for the
+3 empty ones, finally gets — see the migration plan, §3.7) a legible signature identity, and literally
+no existing skill name, message, or narrative beat changes.
+
+**Exotic is not a normal 5th number.** No enemy is ever hand-given an `exotic:` affinity value — instead
+every Exotic-flavored skill bypasses the resistance table entirely and defines its OWN special rule,
+matching the "unmaking punches through resistance" pitch this type was reserved for when first sketched
+above, and Destiny 2's own precedent of literally fusing "gravity" and "entropy" into one Void theme
+rather than treating them as unrelated elements:
+- **Void** — resolves at a flat neutral (1.0×) affinity always, full stop. "Doesn't care what you are."
+  (This is what it already does today by omission — now it's a documented rule, not an oversight.)
+- **Gravity** *(new)* — ignores the target's DEF entirely (reuses the existing `pierce` field at 1.0, no
+  new engine mechanic needed for this half) and applies the new **Pin** status (§3.3). "Crushing force,
+  armor doesn't matter, and you're not moving fast enough to dodge the follow-up."
+  Both stay hero-inaccessible for now, same as Void today — reserved for late-game/precursor-flavored
+  enemies (Deep Descent/the Core in Dungeon 6 is Gravity's natural first home; retrofitting one existing
+  Void-flavored boss skill to Gravity instead is a cheap, optional flavor touch, not required for the
+  mechanical rollout).
+
+**A governing rule for Physical specifically:** since Kinetic is every hero's free universal fallback,
+Physical-bucket affinity values are capped in the `RESIST`–`DOUBLE_WEAK` range (0.5–2.0) game-wide — **no
+enemy is ever HARD_RESIST (0.2) on Physical.** Energy and Mind can still use the full ladder, since
+they're each already tied to one specialist class rather than the shared basic Attack.
+
+**Corrosive keeps its identity without needing its own resistance number.** Rather than hand-authoring a
+new "weak to Corrosive" enemy archetype (which would also re-open the "armor resists bullets but melts to
+acid" contrast that merging Kinetic+Corrosive into one Physical number otherwise gives up — a real,
+deliberately-accepted tradeoff of this rework), Corrosive's distinguishing feature stays exactly what
+it's already doing mechanically: **reliable Sunder application.** Physical damage now, DEF-shred later —
+the payoff is a status-effect combo (this turn's Corrosive skill sets up next turn's Physical/Kinetic
+follow-through), not a resistance lookup. Same principle applied to Radiation (§3.3) — not every gap
+needs a new number, some need a status effect instead.
+
+**Named ladder, formalized** (some enemies already used bare literals for these — now named for
+legibility, per this doc's own "named tiers keep tables readable" convention above):
+`HARD_RESIST 0.2 · RESIST 0.5 · NEUTRAL 1.0 · MILD_WEAK 1.25 · WEAK 1.5 · DOUBLE_WEAK 2.0`.
+
+Full migration methodology, engine changes, regression risk, and build sequencing: §3.7.
+
 ### 3.3 Status-effect engine (NEW — the deferred Phase B, expanded)
 Effects are data on `combatant.effects`: `{ type, magnitude, duration, damageType?, source }`.
 They **tick at turn start**: apply DoT, count down, expire. Proposed catalog:
@@ -162,6 +236,17 @@ They **tick at turn start**: apply DoT, count down, expire. Proposed catalog:
 
 This unlocks the **full class identities** we deferred, and pairs with affinities (e.g., Shock
 both damages *and* can Disable a machine).
+
+**Two new statuses added by the 2026-07-26 damage-type rework (§3.2a), same tick/refresh rules as the
+seven above:**
+- **Irradiate** (Radiation flavor, a DoT like Burn) — magnitude = damage/turn, PLUS while active it
+  halves all incoming healing on the afflicted (`healMultiplier`, a new helper mirroring
+  `guardMultiplier`). Punishes healer-reliant comps specifically — a real Radiation payoff without
+  needing Radiation to be its own damage type. Thematic home: dead Earth (Dungeon 6), Vossmark
+  contamination.
+- **Pin** (Gravity flavor) — magnitude = flat Speed reduction, read by a new `effectiveSpeed()` helper
+  (mirrors `effectiveAttack`/`effectiveDefense`) that the turn-order sort uses instead of raw
+  `stats.speed` — a pinned combatant reliably acts near-last. Carried only by Gravity-flavored skills.
 
 ### 3.4 Full class kits (target design, built once §3.2/§3.3 exist)
 Damage type in brackets; ⓔ = costs EN.
@@ -217,6 +302,107 @@ party meets fodder first and grows into the elites.
 We maintain the headless sim harness to stress-test win rates whenever we add content, so
 difficulty stays intentional. Target: a *good* squad ~50–70%, a *bad* comp clearly punished.
 
+### 3.7 Battle Mechanics Overhaul — implementation & migration plan (locked 2026-07-26)
+Full spec for §3.2a (damage-type buckets) and §4.1a (skill-tree overhaul) is locked; this section is the
+"how do we actually build it without breaking six shipped dungeons" plan, written before any code
+changed, per the user's explicit request to think through effects/breakage first.
+
+**Why this is a genuine full-game rebalance, not a patch.** Every dungeon's difficulty (Kharon's Reach
+through Dungeon 6b) was tuned, sim-verified, and in several cases hand-corrected against the CURRENT
+7-type numbers. Collapsing 7 types into 4 buckets changes the EFFECTIVE resistance of enemies that had
+different values across the types now sharing a bucket (e.g., an enemy that was `cyber: WEAK` but
+`shock: NEUTRAL` becomes uniformly Energy-WEAK — now also weak to Thermal, which it never was before).
+This is a real balance shift on top of the relabeling, not just a find-and-replace. **The full
+naive+smart-autoplay, full-chain sim methodology (§3.6, established since Phase 1) must be re-run across
+every dungeon before this is considered done** — same discipline as every prior balance pass in this
+project's history, just wider in scope than any single one of them.
+
+**Migration methodology for the 42 existing affinity tables:**
+1. For each CLASS/ENEMY template, compute its new `physical` value from its old `kinetic`/`corrosive`
+   entries, its new `energy` value from `shock`/`thermal`/`cyber`, and its new `mind` value from
+   `psionic` (near 1:1 today, single-source already).
+2. **Where a template had multiple source values that disagree** (the real judgment-call cases — mostly
+   in the Energy bucket, e.g. `arcSentinel`'s `cyber: WEAK` vs. its implicit-neutral Shock), **take the
+   more extreme (further-from-1.0) of the source values.** This preserves each enemy's most memorable
+   existing matchup (Security Mech's `cyber: 2.0` — its whole "hackers wreck robots" identity — carries
+   forward as `energy: 2.0` rather than getting averaged down) instead of silently flattening intended
+   design.
+3. Apply the Physical HARD_RESIST-ban rule (§3.2a) as a final clamp pass.
+4. Re-verify every named/notable matchup already on record in this doc still reads correctly
+   post-migration (e.g. "Warden: weak Shock, doubly-weak Cyber" → Energy DOUBLE_WEAK; "Mentalist
+   hard-resists Cyber" → becomes a Mind... no — Mentalist's OWN Cyber-resist is itself now an
+   Energy-bucket entry on the Mentalist's affinities, meaning Mentalist now also resists Thermal/Shock at
+   that same value — a real behavior change to sanity-check in the sim, not just wave through).
+This is authoring work, not something to hand-derive in a planning doc — it happens during the build
+pass, verified table-by-table against the sim, not guessed up front.
+
+**Engine changes required (state.js / engine.js):**
+- `affinityMultiplier(target, damageType)` (state.js) — resolve via `DAMAGE_TYPE_CATEGORY[damageType]`
+  instead of the raw type; return `1` unconditionally when the category is `"exotic"`.
+- New `healMultiplier(c)` (state.js, mirrors `guardMultiplier`) — folds into the heal branch of
+  `applyToTarget` (engine.js) the same way `guardMultiplier` already folds into the damage branch.
+- New `effectiveSpeed(c)` (state.js, mirrors `effectiveAttack`/`effectiveDefense`) — the initiative sort
+  (`engine.js`, currently `combatants.slice().sort(function(a,b){ return b.stats.speed - a.stats.speed; })`)
+  switches to `effectiveSpeed(b) - effectiveSpeed(a)`.
+- `DAMAGE_TYPE_CATEGORY` constant + 2 new STATUSES entries (`irradiate`, `pin`) — data.js.
+- No changes needed to `chooseEnemyAction`/`pickEnemyTarget`/`enemyThreatScore`/`estimateEnemyDamage` —
+  they already call `affinityMultiplier` generically, so bucket-awareness is transparent to enemy AI.
+  Still gets a smoke-test pass, not assumed safe.
+- No UI changes needed for the affinity system itself — `statsSectionHtml` (engine.js) already renders
+  whatever keys exist in `h.affinities` generically (`capitalize(k) + "×" + value`), so it'll show
+  "Energy ×1.5" etc. for free. The skill-menu damage-type label (`ui.js`,
+  `" · " + capitalize(skill.damageType)`) is untouched — flavor labels still show the original 8 flavor
+  words, not bucket names, which is the point.
+
+**Regression risk inventory:**
+
+| Risk | Detail | Mitigation |
+|---|---|---|
+| Full-game balance drift | Every dungeon's win-rate numbers shift, some more than others | Full sim re-run (§3.6 method) across all 7 dungeons, compare against the historical numbers already recorded in this doc's changelog/roadmap notes; retune `ENEMY_HP_MULT`/`ENEMY_DAMAGE_MULT` or individual templates as needed |
+| Save-game compatibility | `saveGame()` (ui.js) serializes full `roster` objects — old saves' `skills`/`unlockedNodes` arrays predate the new branching trees, and lack the new `tacticSlots`/`socketedPassives` fields entirely | New fields default safely on load (`hero.tacticSlots \|\| tacticSlotsForLevel(hero.level)`, `hero.socketedPassives \|\| []`) — pure additions are cheap. Renamed/restructured node keys are NOT safely migratable; since this is a solo local save (not a live service), the pragmatic call is accepting that a sufficiently old save may need a fresh Start after this update rather than building real save-versioning — flagged as a quick user confirmation before the build pass, not a blocker |
+| Arms-gear vs. tree-passive collision | Both can push into `hero.skills`/affect the hero — need the two systems to stay cleanly separate | Arms items keep pushing directly into `hero.skills` exactly as today (untouched code path); ONLY new tree nodes of `type !== "active"` route through the new socket layer. Active tree nodes keep today's `learnNode` behavior unchanged |
+| Existing tree content getting discarded | Merc/Dread Knight/Mech Runner/Netrunner/Mentalist/Saboteur's current single/double nodes (`suppressingFire`, `cleave`, `overclock`, `systemShock`→`firewallBreach`, `terror`→`cerebralOverload`, `corrosionField`) are real, already-tuned content | These become the FIRST node of each class's new deeper tree, not replaced — the new trees extend outward from what's already there |
+| Exotic hits never showing "Resisted"/"Super effective!" | Since Void/Gravity always resolve at neutral (1.0×) multiplier, `applyToTarget`'s feedback-text branch (which checks `mult`) will never print those lines for Exotic hits | Intentional, not a bug — matches the "doesn't care what you are" flavor. Worth a one-line message-flavor pass so an Exotic hit still reads as distinct, not silently identical to a neutral Kinetic hit |
+
+**Build sequencing (slice, verify, next slice — same discipline as every prior phase in this project):**
+1. **Foundation.** `DAMAGE_TYPE_CATEGORY`, bucket-aware `affinityMultiplier`, Exotic bypass rule, the 42
+   affinity-table migration (kinetic/corrosive-run tables first — the smaller, mostly non-conflicting
+   bucket — then the energy-run tables, which have the real judgment calls). Add `irradiate`/`pin` +
+   `healMultiplier`/`effectiveSpeed`. Full sim re-run; fix regressions until every dungeon reads within a
+   defensible band of its historical numbers (or is intentionally shifted, with a stated reason).
+2. **Skill-tree engine.** New node-data shape (`type`, `slotCost`), `tacticSlots`/`socketedPassives` hero
+   fields, `tacticSlotsForLevel()`, socket/unsocket functions, and the passive-effect application hooks
+   (folded into `effectiveAttack`/`effectiveDefense`/EN-cost/gauge-gain the same way Weaken/Sunder/Guard
+   already are). Minimal UI: extend `skillsSectionHtml` for branch grouping + a new Tactic Slots
+   sub-panel. Prove it end-to-end on ONE class before scaling to all six.
+3. **Content authoring.** Design + write the actual branching trees for all 6 classes — the single
+   biggest new-writing task in this whole plan (§4.1a has worked examples for Merc + Netrunner; the
+   remaining 4 follow the same pattern). Sim-verify class by class.
+4. **Optional flavor seeding.** Reflavor 1-2 existing skills to Gravity/Irradiate where thematically apt
+   (Dungeon 6's Deep Descent/dead-Earth zones) — not required for mechanical completeness, purely polish.
+5. **Full-game regression pass.** Re-run the naive+smart-autoplay full-chain sim across all 7 dungeons,
+   compare against every historical number on record, retune global constants until back in the
+   established "good squad ~55-70% HP remaining" band (§3.6).
+6. **Real playtest** — this project's own established pattern (D4/D5/D6's own postmortems, this doc's
+   changelog) is that sim catches structural/level-curve bugs but real play still finds things sim
+   doesn't (the D4 map, D6's radial layout, and D5's squad-swap request were all real-playtest finds, not
+   sim finds).
+
+**Research grounding for this whole plan (§3.2a + §4.1a), two rounds:** Round 1 — Pokémon-style binary as
+the "keep it legible" baseline; Persona/SMT's Press Turn (hitting a weakness does something mechanical —
+a bonus turn — not just more damage, the direct inspiration for the weakness-payoff skill-tree node,
+§4.1a); GDKeys on skill-tree design (avoid filler nodes, mix actives/passives, size trees so they can't
+be fully cleared in one playthrough). Round 2 (user asked to "game it out" further and "review gameplay
+mechanics externally again") — Destiny 2's elemental design (each element is a status VERB, not just a
+number — Solar/Scorch, Stasis/Freeze; and critically, Destiny's own Void element already fuses "gravity"
+and "entropy" into one theme, direct precedent for §3.2a folding Gravity into Exotic alongside Void
+rather than giving it a separate bucket); Mass Effect's Shields/Armor/Barriers layered-defense model
+(close cousin of this doc's own already-deferred Armor/Shields equipment idea above — referenced as
+context, not built now, since equipment stayed explicitly out of scope for this pass); Hollow Knight's
+charm/notch system (the direct model for Tactic Slots, §4.1a — a small team's proof that a notch-budget
+beats a huge tech tree for real build depth); Path of Exile's Keystone/Notable node philosophy (one
+rule-changing node beats ten `+2%` nodes — the direct model for the Keystone node type, §4.1a).
+
 ---
 
 ## 4. Progression & leveling
@@ -257,6 +443,100 @@ grows as you go," FF-style.
   plus a few new ones (Cleave, Overclock, Firewall Breach, Cerebral Overload). First build: the
   **engine, sim-tested, with a minimal debug "Skills" panel** between fights — not the full Character
   Sheet, which comes next.
+
+### 4.1a Skill-tree overhaul: Unlock Pool + Tactic Slots (locked 2026-07-26)
+§4.1's original trees shipped too thin to matter — Merc/Dread Knight/Mech Runner/Saboteur each have
+exactly ONE node (learn it turn one, tree is "done" forever); Netrunner/Mentalist have two nodes in a
+straight line. SP has never actually gated a choice, only delayed one. A dedicated planning session
+(research: Hollow Knight's charm/notch system, Path of Exile's keystone/notable design, GDKeys' "avoid
+meaningless filler nodes" writing — full list in §3.7) redesigned this as a **two-layer system**,
+deliberately modeled on Hollow Knight specifically because it's the strongest "real build depth without
+hundreds of nodes, built by a tiny team" precedent available — and per the user's own explicit direction
+("lean into the skill tree system similar to [Hollow] Knight... a range of unlockable abilities... they
+don't all stack onto the character at once... more ways to play, and it has longer playthrough for
+endless").
+
+**Layer 1 — the Unlock Pool (permanent, SP-bought, unchanged mechanism).** Same `prereq`-gated tree
+structure that already exists (`canLearnNode`/`learnNode`, engine.js — **branching needs zero new engine
+code**, since multiple nodes can already share one `prereq` key today; it was just never authored that
+way). What's new is the CONTENT shape: real branches (2-3 paths per class) sized so a full campaign's
+~8-12 total SP (at `SP_PER_LEVEL = 1`, campaign historically tops out around character level 8-12)
+**cannot clear an entire tree** — committing to a branch is a real, felt choice, not a formality. Five
+node types populate the branches (only one of which — active — exists today):
+- **Active skill** (existing pattern) — a new attack/heal/status skill, pushed into `hero.skills`
+  permanently on learn, exactly as today.
+- **Combat modifier passive** — always-on once socketed (see Layer 2): +pierce%, +status duration, +crit,
+  etc.
+- **Keystone** — one per branch, usually the capstone (priciest SP cost). Rewrites a RULE rather than a
+  number — e.g. Dread Knight: "Guard also reflects 20% of blocked damage." Netrunner: "Disable lasts +1
+  turn, but Energy-flavored skills cost +50% EN." Reuses this doc's own already-identified extension
+  point (§4.3): a keystone can simply overwrite `CLASSES[classKey].limitBreak` to point at a stronger
+  skill — no new plumbing needed for "upgraded Limit Breaks," it already works this way.
+- **Weakness-payoff passive** — the Persona-style hook from the research pass: while socketed, hitting a
+  target's bucket-weakness (affinity mult ≥ WEAK, §3.2a) grants a bonus (extra Limit gauge, EN refund, or
+  guaranteed status application). Directly ties §3.2a's damage-bucket rework and the skill tree into one
+  reinforcing loop.
+- **Economy / run-meta node** — cheaper EN on a specific skill, faster Limit-gauge fill, +1 Ring slot,
+  cheaper Rest-node healing for this hero, +loot rarity chance, or (fog-of-war dungeons) reveal one extra
+  hop — gives the tree value outside combat too, matching that this is a Slay-the-Spire-style run, not
+  just a battle system.
+
+**Layer 2 — Tactic Slots (the actual Hollow Knight mechanic: a swappable BUDGET, not a permanent
+toggle).** Only non-`active` nodes are gated by this layer — actives stay always-on once learned exactly
+like today, keeping combat itself unchanged in complexity. Every hero gets a small, level-scaling
+**Tactic Slot budget** (proposed starting curve: `2 + floor(level / 4)` — 2 slots at Lv1, 3 at Lv4, 4 at
+Lv8, continuing to grow slowly past the campaign's normal level ceiling; exact curve tunable via sim,
+same as every numeric constant in this project). Each unlocked passive/keystone/economy/meta node has a
+**slot cost** (1-3, mirroring Hollow Knight's 1-4 notch costs) — a build chooses "one big powerful
+passive" or "three small ones." **Reconfiguring which unlocked passives are socketed happens at Rest
+nodes and in Town only** (mirrors Hollow Knight's bench-only charm swapping, and matches this project's
+own existing pattern — squad swaps and equipment changes already only happen at these same safe points) —
+not mid-combat, keeping the in-fight decision space unchanged.
+
+**Why this specific shape, for THIS game specifically:** it gives real replay value **without adding
+combat-turn complexity** (the only thing that changes turn-to-turn is which passives are silently active
+— no new buttons to press mid-fight), and the slot budget's slow, uncapped-feeling growth is a deliberate
+long-tail hook for the not-yet-built endless portal (§5.4b/§9, Phase P3) — a reason to keep earning
+levels past the story campaign's natural end, the same job Hades' mirror upgrades or Slay the Spire's
+relic accumulation do in their own endless/repeat-run modes.
+
+**Worked example — Merc (was: 1 node, `suppressingFire`):**
+```
+                    [Suppressing Fire]  (existing node, kept as the tree's root)
+                    /                \
+        [Adrenaline Rush]          [Piercing Rounds]
+         passive · 1 slot           passive · 1 slot
+        "+1 Limit gauge/turn"       "+15% pierce, all Kinetic/Physical skills"
+              |                            |
+      [Exploit: Weakspot]           [KEYSTONE: Overwatch]
+       passive · 2 slots             cost 3 SP · 2 slots
+      "Physical-bucket weak        "Gain a free counter-Attack the first
+       hits also apply Weaken"      time you're targeted each combat"
+```
+A full campaign's SP can afford maybe 3 of these 4 branch nodes — genuinely choosing burst-and-pierce vs.
+weakness-exploit vs. the defensive keystone, not collecting all of them.
+
+**Worked example — Netrunner (was: 2 linear nodes, `systemShock`→`firewallBreach`):**
+```
+                         [System Shock]  (existing node, kept as root)
+                        /                \
+          [Overcharge Field]          [Ghost Protocol]
+           active · Energy AoE         passive · 2 slots
+           (new skill)                 "Disable no longer nature-gated to synthetics"
+                |                              |
+       [Firewall Breach]                [KEYSTONE: Total Lockdown]
+        (existing node, now              cost 3 SP · 2 slots
+         mid-branch not endpoint)        "Limit Break (Total Hack) also
+                                          applies Disable to any target
+                                          still alive after it resolves"
+```
+The AoE/nuke branch vs. the control branch is a real Netrunner identity fork — today's Netrunner has no
+such choice at all.
+
+The remaining 4 classes (Dread Knight, Mech Runner, Mentalist, Saboteur) follow the same shape — 1 kept
+root node + 2 branches of 2 nodes each + a keystone-capped branch — authored during the Content Authoring
+build step (§3.7 step 3), not fully specified here; the two worked examples above are the template every
+class's tree follows.
 
 ### 4.2 Run persistence (HP + EN/SP carry over)
 Party state — **HP, EN, XP, level, SP, learned skills, inventory, Limit charge** — **persists between
@@ -1730,6 +2010,7 @@ then graphics, then story. Graphics can slot in partially earlier as a coat of p
 | **I. Graphics pass** | ✅ combat sprites (all 5 heroes + all 17 enemies, idle bob + hit flash, tier-scaled), ✅ hex-node map + per-region backdrops, ✅ combat backdrops (mining/station/hive). Also this phase: the single `game.html` was split into 5 classic `<script>` files (data/state/ui/engine/main). **Sprite-quality pass RESUMED 2026-07-25/26 (was paused since 2026-07-24) — new repo tooling `tools/sprite-review/` generates a live pixel-accurate status page straight from the game data, regenerate via `python3 tools/sprite-review/build.py`:** ✅ **all 9 bosses now bespoke** (Voraxx "Ledger & Lash," Broodmarshal redone as a Starship-Troopers-style Warrior Bug, Warden, Proteus, Void Soul Eater, Sun God, Phthora, Caged God, Chthon the true final boss); ✅ Merc redrawn again as "Poster Ready" (diagonal held rifle, reworked face). Remaining, now scoped as a **full redo of every Hero/Mob** (not just gaps): Merc's right arm is a confirmed missing shape + the rifle wants more detail; Mech Runner/Netrunner/Dread Knight each have confirmed concrete issues (cannon-arm clipped at frame edge, flat face + undrawn waist-taper, sword sitting dead-center reading as anatomy instead of being angled); Mentalist still on the old 18×28 grid; Saboteur has zero sprite; all 27 mob entries across every faction get redrawn with per-section unique silhouettes instead of the current shared-shape recolor economy. UI/menu theming polish still open |
 | **J. Story arc → finished game** *(canon locked 2026-07-23, §9; map-system spec locked 2026-07-24, §5.4; Dungeon 6 fully speced + Talos retconned 2026-07-25, §5.4c)* | The 3-act Sol arc to a finite ending. Act I shipped (Kharon's Reach → Vossmark Station Sector 1); Act II = Erebus (shipped) + **Dungeon 4 ✅ SHIPPED 2026-07-24** (Talos bio-foundry, §5.4a — 14 nodes, two pool-differentiated wings, Six the Psionic Mentalist recruit, boss Proteus, sim-verified end-to-end) — debuted the §5.4 map upgrade (fog of war, Unknown nodes, loot variance, dead-end spurs) as reusable systemic mechanics, not one-off content; Act III = **Dungeon 5 "Helios Station" ✅ SHIPPED 2026-07-24/25** (§5.4b — a new radial/circular map shape, the double boss, a narrow Void/Entropy preview roster; **balance-tuned 2026-07-25** — a full-chain sim caught the bosses' encounter levels were hardcoded 7/8 against a party that actually arrives around level 2, fixed and re-verified) + **Dungeon 6 "the Cradle" ✅ SHIPPED 2026-07-25 (finale, §5.4c — designed AND built same day)**: Vossmark's Chancellor merges with the Loom into the true final boss (Chthon, God of the Breach) in a two-phase double-boss finale that directly causes the Helios wormhole to finally open; Talos's own leader (Phthora, the Fleshspring) fails a mirrored merge attempt earlier in the dungeon; two new recruits (Vincent/Dread Knight, Sexias/new Corrosive class) close real content/system gaps; 22 nodes, biggest map yet; the game's first branching ending (all 3 §9.5 choices) implemented. **The Sol arc is now content-complete, start to finish.** Sim-verified as a first-pass baseline (structurally clean, zero crashes, one squad clears the full chain at 36% win rate) — NOT yet balance-tuned to the game's usual target band, that's its own later roadmap phase. Sprite art for Dungeon 4/5/6's new rosters still outstanding (generic-blob fallback). See §9.4 for story beats, §5.4/§5.4a/§5.4b/§5.4c for the map-system + Dungeon 4/5/6 specs |
 | ~~**K. Town/hub layer**~~ *(retired 2026-07-23 — absorbed into Phase H, §5.2)* | superseded: towns/roster/save could not wait for a "future" phase once story-mode start was decided |
+| **M. Battle mechanics overhaul** *(locked 2026-07-26, spec only — not yet built)* | 7→4 damage-type resistance buckets (Physical/Energy/Mind/Exotic — §3.2a) decoupling flavor from math, with zero flavor-text/skill rewrites; 2 new statuses (Irradiate, Pin — §3.3); two-layer Hollow-Knight-style skill trees (permanent branching Unlock Pool + a swappable Tactic Slot budget — §4.1a); full migration methodology + engine changes + regression-risk inventory + build sequencing in §3.7. Touches every shipped dungeon's balance — requires a full sim re-verification pass (§3.6) before real-play. See §13 changelog for the session summary |
 
 *(B and C are close cousins and may be built together; I is flexible and can start once F lands.)*
 
@@ -1922,6 +2203,24 @@ pointer):**
 ---
 
 ## 13. Changelog
+- **2026-07-26 — Battle mechanics overhaul: full design lock (damage-type consolidation + skill-tree
+  rework), SPEC ONLY, nothing built yet.** A dedicated multi-round planning session (external research:
+  Pokémon/Persona press-turn/Destiny elemental-verb design/Mass Effect defense layers/Hollow Knight
+  charms/Path of Exile keystones), triggered by the user's read that combat had too many damage types and
+  the skill trees didn't matter. Full detail: §3.2a (damage types), §3.3 (2 new statuses), §3.7
+  (implementation/migration/regression plan), §4.1a (skill trees), §11 roadmap row M. Headline decisions:
+  7 damage types collapse to 4 RESISTANCE buckets (Physical/Energy/Mind/Exotic) while every flavor
+  name/skill message stays completely unchanged (flavor and math are now decoupled); "hacking" (Cyber) is
+  mechanically absorbed into Shock's Energy bucket per the user's own instinct, with zero content
+  rewrites; Corrosive and Kinetic's long-standing "never rewarded" problems both resolve as a side effect
+  of sharing one Physical bucket; Exotic (Void + new Gravity) stops being a normal resistance number and
+  becomes a family of hero-inaccessible rule-breaking flavors, each bypassing the grid its own way; skill
+  trees become a two-layer Hollow-Knight-style system (a big permanent branching Unlock Pool + a small
+  swappable Tactic Slot budget that grows slowly past the campaign's level ceiling — a deliberate
+  long-tail hook for the not-yet-built endless portal). Equipment/gear-affinity rework stayed explicitly
+  out of scope (user's call). **Next actionable step when asked: begin §3.7's build sequencing, starting
+  with the Foundation slice** — the user wants a go-ahead checkpoint on this written plan before any code
+  changes.
 - **2026-07-25** — **Dungeon 6 map fixed after a real playthrough surfaced broken node positions**
   (same-day follow-up to the build below). Player report: "issues with the nodes." Verified by
   computing `computeMapLayoutRadial`'s actual output — several unrelated nodes (`s1`/`s2`, `u1`/`u2`,
