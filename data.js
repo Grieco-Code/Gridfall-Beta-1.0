@@ -1331,66 +1331,67 @@
     //   E eye-pupil · W eye-white · V accent glow · B/L/A cloth base/light/shadow ·
     //   M/P/N metal base/gleam/shadow · C strap · T/U pants · F boot · R robe-rune
     const SPRITE_SHAPES = {
-      // Merc — "Poster Ready" v2 (2026-07-26 sprite pass, redrawn from the
-      // ground up for real "lead actor" presence, 2 revision rounds). A
-      // classic action-poster silhouette: rifle held diagonally across the
-      // chest gripped by both hands, a distinct rectangular magazine + a
-      // squared-off buttstock (the detail that actually reads "gun," not
-      // just a barrel shape — a blade has no rectangular part sticking out
-      // of it, which is what the original straight-diagonal read as before
-      // this fix), a blunt muzzle cap poking past the shoulder instead of a
-      // tapering point. Face: brows sit directly over the eyes (previously
-      // misplaced at the temples, reading as random highlights), eyes have
-      // real temple buffer + a wide nose-bridge gap (previously nearly
-      // touching the face outline — read as lateral "gecko eyes"), a
-      // distinct nose and mouth with breathing room between them instead of
-      // one blended blob, and a new jaw-shadow band for a defined jawline
-      // instead of fading straight into the neck. Vest has a highlight
-      // column + shadow fold for real dimension, plus a red collar-strap
-      // accent so he doesn't blend into his own olive vest. Kept the
-      // established green cyber-eye (Human Augmented lore) and general
-      // color identity. 24x39 (taller than the old 24x32 — heroes render at
-      // a fixed battle scale regardless of grid height, so this is fine).
+      // Merc — TOTAL REBUILD (2026-07-27, 3 revision rounds) as "a man in a
+      // space suit with a rifle" — direct request, explicitly to sidestep
+      // human-face rendering (this whole hero pass kept stumbling on faces
+      // specifically: Merc's own old eye-spacing bugs, Netrunner's flat
+      // face, several Vossmark Officer rounds — meanwhile Dread Knight, the
+      // best-received hero, works because it's a skull with no organic
+      // face at all). Full sealed helmet, zero exposed skin anywhere; the
+      // "face" is a glowing green visor (keeps the established Human-
+      // Augmented cyber-green identity color, just moved from an eye to a
+      // visor). Helmet is a real Apollo-era "bubble helmet": a symmetric
+      // round bulge (narrow crown -> wide equator -> narrows again) with a
+      // large transparent visor and a distinct locking neck-ring collar —
+      // v1 read as more tactical-combat, v2 fixed the visor size but held
+      // one width straight into the neck (read as a cylinder, not a
+      // sphere), v3 added the real taper on both sides of the equator.
+      // Rifle: a visible BEND between a shallow barrel and a steeper stock
+      // meeting at a rectangular receiver block, plus a light-metal
+      // magazine — v1's straight uniform diagonal read as a sword
+      // regardless of color; the angle change plus the rectangular
+      // magazine jutting off it is what actually flips the read to "gun."
+      // Preserved from the original "Poster Ready" design: rifle held
+      // diagonally across the chest, both hands gripping. Resized from the
+      // old off-grid 24x39 back to the party's standard 24x32 hero grid.
+      // Anchors: the classic astronaut bubble-helmet convention; Halo's
+      // helmet-defines-the-silhouette design (same lesson as the FF1 job-
+      // sprite sheet, where a hat alone IDs the class); Starship Troopers'
+      // Mobile Infantry suit (grounded human-scale, distinct from Mech
+      // Runner, the party's actual machine); Dead Space's segmented rig.
       heroMerc: [
-        "........................",
-        ".........JOOOOJ.........",
-        ".......OJHHHHHHJO.......",
-        "......OJHHHHHHHHJO......",
-        ".....OJHHHHHHHHHHJO.....",
-        ".....OHHHHHHHHHHHHO.....",
-        ".....OSSSSSSSSSSSSO.....",
-        ".....OSSDDSSSSDKSSO.....",
-        ".....OSSSDSSSSDSSSO.....",
-        ".....OSSSWESSEWSSSO.....",
-        ".....OSSSSSSSSSSSSO.....",
-        "......OSSSSIISSSSO......",
-        "......OSSSSSSSSSSO......",
-        "......ODDDDDDDDDDO......",
-        "......OYYYYYYYYYYO......",
-        ".......OYYYYYYYYO.......",
-        "........OZZZZZZO........",
-        "......ORRZZZZZZRRO......",
-        "...OAAAALBBBBBBAAAANPO..",
-        "...OOAAOBBBBBOSKOBNPO...",
-        "...OOAAOBBBOSSOBBNPOO...",
-        "...OOSSOBOSSOMMMMMMOO...",
-        "...OOSSOBBBBOMMMMMMOO...",
-        "...OOSSONNNNBOQQOBBBO...",
-        "...OOSSONNNNBOQQOBBBO...",
-        "...OOSSSONNNNOQQOBBBO...",
-        "...OONNNNNNNNOBBBBBBO...",
-        "...OONNNNNNNNOBBBBBBO...",
-        "...OCCCCCCCCCCCCCCCCO...",
-        "...OCCCCCCCCCCCCCCCO....",
-        "....OTTTTTTOOTTTTTTO....",
-        "....OTTTTTTOOTTTTTTO....",
-        "....OTTTUTTOOTTUTTTO....",
-        "....OTTTTTTOOTTTTTTO....",
-        "....OUTTTTUOOUTTTTUO....",
-        "....OFFFFFFOOFFFFFFO....",
-        "....OFFFFFOOOOFFFFFO....",
-        "........................",
-        "........................"
+        "..........OKKO..........",
+        "........OHHHHHHO........",
+        ".......OHHHHHHHHO.......",
+        "......OKKGGGGGGKKO......",
+        ".....OKVVVVGGGGGGKO.....",
+        ".....OKGGGGGGGGGGKO.....",
+        "......OGGGGGGGGGGO......",
+        "........OHHHHHHO......O.",
+        "........OCCJCCJO.....MPO",
+        "......OYYBBBBBBBBLOMPO..",
+        ".....OYLLBBBBBBBOMPOO...",
+        ".....OIIBBBBBBOXPOIIO...",
+        ".....OBBLBBBXOPPOLBBO...",
+        ".....OBALAAOOMMMOLABO...",
+        ".....OBBBBONPOOMMOBBO...",
+        ".....OBBBOPOGOMMMOBBO...",
+        "......RRPNORROPPORRR....",
+        ".....OOPOBBBOQQOBBBBO...",
+        "....ONXOAAAAOOOAAAABO...",
+        "....XXOBBBBBBBBBBBBBO...",
+        ".....OCCCCCCCCCCCCCCO...",
+        "......OAAOYYOAAAAAAO....",
+        ".......OAOYYOAAAAAO.....",
+        ".......OTTTTOOTTTTO.....",
+        ".......OTTTTOOTTTTO.....",
+        ".......OUUUUOOUUUUO.....",
+        ".......OTTTTOOTTTTO.....",
+        ".......OTTTTOOTTTTO.....",
+        "......OFFFFFOOFFFFFO....",
+        "......OFFFFFOOFFFFFO....",
+        "......OFFFFFOOFFFFFO....",
+        "......OFFFFFOOFFFFFO...."
       ],
       // Netrunner (Nyx) — REDRAWN 24x32 as a FEMALE synthetic/android. Female
       // cues: long hair framing the face and falling to the shoulders, narrow
@@ -1466,45 +1467,61 @@
         "........................",
         "........................"
       ],
-      // Mech Runner (Torque von Bram) — REDRAWN 24x32 as a HUMAN FACE + FULL MECH BODY
-      // (per user direction: "more mech than human body"). A small human head
-      // sits atop a bulky mechanical exo-frame: wide angular shoulders, a
-      // glowing amber power core (V) in the chest, an asymmetric build (right
-      // arm is a heavy cannon (N barrel), left ends in a mech hand (X)), rust
-      // joints (R), thick mech legs + big feet. Reads as "the machine" of the
-      // party vs. the Merc's human body — the two are now clearly different.
+      // Mech Runner (Torque von Bram) — TOTAL REBUILD 2026-07-27 as a
+      // standalone "agile digitigrade battle-mech" (direct request: "look
+      // up Battle Mechs, Sci-fi content... create something standalone...
+      // different from what you currently built"). Archetype confirmed via
+      // AskUserQuestion. Research anchor: BattleTech/MechWarrior's reverse-
+      // joint "chicken-walker" bipeds (Timber Wolf/Mad Cat, Catapult,
+      // Marauder) and Titanfall's Titans — the backward-bending leg is the
+      // real convention for "fast mech," a direct payoff of "Runner" as a
+      // class name. A reverse-joint bend is a depth-axis thing, invisible
+      // in a flat front-facing sprite, so the readable translation is a
+      // bold OUTWARD SPLAY at the knee: narrow hip, legs bow wide at the
+      // knee, narrow back in at the ankle, with a heel spur and clawed
+      // toes — the same bow-legged stance a real digitigrade animal shows
+      // even viewed head-on. Deliberately differentiated from this game's
+      // own Security Mech (`heavyMech`): that one is a squat no-face robot
+      // on stubby straight tank legs. Kept from the old design: the human
+      // pilot face on top (his identity marker vs. Security Mech's single
+      // sensor lens and Netrunner's synthetic face), amber core-light +
+      // rust-joint color identity, and the asymmetric heavy-cannon-arm
+      // build (railShot/incendiaryRounds/orbitalStrike are all heavy-
+      // weapons-flavored). The previous build is preserved as the
+      // `heroMechLegacy` candidate in tools/sprite-review/candidates.json
+      // per explicit instruction, not deleted.
       heroMech: [
         ".........OHHHHO.........",
-        ".......OHHHHHHHHO.......",
-        "......OHSSSSSSSSHO......",
-        "......OSSDDDDDDSSO......",
-        "......OSWESSSSWESO......",
-        "......OSSSSDDSSSSO......",
-        "......OKSSSSSSSSKO......",
-        "......OSSDDDDDDSSO......",
-        ".......OKSSSSSSKO.......",
-        "......ONNNNNNNNNNO......",
-        "....OMMMMONNNNOMMMMO....",
-        "..ORRRROMMMMMMMMORRRRO..",
-        "..OMMMMOOAAAAAAOOMMMMO..",
-        "..OMMMMOOAAAAAAOOMMMMO..",
-        "..OMMMMOOAAAVVAOOMMMMO..",
-        "..OMMMMOOAAAVVAOOMMMMO..",
-        "..OMMMMOOAAAAAAOOMMMMO..",
-        "..OMMMMOMMMMMMMMONNNNNO.",
-        "..ORRRROMMMMMMMMONNNNNO.",
-        "..OMMMMOMMMMMMMMONNNNNO.",
-        "..OXXXOOMMMMMMMMONNNNO..",
-        ".......OMMMMMMMMONNNO...",
-        "....OMMMNMMOOMMNMMMO....",
-        "....OMMMMMMOOMMMMMMO....",
-        "....ORMMMMMOORMMMMMRO...",
-        "....RRRRRMMOOMMRRRRR....",
-        "....OMMMMMMOOMMMMMMO....",
-        "....ONMMMMNOONMMMMNO....",
-        "...OFFFFFFFOOFFFFFFFO...",
-        "...OFFFFFFFOOFFFFFFFO...",
-        "...OFFFFFFOOOOFFFFFFO...",
+        "........OHHHHHHO........",
+        ".......OSSSSSSSSO.......",
+        ".......ODDWEDDWEO.......",
+        ".......OSSSSSSSSO.......",
+        "........ODDDDDDO........",
+        ".......ONNNNNNNNO.......",
+        "...OMMMMMAAAAAAMMMMO....",
+        ".NOMMMMRAAAAAAAARMMOM...",
+        ".OMPPPPAAAAAAAAAAPPMO...",
+        ".OMMOAAAAAAAAAAAAAAOMMO.",
+        ".OPPOOAAAAAAAAAAAAOOPPO.",
+        ".OMMO.ONNNVVVVNNNO.OMMO.",
+        ".OPPO.ONNNVVVVNNNO.OMMO.",
+        ".OMMO.OAAAAAAAAAAO.OMMO.",
+        ".ONNO..OAAAAAAAAO..OXXO.",
+        ".ONNO...ONNNNNNO..OXXXO.",
+        ".OPPO.OAAAAAAAAAAOOX.XO.",
+        ".....ONNNNAAAANNNNO.....",
+        "......OMMMO..OMMMO......",
+        ".....OMMMMO..OMMMMO.....",
+        "...OMMMMMO....OMMMMMO...",
+        "..RONNNNO......ONNNNOR..",
+        "....OMMMO......OMMMO....",
+        ".....OMMMO....OMMMO.....",
+        ".....OMMMO....OMMMO.....",
+        "...ONNOAAO....OAAONNO...",
+        "....ONOAAO....OAAONO....",
+        "...OFFFOOFFOOFFOOFFFO...",
+        "...OFFFOOFFOOFFOOFFFO...",
+        "....OFF..FO..OF..FFO....",
         "........................"
       ],
       heroMentalist: [  // psion: staff + orb, deep hood, two glowing purple eyes, runed robe
@@ -1694,9 +1711,11 @@
       // gorget and a BOXY armored torso with shoulder pauldrons (a chest plate,
       // not the hero's lean vest); left arm RAISED overhead gripping a glowing
       // stun-baton (matches the Quota Enforcer's Baton Strike), right arm down in
-      // a gauntlet. Modular accent zones for later-tier reskins: H = pauldron /
-      // heavy-plate accent, V = glow accent (baton tip / a visor glow) — recolor
-      // for riot / heavy variants. Used by Quota Enforcer + Vossmark Grunt.
+      // a gauntlet. Now Vossmark Grunt's ALONE (Quota Enforcer and Riot Enforcer
+      // split off into their own bespoke `laborEnforcer`/`riotShieldTrooper`
+      // shapes, 2026-07-27, ending the 3-way recolor economy) — light polish pass
+      // same day: the mouth was a 7px-wide solid white block reading as a cartoon
+      // grin, narrowed to a 3px closed stern line.
       // Legend: O outline | P helmet G helmet-rim/gorget | S skin K skin-lt D brow/shadow
       //   W eye-white/teeth E eye-dark | C collar/belt | H pauldron B chest-armor
       //   A arm/plate-shadow X gauntlet | M baton-shaft V baton-glow
@@ -1712,7 +1731,7 @@
         ".SSX.OSEESSSSEESSO......",
         ".SSA.OSSSSSDDSSSSO......",
         ".AAA.OKSSSSSSSSSKO......",
-        "..AA.OSDWWWWWWWDSO......",
+        "..AA.OSDDDWWWDDDSO......",
         "..AA.OKSSSSSSSSSKO......",
         "...A..OKSSSSSSKO........",
         ".....OGGGGGGGGGGO.......",
@@ -1733,6 +1752,84 @@
         "..OFFFFO....OFFFFO......",
         "..OFFFFO....OFFFFO......",
         "..OFFFO......OFFFO......",
+        "........................"
+      ],
+      // Quota Enforcer — split off the shared guardTrooper shape
+      // (2026-07-27, was tabled as a candidate since 2026-07-26). Redesigned
+      // as a corporate labor-enforcer, not a soldier: bare head (no helmet),
+      // visible unshadowed face, a lighter vest instead of plate armor, a
+      // narrower silhouette overall — still carries the established baton.
+      laborEnforcer: [
+        "........................",
+        "........................",
+        "..........OHHO..........",
+        "....V....OHHHHO.........",
+        "....M...OSSSSSSO........",
+        "....M..OSSSSSSSSO.......",
+        "...XM..ODDSSSSDDO.......",
+        "..SXX..OEESSSSEEO.......",
+        "..SSX..OSSSSSSSSO.......",
+        "..SSA...ODDDDDDO........",
+        "...AA....OKKKKO.........",
+        "....AA....OSSO..........",
+        ".....AA...OCCO..........",
+        "......OBBBBBBBBBBO......",
+        "......OBBBBBBBBBBO......",
+        "......OBBBVVBBBBBO......",
+        "......OBBBBBBBBBBO......",
+        "......OBBBBBBBBBBO......",
+        "......OBBBBBBBBBBO......",
+        "......OAAAAAAAAAAO......",
+        ".......OCCCCCCCCO.......",
+        "........OTTTOOTTTO......",
+        "........OTTTOOTTTO......",
+        "........OTTTOOTTTO......",
+        "........OTTTOOTTTO......",
+        "........OTTTOOTTTO......",
+        "........OTTTOOTTTO......",
+        "........OFFFOOFFFO......",
+        "........OFFFOOFFFO......",
+        "........................",
+        "........................",
+        "........................"
+      ],
+      // Riot Enforcer — split off the shared guardTrooper shape
+      // (2026-07-27, was tabled as a candidate since 2026-07-26). Redesigned
+      // as the bulkiest of the Vossmark trio: full face-shield helmet (no
+      // visible face at all), a riot shield on one arm, baton on the other,
+      // wider shoulders, shin guards.
+      riotShieldTrooper: [
+        "........................",
+        ".........OPPPPO.........",
+        "........OPPPPPPO........",
+        ".......OPPPPPPPPO.......",
+        ".......OGGGGGGGGO.......",
+        "......OPPEEEEEEPPO......",
+        "......OPPEEEEEEPPO......",
+        "......OPPPPPPPPPPO......",
+        ".......OGGGGGGGGO.......",
+        "........OPPPPPPO........",
+        ".........OCCCCO.........",
+        "OAAOBBBBBCCCCCCBBBBBOV..",
+        "OAAOBBBBBBBBBBBBBBBBMMO.",
+        "OAAOBBBBBBBBBBBBBBBO....",
+        "OVVOBBBBBBBBBBBBBBBO....",
+        "OAAOBBBBBVVBBVVBBBBO....",
+        "OAAOBBBBBBBBBBBBBBBO....",
+        "OVVOBBBBBBBBBBBBBBBO....",
+        "OAAOBBBBBBBBBBBBBBBO....",
+        "OAAOBBBBBBBBBBBBBBBO....",
+        "....OAAAAAAAAAAAAAAO....",
+        ".....OCCCCCCCCCCCCO.....",
+        "......OTTTTOOTTTTO......",
+        "......OTTTTOOTTTTO......",
+        "......OTTTTOOTTTTO......",
+        "......OUUUUOOUUUUO......",
+        "......OTTTTOOTTTTO......",
+        "......OFFFFOOFFFFO......",
+        "......OFFFFOOFFFFO......",
+        "........................",
+        "........................",
         "........................"
       ],
       // Humanoid officer, Vossmark — bespoke (originally split from a
@@ -1882,6 +1979,148 @@
         "......OFFFFOOFFFFO......",
         "......OFFFFOOFFFFO......",
         "......OFFFFOOFFFFO......"
+      ],
+      // ---------- TALOS SPECIMEN WING (§5.4a) ----------
+      // Design doc lock: "unsettling, not graphic" -- wrongness via
+      // shape/asymmetry and color (sickly growth, unnatural fusion,
+      // restraints, distorted silhouettes), never gore. Anchored to this
+      // game's own already-shipped Phthora ("hollow-eyed... bioluminescent
+      // rupture") and Proteus ("peeled chest around a glowing core, one
+      // wrong arm") bosses, so the mob family reads as smaller-scale
+      // echoes of the same origin-point transformation. Reuses Phthora's
+      // exact bioluminescent green (#7ae0a0) as the family's throughline
+      // glow, escalating in size with tier. Started at 16x16 like the
+      // rest of the mob roster, then upscaled to 24x32 (2026-07-27, user:
+      // "why are they still 16x16, let's add more detail if we can") --
+      // same hero-scale grid guardTrooper/Chimera already used, needs
+      // HERO_BATTLE_SCALE in ui.js SHAPE_SCALE_OVERRIDE.
+      // Splice Husk — "a failed early test subject, barely held
+      // together... these were people." Gaunt hollow-eyed head (one
+      // socket a dark void, the other nearly shut -- asymmetry as the
+      // wrongness cue), patchy bald hair, one visibly withered/shorter
+      // arm, a metal restraint cuff still fused to the other wrist, a
+      // torn clinical smock, an uneven dragging stance. Only a single
+      // pinprick of glow -- barely a tell yet at this tier.
+      spliceWither: [
+        "..........OHHO..........",
+        ".........OHSHHO.........",
+        "........OSSSSSSO........",
+        "........OSSSSSSSO.......",
+        "........OEESSSDSO.......",
+        "........OSSSSSSSO.......",
+        ".........OAAAAAO........",
+        ".........OSSSSSO........",
+        "..........OSSSO.........",
+        ".........OWWWWO.........",
+        ".......OTTWWWWMMO.......",
+        "......OTTWWWWWWMMO......",
+        "......OTTWWWWWGMMO......",
+        "......OAAWWWWWWDDO......",
+        ".......OAOWWWWWDDO......",
+        ".........OWWWWWSSO......",
+        ".........OAAAAAADO......",
+        "..........OAAAAAO.......",
+        ".........OWWWOWWO.......",
+        "..........OWWWWWO.......",
+        "..........OUUOOUUO......",
+        "..........OUUOOUUO......",
+        "..........OUUOOUUO......",
+        "..........OUUOOUUO......",
+        "..........OUUOOUUO......",
+        "..........OUUOOUUO......",
+        "..........OFFOOFFO......",
+        "..........OFFO..........",
+        "........................",
+        "........................",
+        "........................",
+        "........................"
+      ],
+      // Bio-Tank — "a restrained containment specimen that breaks
+      // loose." Bulkier than Splice Husk with ASYMMETRIC overgrowth on
+      // one side (carries the Regen mechanic visually), a broken harness
+      // with real buckle detail crossing the chest (one snapped, kept
+      // inside the silhouette rather than a separate floating piece), and
+      // a bigger bioluminescent rupture with radiating veins than Husk's
+      // single pinprick — same Phthora-green family, escalating with
+      // tier. Wide braced stance for the "tank" read.
+      bioRupture: [
+        ".........OHHHHO.........",
+        "........OSSSSSSO........",
+        ".......OSSSSSSSSO.......",
+        ".......OEESSSSDSO.......",
+        ".......OSSSSSSSSO.......",
+        "........OAAAAAAO........",
+        "........OSSSSSSO........",
+        "........OWWWWWWO........",
+        "....ONNNNWWWWWWWWNNO....",
+        "...ONNNNNWWWWWWWWNNO....",
+        "...OWWWWWWWWWWWWWWWWO...",
+        "...OCCCCCWWWWWWCCCCCO...",
+        "...OCCCCCDWWWWDCCCCCO...",
+        "...OCCCCDWWWWWWWWWWWO...",
+        "...ODWWWWWWWWWWWWWWWO...",
+        "...OWWWGGGWWWWWWWWWWO...",
+        "...OWWGGGGGWWWWWWWWWO...",
+        "...OWWWGGGAAAAAAAAAAO...",
+        "...OAAAAAAAAAAAAAAAAO...",
+        "....OAAAAAAAAAAAAAAO....",
+        ".....OCCCCCCCCCCCCO.....",
+        "......OUUUUOOUUUUO......",
+        "......OUUUUOOUUUUO......",
+        "......OUUUUOOUUUUO......",
+        "......OUUUUOOUUUUO......",
+        "......OUUUUOOUUUUO......",
+        "......OUUUUOOUUUUO......",
+        "......OFFFFOOFFFFO......",
+        "......OFFFFOOFFFFO......",
+        "......OFFFFOOFFFFO......",
+        "......OFFFFOOFFFFO......",
+        "........................"
+      ],
+      // Chimera Specimen — design doc explicitly locks this one as fully
+      // bespoke, NOT a hive-shape reuse: kept human-adjacent-wrong (a
+      // swollen bone-spur claw mass) rather than insectoid, so the Erebus
+      // connection stays in flavor text only. Restraint straps have
+      // fused INTO the torso (wrapped bands the skin has grown over —
+      // unnatural fusion, not gore), one arm still ends in a human hand
+      // with a torn cuff (the "these were people" tragic note even at
+      // elite tier), the other a fused overgrown claw-limb, the biggest
+      // bioluminescent rupture in the family (echoing Phthora's chest
+      // rupture at a smaller scale), and one leg ending in a root-like
+      // stump instead of a foot (echoing Phthora's root-tendril motif).
+      chimeraFusion: [
+        ".........OHHHO..........",
+        "........OSSSSSSO........",
+        ".......OSSSSSSSSO.......",
+        ".......OEESSSSDSO.......",
+        ".......OSSSSSSSSO.......",
+        "........OAAAAAAO........",
+        "........OSSSSSSO........",
+        ".......OWWWWWWWWO.......",
+        ".....ONNNWWWWWWWWON.....",
+        "....ONNNWWWWWWWWWWON....",
+        "..OOCCCCCCCCCCCCCCCCNO..",
+        "..SOWWWWWWWWWWWWWWWWONO.",
+        "..SOWWWWWWWWWWWWWWWWONNO",
+        "..SOWWWWWWWWWWWWWWWWONBO",
+        ".OCOWWWWWWWGGGWWWWWWOOBO",
+        ".OSOWWWWWWGGGGGWWWWWOOO.",
+        ".OOOCCCCCCCCCCCCCCCCO...",
+        "...OWWWWWWWGGWWWWWWWO...",
+        "...OAAAAAAAAAAAAAAAAO...",
+        "...OWWWWWWWWWWWWWWWWO...",
+        "...OAAAAAAAAAAAAAAAAO...",
+        "....OAAAAAAAAAAAAAAO....",
+        "...OCCCCCCCCCCCCCCCCO...",
+        "....OCCCCCCCCCCCCCCO....",
+        "......OUUUUO.OUUUO......",
+        "......OUUUUO.OUUUO......",
+        "......OUUUUO.OUUUO......",
+        "......OUUUUO.OUUUO......",
+        "......OFFFFO.ORRRO......",
+        "......OFFFFO..ORO.......",
+        "........................",
+        "........................"
       ],
       // Sentry bot, mobile — Arc Sentinel: single big optic, a visible
       // thruster glow spreading below the chassis so it clearly reads as
@@ -2225,6 +2464,272 @@
         ".....TTT...TTTT....TTTT...TT",
         ".....UUU...TTT......TTT...TT"
       ],
+      // ---------- VOID WRAITH TRIO (§5.4b) ----------
+      // Poltergeist (fodder) / Shade (standard) / Terror (standard) —
+      // anchored to the Void Soul Eater boss just above (hooded wraith, a
+      // maw wider than its own hood, tattered cloth streamers instead of
+      // legs) via its EXACT palette hex values, so the trash family reads
+      // as unmistakably the same species as the boss, not just "also
+      // purple" — same role Broodmarshal played for Erebus and Phthora/
+      // Proteus played for Talos Specimen. External anchor: the FF Kraken/
+      // Gigas Worm reference images (tentacle-mass horrors, no legs) plus
+      // the general pixel-art-horror lesson that unnatural asymmetric
+      // silhouettes read scarier than surface detail. All 24x32 (was
+      // built directly at hero-scale this time, per the pattern already
+      // set with Splice Husk/Bio-Tank/Chimera Specimen).
+      // Poltergeist — the LEAST substantial of the trio on purpose: a
+      // small floating scrap of torn cloth high in the frame, thin
+      // reaching cloth-tendril arms (restlessGrasp), no legs at all, most
+      // of the canvas deliberately left empty (the "barely here" read,
+      // same technique as keeping Talos Wraith/Erebus Roach simpler than
+      // their standard/elite kin).
+      poltergeistWisp: [
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "..........OHHO..........",
+        ".........OHHHHO.........",
+        ".........OVJJVO.........",
+        ".........OJJJJO.........",
+        "..........OJJO..........",
+        "..........OHHO..........",
+        ".........OHHHHO.........",
+        "......OTTHHHHHO.........",
+        ".....OUUUHHHHTTTO.......",
+        ".........OHHHHUUUO......",
+        "..........OHHHO.........",
+        "..........OTTO..........",
+        ".........OU..UO.........",
+        ".........O....O.........",
+        ".............OU.........",
+        ".............U..........",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................"
+      ],
+      // Shade — a proper hooded wraith, one tier up from Poltergeist:
+      // fuller robe, real hood, glowing eyes. One arm ends in a fused
+      // umbral shadow-blade (umbralCut, angled off centerline — Dread
+      // Knight convention), the other in a withered skeletal claw-hand
+      // (witherTouch) — asymmetric, matching the "one arm normal, one
+      // arm weapon" convention used across this whole pass. Tattered hem
+      // instead of legs (family rule).
+      shadeWraith: [
+        "........................",
+        "........................",
+        ".........OHHHHO.........",
+        "........OHHHHHHO........",
+        ".......OKKKKKKKKO.......",
+        ".......OJJVJJVJJO.......",
+        ".......OJJJJJJJJO.......",
+        "........OHHHHHHO........",
+        ".........OKKKKO.........",
+        "......OBBBBBBBBBBO......",
+        ".....OBBBBBBBBBBBBO.....",
+        ".....OBBBBBBBBBBBBON....",
+        "....OOBAAAAAAAAAABONN...",
+        ".....OBBBBBBBBBBBBOONN..",
+        ".....OBBBBBBBBBBBBO.ONN.",
+        ".....OBAAAAAAAAAABO..ON.",
+        "....ONNBBBBBBBBBBBO.....",
+        "...ONNOBBBBBBBBBBBO.....",
+        "..ONNNOAAAAAAAAAABO.....",
+        "..ONNOBBBBBBBBBBBBO.....",
+        "...OO.OTTTTTTTTTTO......",
+        "......OTTTUTTTUTTO......",
+        "......OTT..TT..TTO......",
+        ".......U...U....U.......",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................"
+      ],
+      // Terror — no head, no eyes; the whole upper body IS a screaming
+      // maw (hollowScream), the most "wrong"/mindless of the trio (also
+      // resists Psionic in its stats — fittingly, nothing there to
+      // target). Squat, hunched, asymmetric (creepingDread) with
+      // clustered short reaching tendrils instead of two clean arms — the
+      // direct Kraken/Gigas Worm callback. Mouth-glow reuses Void Soul
+      // Eater's own mouth-glow hex and its interlocking-teeth-block
+      // pattern (a flat glow slot read as a visor, not a mouth, before
+      // this fix).
+      terrorMaw: [
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........OHHHHHHHHO......",
+        "......OKKKKKKKKKKKKO....",
+        ".....OHHHHHHHHHHHHHHO...",
+        ".....OHHHMMGGMMGGHHHO...",
+        ".....OHHHGGGGGGGGHHHO...",
+        ".....OHHHGGMMGGMMHHHO...",
+        "......OHHHHHHHHHHHHO....",
+        ".......OKKKKKKKKKKO.....",
+        ".....OBBBBBBBBBBBBBO....",
+        "....OBBBBBBBBBBBBBBBO...",
+        "..ONOBBBBBBBBBBBBBBBONO.",
+        ".ONNOBAAAAAAAAAAAAABNNO.",
+        "..ONOBBBBBBBBBBBBBBBONO.",
+        "....OBAAAAAAAAAAAAABONO.",
+        "....OBBBBBBBBBBBBBBBO...",
+        "...OTTTTTTTTTTTTTTTTTO..",
+        "....OTTTTUUUUUUUTTTTO...",
+        ".....OUUUUO....OUUUO....",
+        "......U..........U......",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................",
+        "........................"
+      ],
+      // ---------- VOID ELITE TRIO (§5.4b) ----------
+      // Void Horror / Demon / Devil — same Void Soul Eater palette family
+      // as the wraith trio above, but these three start foreshadowing
+      // BOTH bosses directly (the eclipse patch and the stolen corona
+      // reach toward Void Soul Eater and the Sun God respectively) — the
+      // biggest/most detailed unit in every prior family has been the one
+      // to pay off the most reference, same pattern here.
+      // Void Horror — Kraken-anchored (tentacle-mass body, no legs, a
+      // huge fanged mouth). Its doubly-weak-Thermal "bring the Mech
+      // Runner" fight gets the family's first direct boss foreshadow: a
+      // small "eclipse" patch on the chest (black disc in a violet ring,
+      // mirroring the Sun God's own corona-and-eclipsed-disc face) — the
+      // visual payoff of consumeLight as an ANTI-glow instead of the glow
+      // accent every other faction has used.
+      abyssalClaw: [
+        "........................",
+        ".........OHHHHO.........",
+        ".......OHHHHHHHHO.......",
+        "......OKKKKKKKKKKO......",
+        "......OJJJVJJVJJJO......",
+        "......OHHHHHHHHHHO......",
+        ".....OMMMGMGMGMMMMO.....",
+        ".....OGGGGGGGGGGGGO.....",
+        "......OMMGMGMGMKKO......",
+        ".......OHHHHHHHHO.......",
+        "...OHOBBBBBBBBBBBBOOH...",
+        "..OHHBBBBBBBBBBBBBBHHHO.",
+        ".OKKOBBBOVVVVVOBBBBOKKKO",
+        "OKKOOBBBVMMMMMVBBBBOOKKO",
+        "NNO.OBBBVMMMMMVBBBBO.ONN",
+        "OO..OBBBOVVVVVOBBBBO..OO",
+        "....OBBBBBBBBBBBBBBO....",
+        "....OBAAAAAAAAAAAABO....",
+        "....OBBBBBBBBBBBBBBO....",
+        "....OBBBBBBBBBBBBBBO....",
+        ".....OAAAAAAAAAAAAO.....",
+        "...OHHHHOHHHHOHHHHHO....",
+        "...OKKKKOKKKKOKKKKKO....",
+        "......OHOH.OHOH.OH......",
+        "......HKHK.HKHK.HK......",
+        "......HKHK.HKHK.HK......",
+        "......OOOO.HKHK.HK......",
+        "...........OOOO.HK......",
+        "................OO......",
+        "........................",
+        "........................",
+        "........................"
+      ],
+      // Demon — more upright/humanoid than Void Horror: asymmetric
+      // chitin-spike horns (same technique as Talos Vanguard's shoulder
+      // spike), reaching claws (clawRake), and a glowing orange hellbrand
+      // mark on the chest (hellbrand) — the ONE unit in the whole Void
+      // family with an actual glow accent instead of an anti-glow, for
+      // the "burning horror" flavor.
+      demonBrand: [
+        ".......ON...............",
+        "......ONNOOHHO...ON.....",
+        "......NNOHHHHHHHHOO.....",
+        ".......OKKKKKKKKKO......",
+        ".......OJJVJJVJJJO......",
+        ".......OJJJJJJJJJO......",
+        "........OHHHHHHHO.......",
+        ".........OKKKKKO........",
+        ".....OKKKKBBBBBBKKO.....",
+        "....OKKKKKBBBBBBKKO.....",
+        "..NOOBBBBBBBBBBBBBBO....",
+        "...NOBAAAAAAAAAAAABO....",
+        "..ONOBBBBBBBBBBBBBBO....",
+        ".ONNOBBBBOFFFOBBBBBO....",
+        "ON..OBAAAFFFFFAAAABO....",
+        "....OBBBBOFFFOBBBBBO....",
+        "....OBBBBBBBBBBBBBBO....",
+        "....OBAAAAAAAAAAAABO....",
+        "....OBBBBBBBBBBBBBBOONN.",
+        "....OBBBBBBBBBBBBBBONNO.",
+        "....OAAAAAAAAAAAAAAONN..",
+        "....OBBBBBBBBBBBBBBO....",
+        "......OHHHHOOHHHHO......",
+        "......OHHHHOOHHHHO......",
+        "......OHHHHOOHHHHO......",
+        "......OHHHHOOHHHHO......",
+        "......OHHHHOOHHHHO......",
+        "......OJJJJOOJJJJO......",
+        "......OJJJJOOJJJJO......",
+        "......OJJJJOOJJJJO......",
+        "......OJJJJOOJJJJO......",
+        "........................"
+      ],
+      // Devil — "tormentor caste," the most direct boss foreshadow of the
+      // family: a cracked fragment of the Sun God's own corona worn like
+      // a stolen crown (damnationDecree — authority/command), gold reused
+      // from the Sun God's exact palette. A fused coiled lash-whip
+      // extends from one arm in a winding S-curve (tormentLash — not
+      // held, avoids the floating-prop problem). Leaner/taller than
+      // Demon for a "cruel overseer" read rather than a brute.
+      devilCrown: [
+        ".........Y....Y.........",
+        "........OYHHHHYO........",
+        ".......OHHHHHHHHO.......",
+        ".......OKKKKKKKKO.......",
+        ".......OJJVJJVJJO.......",
+        ".......OJJJJJJJJO.......",
+        "........OHHHHHHO........",
+        ".........OKKKKO.........",
+        "......OBBBBBBBBBBO......",
+        "....ONBBBBBBBBBBBBON....",
+        "....NOBAAAAAAAAAABO.N...",
+        "....NOBBBBBBBBBBBBO..N..",
+        "....OOBBBBBBBBBBBBO..N..",
+        ".....OBAAAAAAAAAABO.N...",
+        ".....OBBBBBBBBBBBBON....",
+        ".....OBBBBBBBBBBBBON....",
+        ".....OBAAAAAAAAAABO.N...",
+        ".....OBBBBBBBBBBBBO..N..",
+        ".....OBBBBBBBBBBBBO..N..",
+        ".....OBAAAAAAAAAABO.N...",
+        ".....OBBBBBBBBBBBBO.O...",
+        ".....OAAAAAAAAAAAAO.....",
+        "......OHHHHHHHHHHO......",
+        "........OHHHOOHHHO......",
+        "........OHHHOOHHHO......",
+        "........OHHHOOHHHO......",
+        "........OHHHOOHHHO......",
+        "........OHHHOOHHHO......",
+        "........OJJJOOJJJO......",
+        "........OJJJOOJJJO......",
+        "........OJJJOOJJJO......",
+        "........................"
+      ],
       // Sun God (D5 double-boss, corrupted-regulator half) — "Eclipse Face"
       // v2 (2026-07-25 sprite pass, revised once per feedback: the head is
       // now a literal circular ring with a floating black disc inside it
@@ -2417,26 +2922,23 @@
     };
 
     const SPRITES = {
-      // Merc — "Poster Ready" v3 (§SPRITE_SHAPES heroMerc): warm skin, both
-      // eyes now plain/mirror-symmetric (dropped the cyborg-eye detail per
-      // direction), a brow scar + fuller jaw stubble for a rugged look, red
-      // collar accent, olive vest. Rifle rebuilt with deliberate right-angle
-      // breaks and light/dark value contrast between parts (straight barrel
-      // -> lighter-grey receiver -> dark magazine at a different angle ->
-      // squared stock) instead of one smooth same-tone taper.
+      // Merc — space-suit TOTAL REBUILD (§SPRITE_SHAPES heroMerc): a
+      // sealed bubble helmet with a glowing green visor (the old cyber-eye
+      // identity color, moved off an exposed face entirely), suit-olive
+      // kept as the established color identity, red chest-stripe accent
+      // (was a collar accent), light-metal rifle with a visible barrel/
+      // stock bend + rectangular magazine.
       merc:        { shape: "heroMerc",  palette: {
         O: "#0d1016",
-        S: "#d09a63", K: "#f4c890", D: "#8a5a30", I: "#a06c3a",   // skin base/light / brow-shadow / nose-shadow
-        H: "#4a3a28", J: "#2e2418",                    // hair base / shadow
-        E: "#141414", W: "#eef0ea", V: "#6cff9e",      // eye pupil / white / green augment glow
-        Y: "#9c6b3d",                                   // jaw shadow
-        Z: "#c9a071",                                   // neck
-        R: "#a8342a",                                   // collar accent (red)
-        B: "#3a4a3d", A: "#26332a", L: "#4c5c47",       // olive vest base / shadow / highlight
-        M: "#727880", P: "#a2a8b0", Q: "#20262c",       // rifle metal / gleam / magazine (dark)
-        C: "#201c18", X: "#d09a63",                     // strap+belt / hand-grip (skin)
-        N: "#171a20",                                    // rifle dark edge / buttstock
-        T: "#35402f", U: "#232b1e", F: "#1a1f16"       // pants / pants-shadow / boot
+        H: "#4a5148", K: "#5c645a", J: "#26302a",       // helmet shell / highlight / visor-frame shadow
+        G: "#0f2a1c", V: "#6cff9e",                     // visor glass / green glow
+        C: "#201c18",                                    // neck-ring / strap+belt
+        Y: "#3a423c", I: "#525c53",                     // backpack / backpack highlight
+        B: "#3a4a3d", A: "#26332a", L: "#4c5c47",       // suit base / shadow / highlight
+        R: "#a8342a",                                    // chest-stripe accent (red)
+        M: "#727880", P: "#a2a8b0", Q: "#20262c", N: "#171a20",  // rifle metal / gleam / magazine-dark / stock-dark
+        X: "#22261e",                                     // gloved hand
+        T: "#3a4a3d", U: "#26332a", F: "#171a20"        // pants / pants-shadow / boot
       } },
       // Netrunner — synthetic hacker (per CLASSES.netrunner.nature): cool
       // pale-grey "skin," dark teal hair, BOTH eyes glowing cyan with a real
@@ -2465,24 +2967,19 @@
         K: "#d3c9a8", D: "#8f8568", J: "#170808",       // bone base / bone shadow / eye-socket interior
         C: "#16161a", U: "#34383e", F: "#1a1a1e"
       } },
-      // Mech Runner (Torque von Bram) — HUMAN FACE + FULL MECH BODY. Rounded/
-      // tapered hairline (was a flat rectangle -- the actual "Frankenstein"
-      // cue) plus a wide metal gorget collar bolting the head to the body.
-      // Segmented shoulder pauldrons + chest side-plates with real outline
-      // seams; rust (R) relocated to the actual joint seams (shoulder/elbow/
-      // knee) instead of scattered random dots. The cannon arm (N) is now
-      // visibly thicker/darker than the normal arm with a tapered muzzle and
-      // a kept frame-edge margin (was clipped before).
+      // Mech Runner (Torque von Bram) — digitigrade battle-mech rebuild
+      // (§SPRITE_SHAPES heroMech): angular pointed shoulders, tapered
+      // agile waist, a bow-legged digitigrade stance (heel spurs + clawed
+      // toes), amber core-light + rust joint-seam accents kept from the
+      // established color identity.
       mechRunner:  { shape: "heroMech",  palette: {
         O: "#0d0d0f",
-        S: "#c88a55", K: "#e8b078", D: "#8a5a30",      // face skin base/light/shadow
-        H: "#3a2a1a",                                   // hair
-        E: "#141414", W: "#e8e0d0",                    // eyes
-        M: "#6b7078", P: "#9aa0a8", N: "#33383e",      // mech metal / gleam / dark (N = cannon)
-        A: "#3a3d42",                                   // dark mech chest panel
-        R: "#8a5a2c",                                   // rust joints / trim
-        V: "#ffb347",                                   // amber power core glow
-        C: "#241c14", X: "#565c64", F: "#1a1a1e"        // collar / mech hand / mech foot
+        S: "#c88a55", D: "#8a5a30", E: "#141414", W: "#e8e0d0",  // face skin / shadow / eyes
+        H: "#3a2a1a",                                             // hair
+        M: "#6b7078", P: "#9aa0a8", N: "#33383e", A: "#3a3d42",  // mech metal / gleam / cannon-dark / chest panel
+        R: "#8a5a2c",                                             // rust joint-seam accent
+        V: "#ffb347",                                             // amber power core glow
+        X: "#4a5058", F: "#20242a"                                // mech claw-hand / foot
       } },
       // Mentalist — hooded psion (its own robe shape): face sunk in hood
       // shadow with two glowing purple eyes (V), purple robe (B/L/A) with gold
@@ -2604,6 +3101,32 @@
         D: "#3a1418", A: "#5a232a", F: "#1a0d0e",
         P: "#ff6a4d", G: "#ffb347", V: "#a8d94a"
       } },
+      // Splice Husk — bespoke spliceWither shape (24x32, was 100% blob).
+      // Sickly pale skin, a metal restraint cuff (M) still fused to one
+      // wrist, Phthora-green (G) glow just a pinprick at this tier.
+      spliceHusk: { shape: "spliceWither", palette: {
+        O: "#0d0f0c", H: "#3a3f34", S: "#8a9280", E: "#141614",
+        D: "#454d40", A: "#5a6250", W: "#c4c8ba", T: "#6b7360",
+        G: "#7ae0a0", U: "#454d40", F: "#1c1e18", M: "#8a8f96"
+      } },
+      // Bio-Tank — bespoke bioRupture shape (24x32, was 100% blob).
+      // Asymmetric overgrowth, a broken harness (C) across the chest,
+      // a bigger Phthora-green rupture than Splice Husk's pinprick.
+      bioTank: { shape: "bioRupture", palette: {
+        O: "#0d0f0c", H: "#3a3f34", S: "#8a9280", E: "#141614",
+        D: "#454d40", A: "#5a6250", W: "#c4c8ba", N: "#6b7360",
+        C: "#3a3f34", G: "#7ae0a0", U: "#454d40", F: "#1c1e18"
+      } },
+      // Chimera Specimen — bespoke chimeraFusion shape (24x32, was 100%
+      // blob; design doc locks this one as NOT a hive-shape reuse). Straps
+      // fused into the skin (C), a fused claw-limb (N/B), the family's
+      // biggest Phthora-green rupture, a root-stump leg (R).
+      chimeraSpecimen: { shape: "chimeraFusion", palette: {
+        O: "#0d0f0c", H: "#3a3f34", S: "#8a9280", E: "#141614",
+        D: "#454d40", A: "#5a6250", W: "#c4c8ba", N: "#6b7360",
+        C: "#3a3f34", G: "#7ae0a0", U: "#454d40", F: "#1c1e18",
+        B: "#2e3428", R: "#454d40"
+      } },
       // Proteus — "Open Bloom" v2 (§SPRITE_SHAPES proteusBloom): half-
       // transcended bio-executive, composed human face over a peeled-open
       // chest revealing a glowing bio-plasma core, one arm already a maroon
@@ -2621,15 +3144,14 @@
 
       // ---------- KHARON'S REACH (§5.2a) ----------
       // Quota Enforcer — rough militia enforcer: dull worn brown armor + tan
-      // helmet, dull amber baton glow (scavenged colony gear, no faction color).
-      // Same guardTrooper shape as the Vossmark Grunt, recolored (§5.2a).
-      quotaEnforcer:  { shape: "guardTrooper",     palette: {
-        O: "#100d0a", P: "#5c4a34", G: "#7a6547",                 // helmet shell / rim + gorget
-        S: "#c9a071", K: "#e0b98a", D: "#7a5330", W: "#c9c6be", E: "#141414",  // skin / brow / teeth / eyes
-        C: "#2e2318", H: "#4a3c2a",                               // collar+belt / pauldron accent
-        B: "#5c4a34", A: "#3f3222", X: "#241a12",                 // brown armor / shadow / gauntlet
-        M: "#6b6158", V: "#d9a94e",                               // baton shaft / amber glow
-        T: "#4a3c2a", U: "#2e2418", F: "#1a140d"                  // greaves / boots
+      // skin/highlight, dull amber baton glow (scavenged colony gear, no
+      // faction color). Bespoke `laborEnforcer` shape now (split off the
+      // shared guardTrooper 2026-07-27) — same established color identity
+      // carried over onto the new silhouette's own keys.
+      quotaEnforcer:  { shape: "laborEnforcer",     palette: {
+        O: "#100d0a", S: "#c9a071", K: "#e0b98a", D: "#7a5330", E: "#141414",
+        C: "#2e2318", H: "#4a3c2a", B: "#5c4a34", A: "#3f3222", X: "#241a12",
+        M: "#6b6158", V: "#d9a94e", T: "#4a3c2a", F: "#1a140d"
       } },
       // Overseer Voraxx — "Ledger & Lash" v2 (§SPRITE_SHAPES voraxxFat): a fat,
       // jowly tyrant in an olive-drab officer's coat with a deep-red sash,
@@ -2707,16 +3229,73 @@
         E: "#5affa0", O: "#1a2a22", B: "#3a6b52", P: "#7ad6a8", L: "#2a4a3a",
         M: "#9ad6b0"                                              // tool-accent highlight
       } },
-      riotEnforcer: { shape: "guardTrooper", palette: {  // black armor / hot-white baton
-        O: "#080808", P: "#2a2a2e", G: "#3a3a40",
-        S: "#c9a071", K: "#e0b98a", D: "#7a5330", W: "#e8e8e8", E: "#141414",
-        C: "#18181c", H: "#dfe8ff",
-        B: "#26262b", A: "#1a1a1e", X: "#0e0e10",
-        M: "#6b6158", V: "#f4f8ff",
-        T: "#26262b", U: "#141416", F: "#0a0a0c"
+      // Riot Enforcer — the bulkiest of the Vossmark trio: black armor,
+      // hot-white baton glow. Bespoke `riotShieldTrooper` shape now (split
+      // off the shared guardTrooper 2026-07-27, was tabled as a candidate
+      // since 2026-07-26): full face-shield helmet (no visible face at
+      // all), a riot shield on one arm, baton on the other, shin guards.
+      riotEnforcer: { shape: "riotShieldTrooper", palette: {
+        O: "#080808", P: "#2a2a2e", G: "#3a3a40", E: "#141414",
+        C: "#18181c", B: "#26262b", A: "#1a1a1e", M: "#6b6158",
+        V: "#f4f8ff", T: "#26262b", U: "#141416", F: "#0a0a0c"
       } },
 
       // ---------- HELIOS STATION / DUNGEON 5 (§5.4b) ----------
+      // Void wraith trio — bespoke shapes (was 100% blob), all reusing
+      // the exact same palette so the family reads as one species,
+      // escalating from Poltergeist's bare scrap of cloth to Terror's
+      // full screaming maw.
+      poltergeist: { shape: "poltergeistWisp", palette: {
+        O: "#0d0812", H: "#2e1f3d", K: "#3d2a52", J: "#1a1226",
+        V: "#c9a8ff", N: "#5c4a70", T: "#2e1f3d", U: "#1a1226"
+      } },
+      shade: { shape: "shadeWraith", palette: {
+        O: "#0d0812", H: "#2e1f3d", K: "#3d2a52", J: "#1a1226",
+        V: "#c9a8ff", N: "#5c4a70", B: "#3d2a52", A: "#241832",
+        T: "#2e1f3d", U: "#1a1226"
+      } },
+      terror: { shape: "terrorMaw", palette: {
+        O: "#0d0812", H: "#2e1f3d", K: "#3d2a52", N: "#5c4a70",
+        M: "#120a1a", G: "#d8f5e0", B: "#3d2a52", A: "#241832",
+        T: "#2e1f3d", U: "#1a1226"
+      } },
+      // Sol's Acolyte — "a reskinned Void in the literal sense the name
+      // implies" (design doc): a station pilgrim consumed by devotion,
+      // still human-shaped and grounded (unlike the legless wraith trio
+      // above). Reuses the orphaned `stealthHumanoid` shape (zero users
+      // left after Talos Wraith/Phantom split into their own bespoke
+      // shapes) recolored into the Sun God's own bronze/gold family —
+      // cheap on purpose, matching the doc's "swarm add, not raw damage"
+      // framing. Blank blinding-white eyes (E) instead of a normal color
+      // are the "none of the will" tell.
+      solAcolyte: { shape: "stealthHumanoid", palette: {
+        O: "#1a0e05", H: "#c98a3a", E: "#fff2c0",
+        B: "#8a5a20", C: "#5c3a14", L: "#3a2410"
+      } },
+      // Void Horror — bespoke abyssalClaw shape (24x32, was 100% blob).
+      // Kraken-anchored fanged maw, an "eclipse" chest patch foreshadowing
+      // the Sun God (consumeLight as anti-glow).
+      voidHorror: { shape: "abyssalClaw", palette: {
+        O: "#0d0812", H: "#2e1f3d", K: "#3d2a52", J: "#1a1226",
+        V: "#c9a8ff", N: "#5c4a70", M: "#120a1a", G: "#d8f5e0",
+        B: "#3d2a52", A: "#241832"
+      } },
+      // Demon — bespoke demonBrand shape (24x32, was 100% blob).
+      // Asymmetric horns, a glowing orange hellbrand mark (the family's
+      // one real glow accent, not an anti-glow).
+      demon: { shape: "demonBrand", palette: {
+        O: "#0d0812", H: "#2e1f3d", K: "#3d2a52", J: "#1a1226",
+        V: "#c9a8ff", N: "#5c4a70", B: "#3d2a52", A: "#241832",
+        F: "#ff8a3d"
+      } },
+      // Devil — bespoke devilCrown shape (24x32, was 100% blob). A
+      // cracked fragment of the Sun God's own corona worn as a crown
+      // (damnationDecree), a fused coiled lash-whip (tormentLash).
+      devil: { shape: "devilCrown", palette: {
+        O: "#0d0812", H: "#2e1f3d", K: "#3d2a52", J: "#1a1226",
+        V: "#c9a8ff", N: "#5c4a70", B: "#3d2a52", A: "#241832",
+        Y: "#f4b12e"
+      } },
       // Void Soul Eater — "Wrong-Angle Maw" v2 (§SPRITE_SHAPES
       // voidSoulEaterMaw): hooded void-wraith, jaw flared wide into a
       // jagged sawtooth maw, tattered robe streamers instead of legs.
