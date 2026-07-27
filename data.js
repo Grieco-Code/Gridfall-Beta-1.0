@@ -1735,30 +1735,12 @@
         "..OFFFO......OFFFO......",
         "........................"
       ],
-      // Humanoid officer — Vossmark Officer, Talos Vanguard, Overseer Voraxx
-      // (boss — same shape, bigger via tier-based scale, own palette): a
-      // bigger, more ornate humanoid for elite/boss-tier organic enemies.
-      humanoidOfficer: [
-        "................",
-        "....OHHHHHHO....",
-        "...OHVVVVVVHO...",
-        "....OSSSSSSO....",
-        "...OOCCCCCCOO...",
-        ".OAAABBBBBBAAAO.",
-        ".OAABBBBBBBBAAO.",
-        ".OAABBBBBBBBWGO.",
-        "..BBBBBBBBWWWWWW",
-        "..BBBBBBBB.WWWW.",
-        "...OOKKKKKKOO...",
-        "..OLLLLLLLLLLO..",
-        "...LLLL..LLLL...",
-        "...LLLL..LLLL...",
-        "...FFFF..FFFF...",
-        "................"
-      ],
-      // Humanoid officer, Vossmark — bespoke, split from the shared shape
-      // above (Talos Vanguard stays on humanoidOfficer until its own
-      // redesign). Anchored to the "Commissar Cap" archetype (oversized
+      // Humanoid officer, Vossmark — bespoke (originally split from a
+      // shared humanoidOfficer shape; that shape is now unused by anything
+      // — Overseer Voraxx moved to its own voraxxFat shape earlier, and
+      // Talos Vanguard split off into humanoidOfficerTalos below — so the
+      // old shared shape was removed rather than left as dead code).
+      // Anchored to the "Commissar Cap" archetype (oversized
       // peaked cap, greatcoat with contrasting trim, gold insignia) at the
       // hero-scale 24x32 grid for real detail: real pupils, angry V-brows,
       // a stern mustache, gold epaulettes, a filled diagonal lapel,
@@ -1798,6 +1780,108 @@
         "......OLLLLOOLLLLO.OPPO.",
         "......OFFFFOOFFFFO..OPO.",
         "......OFFFFOOFFFFO...O.."
+      ],
+      // ---------- TALOS SECURITY WING (§5.1) ----------
+      // Split off the shared stealthHumanoid/humanoidOfficer shapes into
+      // bespoke silhouettes (2026-07-26 sprite pass). Research anchor: the
+      // Warhammer 40k "Genestealer Hybrid" archetype — per the design doc's
+      // own retcon framing the Security Wing reads as "closer to human,
+      // soldier-shaped" (the wing-level contrast against the overtly
+      // monstrous Specimen Wing), so all three stay recognizably human-
+      // soldier silhouettes and push their mutation into ONE escalating
+      // tell per tier rather than going full-monster.
+      // Talos Wraith — hunched fast infiltrator: ragged grown-cowl hood
+      // (uneven hem, not a clean cloth edge), one fused venom-glow claw
+      // growing out of the forearm (not held — avoids the floating-prop
+      // problem that hit Merc/the Officer twice already), other arm
+      // tucked in tight (compact/fast read).
+      stealthHumanoidWraith: [
+        "................",
+        ".......OHH......",
+        "......OHHHHO....",
+        ".....OHHHHHHO...",
+        ".....OJHHHHJO...",
+        "....OJJHHHHJO...",
+        ".....OJJEJEJO...",
+        ".....OJJJJJJO...",
+        "....OBBBBBBBO...",
+        "...OBBBBBBBBBO..",
+        "...OBBBDDBBBBO..",
+        "...OBBBBBBBBOVVV",
+        "..OBBBBBBBBBOVV.",
+        "..OAAAAAAAAONN..",
+        "...OFFFOOFFFO...",
+        "...OFFFOOFFFO..."
+      ],
+      // Talos Phantom — sleeker, more composed stealth striker: an angular
+      // chitin crest (vs Wraith's rounded ragged hood), a tapered upright
+      // waist (vs Wraith's hunched block), fused blade held up in a
+      // forward lunge at shoulder height (changes the actual bounding-box
+      // silhouette, not just the color) — a genuinely distinct silhouette
+      // one tier up, not a recolor of Wraith.
+      stealthHumanoidPhantom: [
+        "........R.......",
+        ".......ORO......",
+        "......OHHHHO....",
+        ".....ORRRRRRO...",
+        ".....OJJEJEJO...",
+        ".....OJJJJJJO...",
+        ".....OHHHHHHO...",
+        "......OCCCCO....",
+        "....OBBBBBBBBONN",
+        "...OBBBDDBBBBONN",
+        "....OBBBBBBBONN.",
+        "....OBBBBBBONN..",
+        "...OAAAAAAAO....",
+        "....OCCCCCCO....",
+        ".....OFFOOFFO...",
+        ".....OFFOOFFO..."
+      ],
+      // Talos Vanguard — bulkier heavy operative, hero-scale 24x32 (was
+      // sharing humanoidOfficer with Vossmark Officer/Overseer Voraxx).
+      // Asymmetric organic-plate pauldrons + a shoulder chitin spike
+      // (contrast to the Officer's mirrored gold epaulettes two factions
+      // over), Broodmarshal-family ribbed chitin torso banding with a
+      // glowing bio-crack, a glowing throat-node marking its 2.0x-weak-
+      // Psionic caste (front-facing analogue of Erebus Shaman's antennae),
+      // a hidden second clawed limb peeking from under the coat at the hip
+      // (direct callback to the Genestealer research anchor — "may hide an
+      // extra clawed limb under tattered clothes"), and a plasma-edge
+      // blade with a real crossguard + gripping hand (Dread Knight's
+      // solid-vertical-blade convention) so it reads as held, not floating.
+      humanoidOfficerTalos: [
+        ".........OHHHHO.........",
+        "........OHHHHHHO........",
+        ".......ORRRRRRRRO.......",
+        ".......OJJEJJEJJO.......",
+        "....O..OJJJJJJJJO.......",
+        "...OK...OHHHHHHO........",
+        "...OKO...OGGHHO.......O.",
+        "...OKK..OCCCCCCO.....OP.",
+        "....OKKKKBBBBBBKKKO..PG.",
+        "...OKKKKKBBBBBBKKO...PG.",
+        "...OBBBBBBBBBBBBBBBBOPG.",
+        "...OBDDDDDDDDDDDDDDBOPG.",
+        "...OBBBBBBBBBBBBBBBBOPG.",
+        "...OBBBBBBVBBBBBBBBBOPG.",
+        "...OBDDDDDVVDDDDDDDBOPG.",
+        "..OOBBBBBBBVBBBBBBBBOPG.",
+        ".OVOBBBBBBBBBBBBBBBBOPG.",
+        ".OVOBDDDDDDDDDDDDDDBOPG.",
+        ".OVKBBBBBBBBBBBBBBBBOKKO",
+        "..OKBBBBBBBBBBBBBBBBOKKO",
+        "..OAAAAAAAAAAAAAAAAAAOO.",
+        "..OAAAAAAAAAAAAAAAAAAO..",
+        "..OCCCCCCCCCCCCCCCCCCO..",
+        "...OCCCCCCCCCCCCCCCCO...",
+        "......OAAAAOOAAAAO......",
+        "......ODDDDOODDDDO......",
+        "......OAAAAOOAAAAO......",
+        "......OAAAAOOAAAAO......",
+        "......OFFFFOOFFFFO......",
+        "......OFFFFOOFFFFO......",
+        "......OFFFFOOFFFFO......",
+        "......OFFFFOOFFFFO......"
       ],
       // Sentry bot, mobile — Arc Sentinel: single big optic, a visible
       // thruster glow spreading below the chassis so it clearly reads as
@@ -2491,20 +2575,34 @@
       } },
 
       // ---------- TALOS SYSTEMS (§5.1) ----------
-      // Talos Wraith — fast fodder infiltrator, raw red-eyed and hunched.
-      talosWraith:  { shape: "stealthHumanoid",  palette: {
-        O: "#0d0808", H: "#3a1418", E: "#ff4d4d", B: "#5c1f24", C: "#d94f4f", L: "#3a1418"
+      // Talos Wraith — bespoke stealthHumanoidWraith shape (2026-07-26,
+      // research-anchored to the Genestealer Hybrid archetype): fast fodder
+      // infiltrator, ragged hood, raw red-eyed, one venom-glow fused claw.
+      talosWraith:  { shape: "stealthHumanoidWraith",  palette: {
+        O: "#0d0808", H: "#6b2530", J: "#2e1418", E: "#ff5a4d",
+        B: "#7a2f38", D: "#4a1c22", A: "#5a232a", N: "#3a1418",
+        V: "#a8d94a", F: "#1a0d0e"
       } },
-      // Talos Phantom — standard stealth operative: sleeker, cooler blue-glow
-      // variant of the same silhouette (a step up from Wraith, not a copy).
-      talosPhantom: { shape: "stealthHumanoid",  palette: {
-        O: "#0d1216", H: "#1c2731", E: "#5fd6ff", B: "#2a3742", C: "#24303a", L: "#1c2731"
+      // Talos Phantom — bespoke stealthHumanoidPhantom shape: sleeker,
+      // cooler cyan-glow operative one tier up from Wraith — an angular
+      // chitin crest, tapered waist, blade held high in a forward lunge
+      // (a genuinely distinct silhouette, not a recolor of Wraith).
+      talosPhantom: { shape: "stealthHumanoidPhantom",  palette: {
+        O: "#0d1216", H: "#33505f", J: "#1c2e38", E: "#6fe0ff",
+        B: "#3d5a68", D: "#578098", A: "#2e4652", C: "#2a4048",
+        R: "#578098", N: "#aef0ff", F: "#0e1418"
       } },
-      // Talos Vanguard — elite heavy operative: bio-augmented (visible skin),
-      // maroon/black armor, matches Wraith/Phantom's red-glow family.
-      talosVanguard:{ shape: "humanoidOfficer",  palette: {
-        O: "#0d0808", H: "#3a1418", V: "#ff4d4d", S: "#b5773f", C: "#2a1012",
-        A: "#4a1c1f", B: "#5c1f24", W: "#d94f4f", G: "#b5773f", K: "#1a1010", L: "#3a1418", F: "#1a0d0e"
+      // Talos Vanguard — bespoke humanoidOfficerTalos shape (24x32, own
+      // shape split from the now-Voraxx-only humanoidOfficer): asymmetric
+      // organic-plate pauldrons + shoulder spike, ribbed chitin torso
+      // banding with a glowing bio-crack, a glowing throat-node (its
+      // 2.0x-weak-Psionic tell), a hidden second clawed limb at the hip,
+      // and a plasma blade with a real crossguard + gripping hand.
+      talosVanguard:{ shape: "humanoidOfficerTalos",  palette: {
+        O: "#0d0808", H: "#5c2029", R: "#7a2f38", J: "#2e1418",
+        E: "#ff5a4d", C: "#3a1418", K: "#6b2530", B: "#5a232a",
+        D: "#3a1418", A: "#5a232a", F: "#1a0d0e",
+        P: "#ff6a4d", G: "#ffb347", V: "#a8d94a"
       } },
       // Proteus — "Open Bloom" v2 (§SPRITE_SHAPES proteusBloom): half-
       // transcended bio-executive, composed human face over a peeled-open
