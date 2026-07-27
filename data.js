@@ -1331,67 +1331,70 @@
     //   E eye-pupil · W eye-white · V accent glow · B/L/A cloth base/light/shadow ·
     //   M/P/N metal base/gleam/shadow · C strap · T/U pants · F boot · R robe-rune
     const SPRITE_SHAPES = {
-      // Merc — TOTAL REBUILD (2026-07-27, 3 revision rounds) as "a man in a
-      // space suit with a rifle" — direct request, explicitly to sidestep
-      // human-face rendering (this whole hero pass kept stumbling on faces
-      // specifically: Merc's own old eye-spacing bugs, Netrunner's flat
-      // face, several Vossmark Officer rounds — meanwhile Dread Knight, the
-      // best-received hero, works because it's a skull with no organic
-      // face at all). Full sealed helmet, zero exposed skin anywhere; the
-      // "face" is a glowing green visor (keeps the established Human-
-      // Augmented cyber-green identity color, just moved from an eye to a
-      // visor). Helmet is a real Apollo-era "bubble helmet": a symmetric
-      // round bulge (narrow crown -> wide equator -> narrows again) with a
-      // large transparent visor and a distinct locking neck-ring collar —
-      // v1 read as more tactical-combat, v2 fixed the visor size but held
-      // one width straight into the neck (read as a cylinder, not a
-      // sphere), v3 added the real taper on both sides of the equator.
-      // Rifle: a visible BEND between a shallow barrel and a steeper stock
-      // meeting at a rectangular receiver block, plus a light-metal
-      // magazine — v1's straight uniform diagonal read as a sword
-      // regardless of color; the angle change plus the rectangular
-      // magazine jutting off it is what actually flips the read to "gun."
-      // Preserved from the original "Poster Ready" design: rifle held
-      // diagonally across the chest, both hands gripping. Resized from the
-      // old off-grid 24x39 back to the party's standard 24x32 hero grid.
-      // Anchors: the classic astronaut bubble-helmet convention; Halo's
-      // helmet-defines-the-silhouette design (same lesson as the FF1 job-
-      // sprite sheet, where a hat alone IDs the class); Starship Troopers'
-      // Mobile Infantry suit (grounded human-scale, distinct from Mech
-      // Runner, the party's actual machine); Dead Space's segmented rig.
+      // Merc — SECOND TOTAL REBUILD (2026-07-27): "tactical operator, closed
+      // helmet" — direct request for a from-scratch main-hero rebuild,
+      // researched off Starship Troopers M-3 "snooper" helmets / The
+      // Expanse MCRN Goliath armor / modern tactical operator gear. Built
+      // in two parallel variants sharing one body (face-exposed vs. sealed
+      // visor) as a controlled A/B; the sealed-visor version shipped,
+      // continuing the pattern that a fully-enclosed head (skull, mask,
+      // visor) sidesteps human-face rendering and reads best at this pixel
+      // scale — the same lesson behind Dread Knight (best-received hero,
+      // literally a skull) and the Saboteur respirator-mask rebuild.
+      // Helmet: angular tactical shell (not the old round Apollo bubble)
+      // with a full wraparound visor lit by the established Human-
+      // Augmented cyber-green glow, a brighter HUD-line accent breaking up
+      // the glass so it doesn't read as one flat color block, and a
+      // chin/jaw guard with vent-slit detail closing off the bottom. Per
+      // follow-up request ("add in some blue eyes... as if you could see
+      // them"), two small cooler-blue patches sit inside the green glass at
+      // the exact temple/nose-bridge spacing the face-exposed variant used
+      // for its real eyes — darker than the surrounding glow so they read
+      // as eyes SEEN through the visor, not part of the glow itself, a
+      // quiet hint of the person underneath without breaking the seal.
+      // Body (identical across both head variants): collar, shoulder
+      // radio, chest-rig straps + red stripe accent, rifle with a visible
+      // barrel/stock bend + rectangular magazine (a straight uniform
+      // diagonal reads as a sword regardless of color — the angle change
+      // plus the magazine jutting off it is what flips the read to "gun"),
+      // belt, knee-pads, boot straps. Legs centered under the head (a v1
+      // had them drifted a full column right — caught via direct column
+      // inspection, not eyeballing). Old space-suit bubble-helmet design
+      // archived to candidates.json as mercSpaceSuitLegacy; the face-
+      // exposed sibling stays staged there too as mercTacticalV1.
       heroMerc: [
         "..........OKKO..........",
-        "........OHHHHHHO........",
-        ".......OHHHHHHHHO.......",
-        "......OKKGGGGGGKKO......",
-        ".....OKVVVVGGGGGGKO.....",
-        ".....OKGGGGGGGGGGKO.....",
+        "........OHHHHHHOZ.......",
+        ".......OHHHHHHHHOZ......",
+        "......OHHHHHHHHHHO......",
+        "......OHHHHHHHHHHO......",
+        "......OZGGZZZZGGZO......",
+        "......OZVVGGGGVVZO......",
+        "......OGGIIGGIIGGO......",
         "......OGGGGGGGGGGO......",
-        "........OHHHHHHO......O.",
-        "........OCCJCCJO.....MPO",
-        "......OYYBBBBBBBBLOMPO..",
-        ".....OYLLBBBBBBBOMPOO...",
-        ".....OIIBBBBBBOXPOIIO...",
-        ".....OBBLBBBXOPPOLBBO...",
-        ".....OBALAAOOMMMOLABO...",
-        ".....OBBBBONPOOMMOBBO...",
-        ".....OBBBOPOGOMMMOBBO...",
-        "......RRPNORROPPORRR....",
-        ".....OOPOBBBOQQOBBBBO...",
-        "....ONXOAAAAOOOAAAABO...",
-        "....XXOBBBBBBBBBBBBBO...",
-        ".....OCCCCCCCCCCCCCCO...",
-        "......OAAOYYOAAAAAAO....",
-        ".......OAOYYOAAAAAO.....",
-        ".......OTTTTOOTTTTO.....",
-        ".......OTTTTOOTTTTO.....",
-        ".......OUUUUOOUUUUO.....",
-        ".......OTTTTOOTTTTO.....",
-        ".......OTTTTOOTTTTO.....",
-        "......OFFFFFOOFFFFFO....",
-        "......OFFFFFOOFFFFFO....",
-        "......OFFFFFOOFFFFFO....",
-        "......OFFFFFOOFFFFFO...."
+        "......OZGGGGGGGGZO......",
+        ".......OHHHZZHHHO.......",
+        "........OHHHHHHO........",
+        "........OSSSSSSO......O.",
+        ".....Z..OCCCCCCO.....MPO",
+        ".....OZZBCCCCCCBBBOMPO..",
+        "....OBZZBBBBBBBBOMPO....",
+        "....OBBBBBBBBBOXPOBO....",
+        "....OBLBLLBBXOPPOBBO....",
+        "....OBLLBBBOOMMMOBBO....",
+        "....ORRRRRRNPOOQQORO....",
+        "....OAACCOPOAOQQQOAO....",
+        "....OBBBPNOBBOPPOBBO....",
+        ".....OCCCCCCONNOCCCO....",
+        "....OOXOAAAAAAAAAAAO....",
+        "....XXOTTTTOOTTTTO......",
+        "......OTLLTOOTLLTO......",
+        "......OUUUUOOUUUUO......",
+        "......OTTTTOOTTTTO......",
+        ".....OFFFFFOOFFFFFO.....",
+        ".....OFFFFFOOFFFFFO.....",
+        ".....OFFFFFOOFFFFFO.....",
+        ".....OYYYYYOOYYYYYO....."
       ],
       // Netrunner (Nyx) — TOTAL REBUILD 2026-07-27. Direct request: "do
       // research... make an attempt at a complete rebuild... worst case,
@@ -1595,34 +1598,60 @@
         "........................",
         "........................"
       ],
-      heroSaboteur: [   // Sexias: Vossmark deserter, scavenged corroded gear, bandana,
-                         // asymmetric armor (one pauldron, one bare), acid-green blade
-        "........................",
-        "........................",
-        "..........OHHHO.........",
-        "........OHHHHHHHO.......",
-        ".......OHHHHHHHHHO......",
-        ".......OHHSSSSSHHO......",
-        "......OSSSWDDWSSSO......",
-        "......OSSSSSSSSSSO......",
-        "......OCCCCCCCCCCO......",
-        ".......OCCCCCCCCO.......",
-        "........ODDDDDDO........",
-        ".....OBBBBBOSSSSORRO....",
-        "....OLLLLLLOBBBBOBBO....",
-        "...OBBBBBBBBBBBBBO..GVO.",
-        "...OBBBBBGGGGBBBBO.GVO..",
-        "...OBBRRRBBBBBBBBOGV....",
-        "...OBBBBBAAABBBBBGV.....",
-        "...OBRRRBBBBBBBGVO......",
-        "...OBBBBBBBBBBGVBO......",
-        "...OAAAAAAAAAAAAAO......",
-        "...OAAAAAAAAAAAAAO......",
-        "....OCCCCCCCCCCCO.......",
+      // Sexias — TOTAL REBUILD 2026-07-27 as a "corroded deserter"
+      // anti-hero. Direct complaint: "he's quite generic... increase the
+      // detail." Rendered the old shipped design directly first: the two
+      // "eyes" had zero gap between their pupils (read as one smudge),
+      // the nose had no shape at all, the rust "decay" patches were clean
+      // solid rectangles (read as a color-block pattern, not battle
+      // damage), and the two "mismatched" legs used two olive tones close
+      // enough in value that they never actually read as different
+      // materials despite the code using different palette letters — same
+      // "claimed but not executed" gap found in Netrunner/Mentalist.
+      // Research: Fallout-style wasteland-mercenary conventions
+      // (scavenged mismatched armor, gas/respirator masks, exposed
+      // corrosion) are the real anchor for "anti-hero deserter." Core fix
+      // builds on this session's single strongest lesson (reconfirmed the
+      // same day — "Dread Knight was your best work" — because a skull
+      // has no organic face to get wrong): a full respirator mask with
+      // glowing acid-green lenses, replacing the bandana + bare eyes.
+      // Good in-fiction logic too (a Corrosive specialist needs breathing
+      // protection around his own acid weapons), and it ties his
+      // signature glow color directly to his face for a much stronger
+      // anti-hero/villain read. Also rebuilt: corroded armor with actual
+      // jagged holed edges (not clean rectangles), a bandolier strap,
+      // a genuinely-contrasting mismatched leg (light tan cloth wrap vs.
+      // dark armored greave, not two similar olive tones), and a jagged
+      // broken-edge acid blade (was a smooth diagonal wand). The previous
+      // build is preserved as the `saboteurLegacy` candidate in
+      // tools/sprite-review/candidates.json, not deleted.
+      heroSaboteur: [
+        ".........OHHHHO.........",
+        ".......OHHHHHHHHO.......",
+        "......OHHHHHHHHHHO......",
+        "......OHHSSSSSSHHO......",
+        "......ONSSSSSSSSNO......",
+        "......OMMGGMMGGMMO......",
+        "......OMMVVNNVVMMO......",
+        "......OMMMMMMMMMMO......",
+        ".......OMMNNNNMMO.......",
+        "........ONNNNNNO........",
+        ".........OMMMMO.........",
+        "..........OSSO..........",
+        "....OLLLLLSSSSCCCCO.....",
+        "...OBBRBBBSSSSCCCCCO....",
+        "...OBBBBBBBBBBBBBBBOBBO.",
+        ".OCOBBBBBBBBBBUBBBBDDDOG",
+        "OCCOBBBBBUUBBUBBBBBOODGV",
+        "ODDORRRBBBBBAABBBBBO.OVG",
+        "ODDOBBFBBBBBBBBBBBBOOGV.",
+        "ODDOBFFFBBBBBBBBBBBOVGO.",
+        "OSSOFFFBBBBBBBBBBBOGVO..",
+        "...OAAAAAAAAAAAAAAOVO...",
+        "....OCCCCCCCCCCCCCO.....",
         ".....OTTTTOOBBBBO.......",
         ".....OTTTTOOBBBBO.......",
-        ".....ORRTTOOBAABO.......",
-        ".....OTTTTOOBBBBO.......",
+        ".....OUUUUOORBBRO.......",
         ".....OTTTTOOBBBBO.......",
         ".....OFFFFOOFFFFO.......",
         ".....OFFFFOOFFFFO.......",
@@ -2957,23 +2986,23 @@
     };
 
     const SPRITES = {
-      // Merc — space-suit TOTAL REBUILD (§SPRITE_SHAPES heroMerc): a
-      // sealed bubble helmet with a glowing green visor (the old cyber-eye
-      // identity color, moved off an exposed face entirely), suit-olive
-      // kept as the established color identity, red chest-stripe accent
-      // (was a collar accent), light-metal rifle with a visible barrel/
-      // stock bend + rectangular magazine.
+      // Merc — tactical closed-helmet REBUILD (§SPRITE_SHAPES heroMerc):
+      // angular tactical shell with a full green-glow visor (V bright HUD
+      // line over the base glow G), cool blue eye-hint (I) seen through
+      // the glass, chest-rig straps + red stripe (R), rifle with visible
+      // metal/gleam/magazine-dark/stock-dark tones (M/P/Q/N).
       merc:        { shape: "heroMerc",  palette: {
         O: "#0d1016",
-        H: "#4a5148", K: "#5c645a", J: "#26302a",       // helmet shell / highlight / visor-frame shadow
-        G: "#0f2a1c", V: "#6cff9e",                     // visor glass / green glow
-        C: "#201c18",                                    // neck-ring / strap+belt
-        Y: "#3a423c", I: "#525c53",                     // backpack / backpack highlight
-        B: "#3a4a3d", A: "#26332a", L: "#4c5c47",       // suit base / shadow / highlight
-        R: "#a8342a",                                    // chest-stripe accent (red)
+        S: "#d09a63", K: "#f4c890",                      // neck skin / helmet crest highlight
+        H: "#454a42", Z: "#26302a",                     // helmet shell / helmet shadow-accent
+        G: "#6cff9e", V: "#9cffc0", I: "#4a7fd6",        // visor glow / HUD-line accent / blue eye-hint
+        Y: "#6b4530",                                     // boot strap
+        C: "#201c18",                                     // collar / strap+belt
+        B: "#3a4a3d", A: "#26332a", L: "#4c5c47",        // suit base / shadow / highlight
+        R: "#a8342a",                                     // chest-stripe accent (red)
         M: "#727880", P: "#a2a8b0", Q: "#20262c", N: "#171a20",  // rifle metal / gleam / magazine-dark / stock-dark
-        X: "#22261e",                                     // gloved hand
-        T: "#3a4a3d", U: "#26332a", F: "#171a20"        // pants / pants-shadow / boot
+        X: "#22261e",                                      // gloved hand
+        T: "#3a4a3d", U: "#26332a", F: "#171a20"         // pants / pants-shadow / boot
       } },
       // Netrunner — synthetic hacker rebuild (§SPRITE_SHAPES heroNetrunner):
       // thin arched brows, curved cyan-glow eyes with a real temple/nose-
@@ -3031,23 +3060,24 @@
         M: "#7a5a3a", N: "#4a3624",                     // staff wood
         W: "#c9c2d6"                                    // beard
       } },
-      // Saboteur (Sexias) — Vossmark deserter fighting with scavenged,
-      // corroded ex-Vossmark gear (armor-stripping/Sunder kit, Corrosive
-      // damage type). Asymmetric armor (one intact pauldron L, one bare
-      // shoulder -- scavenged gear, not a matched uniform), a bandana (C)
-      // across the lower face, rust (R) patches breaking up the olive
-      // Vossmark base (B/A), an acid-green glowing corroded blade (G/V) --
-      // not a gun, matching "corrodedEdge" as his base skill -- and
-      // mismatched legs (one cloth-wrapped T, one armored B).
+      // Saboteur (Sexias) — corroded-deserter rebuild (§SPRITE_SHAPES
+      // heroSaboteur): a full respirator mask (M/N) with glowing acid-
+      // green lenses (G/V) instead of a bandana + bare eyes, asymmetric
+      // scavenged armor (one intact olive pauldron L, one bare/bandaged
+      // arm), jagged corrosion holes (F) breaking up the plating instead
+      // of clean rust rectangles, a bandolier strap, a jagged broken-edge
+      // acid blade, and genuinely mismatched legs (light tan cloth wrap T
+      // vs. dark armored greave B — real value contrast now, not two
+      // similar olive tones).
       saboteur:    { shape: "heroSaboteur",  palette: {
         O: "#0d1210",
         S: "#a8825c", K: "#c9a17a", D: "#6b4d34",      // weathered skin base/light/shadow
         H: "#2e2a20", J: "#1c1912",                    // scruffy hair
-        E: "#141414", W: "#d8d0b8",                    // eyes
+        M: "#454a3c", N: "#2a2e24",                     // respirator mask base / dark (filter, straps)
+        G: "#7ae05a", V: "#9cff6b",                     // acid glow (lenses + blade)
         B: "#4d5140", A: "#383c2e", L: "#63684f",      // olive Vossmark armor base/shadow/highlight
         R: "#6b4023", Y: "#8a5a30",                    // rust decay base/light
-        G: "#7ae05a", V: "#9cff6b",                     // acid corrosion stain / glowing blade edge
-        C: "#232018", T: "#33362a", U: "#1e2018",      // rag wrap / cloth-wrapped leg / boot trim
+        C: "#232018", T: "#c9b896", U: "#8a7458",      // rag wrap / light cloth-wrapped leg / leg shadow
         F: "#141610"
       } },
       // Spider Drone — gunmetal chassis, red optic band, bladed leg-tips
