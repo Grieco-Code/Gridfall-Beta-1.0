@@ -1727,7 +1727,7 @@ then graphics, then story. Graphics can slot in partially earlier as a coat of p
 | ~~**G. First mini-dungeon map**~~ ✅ DONE | branching node tree (§5.1): 9 hand-authored nodes, hex-marker-styled (art deferred to I) node buttons, randomized per-node mob composition (replaces global `encounterLevel`), intra-squad level variance, escalating difficulty → boss finale ("The Warden"), **Talos Systems** shipped as a 2nd faction, no-heal-between-fights persistence |
 | **H. Title, roster & town** *(redefined 2026-07-23, §5.2 — all slices shipped)* | H1 title scene + real `localStorage` save/load ✅ · H2 roster/active-party split (solo start, Merc, **player-named** — §5.2 update) ✅ · H3 prologue ("Kharon's Reach" — §5.2a) ✅ · H4 Town scene ("the Long Shot" — §5.2c: Roster/Equipment, Party Inventory, explicit Save, general dungeon-return hub; Sector 1 reframed as dungeon 2 with a new Netrunner recruit) ✅ · H5 inventory & loadout screens proper (§5.2e: Party Inventory made actionable, Character Sheet Stats grown into a real overview, item effects shown inline) ✅ |
 | ~~**L. Dungeon 3 — "Site Erebus"**~~ ✅ DONE *(§5.3)* | bug-planet crash dungeon: Roach/Warrior/Shaman/Armored Warrior tiers → boss "the Broodmarshal" (add-spawn at 50% HP, a new generic reinforcement engine hook + a relay-jam counter), a Tiangong black-site reveal that widens the story past the corp cold war, one-dungeon detour (no new region, no recruit), sim-verified |
-| **I. Graphics pass** | ✅ combat sprites (all 5 heroes + all 17 enemies, idle bob + hit flash, tier-scaled), ✅ hex-node map + per-region backdrops, ✅ combat backdrops (mining/station/hive). Also this phase: the single `game.html` was split into 5 classic `<script>` files (data/state/ui/engine/main). **Sprite-quality pass RESUMED 2026-07-25/26 (was paused since 2026-07-24) — new repo tooling `tools/sprite-review/` generates a live pixel-accurate status page straight from the game data, regenerate via `python3 tools/sprite-review/build.py`:** ✅ **all 9 bosses now bespoke** (Voraxx "Ledger & Lash," Broodmarshal redone as a Starship-Troopers-style Warrior Bug, Warden, Proteus, Void Soul Eater, Sun God, Phthora, Caged God, Chthon the true final boss); ✅ Merc redrawn again as "Poster Ready" (diagonal held rifle, reworked face). Remaining, now scoped as a **full redo of every Hero/Mob** (not just gaps): Merc's right arm is a confirmed missing shape + the rifle wants more detail; Mech Runner/Netrunner/Dread Knight each have confirmed concrete issues (cannon-arm clipped at frame edge, flat face + undrawn waist-taper, sword sitting dead-center reading as anatomy instead of being angled); Mentalist still on the old 18×28 grid; Saboteur has zero sprite; all 27 mob entries across every faction get redrawn with per-section unique silhouettes instead of the current shared-shape recolor economy. UI/menu theming polish still open |
+| **I. Graphics pass** ✅ | ✅ combat sprites (all 6 heroes + all mob/boss enemies, idle bob + hit flash, tier-scaled), ✅ hex-node map + per-region backdrops, ✅ combat backdrops (mining/station/hive). Also this phase: the single `game.html` was split into 5 classic `<script>` files (data/state/ui/engine/main). **Sprite-quality pass (resumed 2026-07-25, ran through 2026-07-27) is now essentially COMPLETE**, via the repo tooling `tools/sprite-review/` (live pixel-accurate status page straight from the game data, regenerate via `python3 tools/sprite-review/build.py`): ✅ **all 9 bosses bespoke**; ✅ **entire mob roster (Vossmark/Erebus/Talos/Void, all phases) bespoke — zero blob fallbacks, zero recolor-only shares left anywhere**; ✅ **all 6 heroes redrawn/rebuilt, uniformly 24×32** — Mech Runner (agile digitigrade battle-mech, BattleTech/Titanfall-anchored), Netrunner (real face + hourglass torso, female android), Mentalist (wizened-sage refinement — beard, real eyes, wooden staff w/ gripping hand), Saboteur ("corroded deserter" anti-hero — respirator mask w/ glowing lenses, mismatched armor), and **Merc rebuilt twice** — first into a space-suit rifleman, then a **from-scratch tactical-operator rebuild** (Starship Troopers/The Expanse-anchored) shipped as a **sealed tactical helmet w/ a green-glow visor + a hinted blue eye-pair seen through the glass**; Dread Knight left untouched by explicit user call ("your best work"). Unshipped alternates/legacies (unchosen Merc face-exposed variant, superseded pre-rebuild shapes for Merc/Mech Runner/Netrunner/Saboteur) kept staged in `tools/sprite-review/candidates.json` for reference. Only remaining open item from this phase: UI/menu theming polish (status not reverified recently) |
 | **J. Story arc → finished game** *(canon locked 2026-07-23, §9; map-system spec locked 2026-07-24, §5.4; Dungeon 6 fully speced + Talos retconned 2026-07-25, §5.4c)* | The 3-act Sol arc to a finite ending. Act I shipped (Kharon's Reach → Vossmark Station Sector 1); Act II = Erebus (shipped) + **Dungeon 4 ✅ SHIPPED 2026-07-24** (Talos bio-foundry, §5.4a — 14 nodes, two pool-differentiated wings, Six the Psionic Mentalist recruit, boss Proteus, sim-verified end-to-end) — debuted the §5.4 map upgrade (fog of war, Unknown nodes, loot variance, dead-end spurs) as reusable systemic mechanics, not one-off content; Act III = **Dungeon 5 "Helios Station" ✅ SHIPPED 2026-07-24/25** (§5.4b — a new radial/circular map shape, the double boss, a narrow Void/Entropy preview roster; **balance-tuned 2026-07-25** — a full-chain sim caught the bosses' encounter levels were hardcoded 7/8 against a party that actually arrives around level 2, fixed and re-verified) + **Dungeon 6 "the Cradle" ✅ SHIPPED 2026-07-25 (finale, §5.4c — designed AND built same day)**: Vossmark's Chancellor merges with the Loom into the true final boss (Chthon, God of the Breach) in a two-phase double-boss finale that directly causes the Helios wormhole to finally open; Talos's own leader (Phthora, the Fleshspring) fails a mirrored merge attempt earlier in the dungeon; two new recruits (Vincent/Dread Knight, Sexias/new Corrosive class) close real content/system gaps; 22 nodes, biggest map yet; the game's first branching ending (all 3 §9.5 choices) implemented. **The Sol arc is now content-complete, start to finish.** Sim-verified as a first-pass baseline (structurally clean, zero crashes, one squad clears the full chain at 36% win rate) — NOT yet balance-tuned to the game's usual target band, that's its own later roadmap phase. Sprite art for Dungeon 4/5/6's new rosters still outstanding (generic-blob fallback). See §9.4 for story beats, §5.4/§5.4a/§5.4b/§5.4c for the map-system + Dungeon 4/5/6 specs |
 | ~~**K. Town/hub layer**~~ *(retired 2026-07-23 — absorbed into Phase H, §5.2)* | superseded: towns/roster/save could not wait for a "future" phase once story-mode start was decided |
 
@@ -1922,6 +1922,51 @@ pointer):**
 ---
 
 ## 13. Changelog
+- **2026-07-27 — Sprite-quality pass reaches full completion: mob roster finished, then a full
+  hero-by-hero revisit.** Closes out Phase I (§11 roadmap row I). **Mobs:** the last tabled trio
+  (Quota Enforcer/Vossmark Grunt/Riot Enforcer) split into bespoke shapes, leaving **zero blob
+  fallbacks and zero recolor-only shares anywhere in the game** (verified via the `tools/sprite-review/`
+  jsc dump). **Heroes**, each researched against a real-world/genre anchor and shipped after user
+  review: Mech Runner totally rebuilt as an agile digitigrade battle-mech (BattleTech/Titanfall
+  reverse-joint "chicken-walker" convention — translated to a 2D-readable bold outward knee-splay, since
+  the actual joint bend is a depth-axis feature invisible face-on); Netrunner totally rebuilt with a
+  real female face and an hourglass torso that actually reads (the old torso data tapered numerically
+  but the arms masked it — fixed by holding arm position roughly constant while the torso narrows
+  underneath); Mentalist refined (not rebuilt) into a traditional wizened-sage mage — added a beard,
+  real eyes, and a proper wooden staff with a gripping hand; Saboteur totally rebuilt into a "corroded
+  deserter" anti-hero — a respirator mask with glowing acid-green lenses (replacing bare eyes, and
+  narratively justified as breathing protection for a Corrosive specialist), jagged corrosion holes,
+  genuinely-contrasting mismatched armor. **Merc, the starting hero, was rebuilt twice in this pass**:
+  first into a space-suit rifleman (sealed bubble helmet, resized off its old drifted 24×39 grid back to
+  the shared 24×32), then — per a dedicated request to get the flagship hero right, researching
+  Starship Troopers/The Expanse — a from-scratch **tactical-operator rebuild**. Two full variants were
+  built off one shared body (collar/rig/rifle/legs identical) as a controlled A/B: a face-exposed
+  tactical-helmet version, and a sealed-visor version with a hinted pair of blue eyes seen through the
+  green-glowing glass. **The sealed-visor variant shipped** as the live `heroMerc`/`merc`, continuing
+  this whole pass's clearest lesson (explicitly reconfirmed by the user re: Dread Knight, "your best
+  work"): a fully-enclosed head sidesteps human-face rendering and reads better than an exposed face at
+  this pixel scale. Every superseded/unchosen design (old Merc space-suit build, unchosen face-exposed
+  Merc variant, pre-rebuild Mech Runner/Netrunner/Saboteur) is kept staged verbatim in
+  `tools/sprite-review/candidates.json`, not deleted. Technical detail (exact shape/palette diffs,
+  validation steps) in the tech-reference §11 changelog.
+- **2026-07-26 — Battle mechanics overhaul: full design lock (damage-type consolidation + skill-tree
+  rework), SPEC ONLY, nothing built yet.** A dedicated multi-round planning session (external research:
+  Pokémon/Persona press-turn/Destiny elemental-verb design/Mass Effect defense layers/Hollow Knight
+  charms/Path of Exile keystones), triggered by the user's read that combat had too many damage types and
+  the skill trees didn't matter. Full detail: §3.2a (damage types), §3.3 (2 new statuses), §3.7
+  (implementation/migration/regression plan), §4.1a (skill trees), §11 roadmap row M. Headline decisions:
+  7 damage types collapse to 4 RESISTANCE buckets (Physical/Energy/Mind/Exotic) while every flavor
+  name/skill message stays completely unchanged (flavor and math are now decoupled); "hacking" (Cyber) is
+  mechanically absorbed into Shock's Energy bucket per the user's own instinct, with zero content
+  rewrites; Corrosive and Kinetic's long-standing "never rewarded" problems both resolve as a side effect
+  of sharing one Physical bucket; Exotic (Void + new Gravity) stops being a normal resistance number and
+  becomes a family of hero-inaccessible rule-breaking flavors, each bypassing the grid its own way; skill
+  trees become a two-layer Hollow-Knight-style system (a big permanent branching Unlock Pool + a small
+  swappable Tactic Slot budget that grows slowly past the campaign's level ceiling — a deliberate
+  long-tail hook for the not-yet-built endless portal). Equipment/gear-affinity rework stayed explicitly
+  out of scope (user's call). **Next actionable step when asked: begin §3.7's build sequencing, starting
+  with the Foundation slice** — the user wants a go-ahead checkpoint on this written plan before any code
+  changes.
 - **2026-07-25** — **Dungeon 6 map fixed after a real playthrough surfaced broken node positions**
   (same-day follow-up to the build below). Player report: "issues with the nodes." Verified by
   computing `computeMapLayoutRadial`'s actual output — several unrelated nodes (`s1`/`s2`, `u1`/`u2`,

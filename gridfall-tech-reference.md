@@ -771,6 +771,40 @@ numbers in the code are what they are, not just what they are:**
 ---
 
 ## 11. Changelog
+- **2026-07-27 — Sprite-quality pass completes: mob roster finished, full hero rebuild pass.** All in
+  `data.js` (`SPRITE_SHAPES`/`SPRITES`), validated each time via the standard 3-layer check (Python
+  re-parse of shape/palette in a scratchpad `extract.py`, a `jsc` parse-check on `cat data.js state.js
+  ui.js engine.js`, and a `jsc` dump-status-check via `tools/sprite-review/dump_sprites.js` confirming
+  live bespoke/shared/blob status + dims + scale). **Mobs:** `laborEnforcer` (Quota Enforcer, bare head/
+  lighter vest) and `riotShieldTrooper` (Riot Enforcer, face-shield + riot shield + baton) split off the
+  old shared `guardTrooper`; Vossmark Grunt keeps `guardTrooper` alone with a mouth-shape polish. Zero
+  `ENEMIES` keys resolve to a blob or a `sharedWith.length > 1` shape anywhere in the roster now.
+  **Heroes**, all remaining on the shared 24×32 `HERO_BATTLE_SCALE` grid (no `SHAPE_SCALE_OVERRIDE`
+  entries needed for any of them): `heroMech`/`mechRunner` replaced (digitigrade mech, bow-legged knee
+  splay); `heroNetrunner`/`netrunner` replaced (real face, new `Y` lip-tone palette key, hourglass fixed
+  by decoupling arm position from the torso's own taper); `heroMentalist`/`mentalist` edited in place
+  (new `W` beard key, `M`/`N` staff-wood keys that existed but were unused now actually used, eyes
+  reshaped); `heroSaboteur`/`saboteur` replaced (new `M`/`N` respirator-mask keys, `T`/`U` leg-material
+  keys repointed to genuinely-contrasting hex values). **`heroMerc`/`merc` replaced twice**: v1 to a
+  space-suit design (also fixed a longstanding grid-size bug — the shape had drifted to an off-grid
+  24×39, resized back to 24×32). v2 is the current shipped state — an angular tactical helmet, fully
+  sealed, with a green-glow visor (`G`/`V` base+HUD-line) and a cooler-blue `I` eye-hint at the same
+  column positions (9–10, 13–14) a parallel face-exposed build (`mercTacticalV1`, unshipped, staged in
+  candidates.json) used for its real eyes; body unchanged from the space-suit-era rifle/vest/leg
+  geometry (barrel/receiver/magazine bend, chest-rig straps, knee-pads, boot straps). All superseded/
+  unchosen shapes (old Merc space-suit, unchosen face-exposed Merc, pre-rebuild Mech Runner/Netrunner/
+  Saboteur) preserved verbatim as dedicated entries in `tools/sprite-review/candidates.json` — schema
+  `{key, targetKey, tier, label, note, shape, palette}`, `tier:"hero"` triggers hero-scale rendering +
+  the same horizontal flip the real battle display uses. `candidates.json` entries that came to exactly
+  match a just-shipped live shape were deleted (redundant with the main roster view); everything else —
+  true alternates and legacy archives — was kept.
+- **2026-07-26 — Battle mechanics overhaul: schema + migration plan written, SPEC ONLY, nothing built.**
+  Full technical detail in the new §12. Schema changes previewed inline above: `damageType` gains
+  `gravity` (§2 SKILLS), `affinities` keys move from 7 raw flavors to 4 resistance buckets
+  (`physical`/`energy`/`mind`, + non-authored `exotic`) via a new `DAMAGE_TYPE_CATEGORY` lookup (§2
+  Combatant), 2 new STATUSES (`irradiate`/`pin`, §2), and SKILL_TREES nodes gain `type`/`slotCost` plus
+  two new hero fields (`tacticSlots`/`socketedPassives`, §2 SKILL_TREES). Design rationale: design doc
+  §3.2a/§3.3/§3.7/§4.1a. Nothing in `data.js`/`engine.js`/`ui.js` touched yet — pending user go-ahead.
 - **2026-07-24** — **Sprite-quality pass (partial, paused) + roster edits.** All in `data.js`
   (`SPRITE_SHAPES`/`SPRITES`/`ENEMIES`/`ENEMY_POOLS`) except one `ui.js` mechanism.
   **(1) New/redrawn shapes.** Heroes to **24×32 w/ human faces** (`heroMerc`, `heroMech` = human head +
