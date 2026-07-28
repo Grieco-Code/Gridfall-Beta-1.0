@@ -180,13 +180,31 @@ a `DAMAGE_TYPE_CATEGORY` lookup that maps every flavor to one of **4 resistance 
 | Bucket | Flavors that resolve into it | Owning class(es) |
 |---|---|---|
 | **Physical** | Kinetic, Corrosive | Merc, Dread Knight (Kinetic) · Saboteur (Corrosive) |
-| **Energy** | Thermal, Shock, Cyber | Mech Runner (Thermal) · Netrunner (Shock/Cyber — "hacking" IS Shock now, mechanically) |
+| **Thermal** | Thermal only | Mech Runner |
+| **Shock** | Shock, Cyber | Netrunner — "hacking" IS Shock now, mechanically |
 | **Mind** | Psionic | Mentalist |
 | **Exotic** | Void, Gravity (new) | no hero (reserved, as today) |
 
-This is a **7→4 cut in the numbers anyone has to track or author**, while every class keeps (or, for the
-3 empty ones, finally gets — see the migration plan, §3.7) a legible signature identity, and literally
-no existing skill name, message, or narrative beat changes.
+This is a **7→4 cut in the numbers anyone has to track or author** (Physical/Thermal/Shock/Mind, +
+Exotic as the special non-numeric 5th), while every class keeps (or, for the 3 empty ones, finally gets —
+see the migration plan, §3.7) a legible signature identity, and literally no existing skill name,
+message, or narrative beat changes.
+
+**Correction, 2026-07-28 (found during Slice 1's own migration audit, before any code was written):**
+the original version of this table merged Thermal into the same bucket as Shock/Cyber (both under
+"Energy"). A full audit of all 42 affinity tables ahead of the actual migration found exactly one real
+conflict this caused: **the Sun God** ships as both `cyber: DOUBLE_WEAK` — "secretly a machine," the
+Netrunner's designed payoff moment — and `thermal: HARD_RESIST` — "a fire god, immune to fire." Forcing
+those into one shared number means picking a winner and losing the other property outright. Checked
+every other table for the same pattern first: nowhere else does an enemy have meaningfully different
+Thermal vs. Shock/Cyber values, so the original merge was never earning its keep — it just cut a number
+for its own sake, and this is the one place it broke something real. **Fix: split Thermal back into its
+own bucket** (mirroring Mind's single-flavor pattern) and keep only Shock+Cyber merged — which is also,
+notably, exactly the original "hacking could probably just be Shock" instinct this whole rework started
+from, not the broader Thermal-inclusive grouping that got layered on during design. Net effect is a
+strict improvement, not just a fix: Mech Runner and Netrunner now each own one fully separate number
+instead of sharing one, and the Sun God ships with both shipped properties intact
+(`thermal: HARD_RESIST` + `shock: DOUBLE_WEAK`) — no tradeoff needed.
 
 **Exotic is not a normal 5th number.** No enemy is ever hand-given an `exotic:` affinity value — instead
 every Exotic-flavored skill bypasses the resistance table entirely and defines its OWN special rule,
@@ -205,8 +223,8 @@ rather than treating them as unrelated elements:
 
 **A governing rule for Physical specifically:** since Kinetic is every hero's free universal fallback,
 Physical-bucket affinity values are capped in the `RESIST`–`DOUBLE_WEAK` range (0.5–2.0) game-wide — **no
-enemy is ever HARD_RESIST (0.2) on Physical.** Energy and Mind can still use the full ladder, since
-they're each already tied to one specialist class rather than the shared basic Attack.
+enemy is ever HARD_RESIST (0.2) on Physical.** Thermal, Shock, and Mind can still use the full ladder,
+since they're each already tied to one specialist class rather than the shared basic Attack.
 
 **Corrosive keeps its identity without needing its own resistance number.** Rather than hand-authoring a
 new "weak to Corrosive" enemy archetype (which would also re-open the "armor resists bullets but melts to
@@ -317,24 +335,35 @@ naive+smart-autoplay, full-chain sim methodology (§3.6, established since Phase
 every dungeon before this is considered done** — same discipline as every prior balance pass in this
 project's history, just wider in scope than any single one of them.
 
-**Migration methodology for the 42 existing affinity tables:**
-1. For each CLASS/ENEMY template, compute its new `physical` value from its old `kinetic`/`corrosive`
-   entries, its new `energy` value from `shock`/`thermal`/`cyber`, and its new `mind` value from
-   `psionic` (near 1:1 today, single-source already).
-2. **Where a template had multiple source values that disagree** (the real judgment-call cases — mostly
-   in the Energy bucket, e.g. `arcSentinel`'s `cyber: WEAK` vs. its implicit-neutral Shock), **take the
-   more extreme (further-from-1.0) of the source values.** This preserves each enemy's most memorable
-   existing matchup (Security Mech's `cyber: 2.0` — its whole "hackers wreck robots" identity — carries
-   forward as `energy: 2.0` rather than getting averaged down) instead of silently flattening intended
-   design.
-3. Apply the Physical HARD_RESIST-ban rule (§3.2a) as a final clamp pass.
-4. Re-verify every named/notable matchup already on record in this doc still reads correctly
-   post-migration (e.g. "Warden: weak Shock, doubly-weak Cyber" → Energy DOUBLE_WEAK; "Mentalist
-   hard-resists Cyber" → becomes a Mind... no — Mentalist's OWN Cyber-resist is itself now an
-   Energy-bucket entry on the Mentalist's affinities, meaning Mentalist now also resists Thermal/Shock at
-   that same value — a real behavior change to sanity-check in the sim, not just wave through).
-This is authoring work, not something to hand-derive in a planning doc — it happens during the build
-pass, verified table-by-table against the sim, not guessed up front.
+**Migration methodology for the 42 existing affinity tables — fully audited by hand (2026-07-28) ahead of
+writing any code, per the Thermal/Shock split above.** With Thermal split back into its own bucket, three
+of the four buckets turn out to be mechanically trivial renames with zero conflicts:
+- **Mind** — `psionic` → `mind`, 1:1, no template ever had a second Mind-bucket source. No values change.
+- **Thermal** — `thermal` → `thermal` (same key), no template ever had a second Thermal-bucket source
+  (that's the whole point of splitting it out — see the correction note above). No values change.
+- **Physical** — `kinetic`/`corrosive` → `physical`. Exactly one template (`demon`) has both sources set,
+  and they already agree (`RESIST`/`RESIST`), so no real choice is ever forced. The Physical
+  HARD_RESIST-ban clamp (above) never actually triggers on current content either — nothing today sets
+  `kinetic`/`corrosive` below `RESIST`. This bucket is a pure rename.
+
+**Shock is the only bucket with real judgment calls** (`shock`/`cyber` → `shock`), all resolved during
+this audit:
+1. **Same-direction conflicts** (`securityMech`: `shock WEAK` + `cyber DOUBLE_WEAK`; `warden`: identical
+   pattern) — take the more extreme value, `DOUBLE_WEAK`. Preserves each one's most memorable matchup
+   (Security Mech/Warden's "hackers wreck robots" identity) instead of averaging it down.
+2. **Single-source `cyber`-only entries, RESIST-direction, on an ORGANIC template** (`vossmarkGrunt`,
+   `vossmarkOfficer`, hero `mentalist` — all `cyber: HARD_RESIST`, no `shock` entry) — dampened one step
+   to `RESIST` rather than carried over at face value. Reasoning: "no mind to hack" is a narrow claim
+   that doesn't imply "resists being electrocuted too" once Cyber and Shock share one number — carrying
+   `HARD_RESIST` over unchanged would silently overstate what these organics were ever designed to
+   resist. (Synthetic `cyber`-only entries were NOT dampened — a drone being weak to both hacking *and*
+   raw electricity needs no such correction, they're not in tension the way "immune to hacking" and
+   "immune to being shocked" are for a human.)
+3. **Every other Shock-bucket entry** is single-source with no thematic tension (either WEAK-direction on
+   synthetics, which needs no softening, or absent entirely) — carried over unchanged.
+
+This is now the actual, verified migration table (not a methodology to apply later) — implementation
+copies it directly rather than re-deriving it.
 
 **Engine changes required (state.js / engine.js):**
 - `affinityMultiplier(target, damageType)` (state.js) — resolve via `DAMAGE_TYPE_CATEGORY[damageType]`
@@ -344,13 +373,19 @@ pass, verified table-by-table against the sim, not guessed up front.
 - New `effectiveSpeed(c)` (state.js, mirrors `effectiveAttack`/`effectiveDefense`) — the initiative sort
   (`engine.js`, currently `combatants.slice().sort(function(a,b){ return b.stats.speed - a.stats.speed; })`)
   switches to `effectiveSpeed(b) - effectiveSpeed(a)`.
+- New `skill.drain` field (attack skills only) — `applyToTarget`'s attack branch heals the actor for
+  `damage * skill.drain` right after damage resolves (2026-07-28 addition, from the Dread Knight
+  "Bloodfeed" idea above, §4.1a). Added now as foundation even though the skill using it isn't authored
+  until Content Authoring — same treatment as Irradiate/Pin.
 - `DAMAGE_TYPE_CATEGORY` constant + 2 new STATUSES entries (`irradiate`, `pin`) — data.js.
-- No changes needed to `chooseEnemyAction`/`pickEnemyTarget`/`enemyThreatScore`/`estimateEnemyDamage` —
-  they already call `affinityMultiplier` generically, so bucket-awareness is transparent to enemy AI.
-  Still gets a smoke-test pass, not assumed safe.
+- No changes needed to `chooseEnemyAction`/`pickEnemyTarget`/`enemyThreatScore`/`estimateEnemyDamage` for
+  THIS slice — they already call `affinityMultiplier` generically, so bucket-awareness is transparent to
+  enemy AI. Still gets a smoke-test pass, not assumed safe. (Taunt, §4.1a's Dread Knight tree, WILL need
+  `pickEnemyTarget` to check for an active taunt effect — that's Content Authoring's problem, not this
+  slice's; noted here so it isn't forgotten when that class's tree gets built.)
 - No UI changes needed for the affinity system itself — `statsSectionHtml` (engine.js) already renders
   whatever keys exist in `h.affinities` generically (`capitalize(k) + "×" + value`), so it'll show
-  "Energy ×1.5" etc. for free. The skill-menu damage-type label (`ui.js`,
+  "Shock ×1.5" etc. for free. The skill-menu damage-type label (`ui.js`,
   `" · " + capitalize(skill.damageType)`) is untouched — flavor labels still show the original 8 flavor
   words, not bucket names, which is the point.
 
@@ -504,9 +539,9 @@ relic accumulation do in their own endless/repeat-run modes.
 ```
                     [Suppressing Fire]  (existing node, kept as the tree's root)
                     /                \
-        [Adrenaline Rush]          [Piercing Rounds]
-         passive · 1 slot           passive · 1 slot
-        "+1 Limit gauge/turn"       "+15% pierce, all Kinetic/Physical skills"
+  [Armor-Piercing Rounds]         [Adrenaline Rush]
+   active · Physical,              passive · 1 slot
+   very high pierce (new skill)    "+1 Limit gauge/turn"
               |                            |
       [Exploit: Weakspot]           [KEYSTONE: Overwatch]
        passive · 2 slots             cost 3 SP · 2 slots
@@ -514,14 +549,17 @@ relic accumulation do in their own endless/repeat-run modes.
        hits also apply Weaken"      time you're targeted each combat"
 ```
 A full campaign's SP can afford maybe 3 of these 4 branch nodes — genuinely choosing burst-and-pierce vs.
-weakness-exploit vs. the defensive keystone, not collecting all of them.
+weakness-exploit vs. the defensive keystone, not collecting all of them. **2026-07-28 update:** the
+user's own idea (armor-piercing rounds) replaced the original generic "+15% pierce" passive placeholder
+with a real active skill — Merc stays purely Physical-flavored (deliberately, to keep the "one class, one
+bucket" clarity the Sun God fix above reinforced) rather than picking up a second damage type.
 
 **Worked example — Netrunner (was: 2 linear nodes, `systemShock`→`firewallBreach`):**
 ```
                          [System Shock]  (existing node, kept as root)
                         /                \
           [Overcharge Field]          [Ghost Protocol]
-           active · Energy AoE         passive · 2 slots
+           active · Shock AoE          passive · 2 slots
            (new skill)                 "Disable no longer nature-gated to synthetics"
                 |                              |
        [Firewall Breach]                [KEYSTONE: Total Lockdown]
@@ -533,10 +571,51 @@ weakness-exploit vs. the defensive keystone, not collecting all of them.
 The AoE/nuke branch vs. the control branch is a real Netrunner identity fork — today's Netrunner has no
 such choice at all.
 
-The remaining 4 classes (Dread Knight, Mech Runner, Mentalist, Saboteur) follow the same shape — 1 kept
-root node + 2 branches of 2 nodes each + a keystone-capped branch — authored during the Content Authoring
-build step (§3.7 step 3), not fully specified here; the two worked examples above are the template every
-class's tree follows.
+**Worked example — Dread Knight (was: 1 node, `cleave`), 2026-07-28, from the user's own skill ideas:**
+```
+                    [Cleave]  (existing node, kept as root)
+                   /                \
+        [Taunt]                 [Crack Armor]
+        active · aggro           active · Physical + guaranteed Sunder
+        (the long-reserved,      (matches Saboteur's existing Sunder
+         never-built §3.3        pattern — zero new mechanic needed)
+         mechanic — see note)          |
+              |                 [KEYSTONE: Unbreaking]
+      [Bloodfeed]                cost 3 SP · 2 slots
+       active · Physical,       "Guard reflects 20% of blocked
+       drains 30% of damage      damage back at the attacker"
+       dealt as self-heal
+       (NEW mechanic — §3.7)
+```
+**Taunt needs real enemy-AI support**, not just a passive number — `pickEnemyTarget` (engine.js) has to
+actually check for and prioritize a taunting target, which is more engineering than a typical node.
+Flagged here rather than quietly absorbed. **Bloodfeed needs a new `drain` skill field** (heal the actor
+for a fraction of damage dealt) — small, but genuinely new engine surface, added in Slice 1 alongside
+Irradiate/Pin even though the skill itself isn't authored until Content Authoring (§3.7 step 3).
+
+**Worked example — Mech Runner (was: 1 node, `overclock`), 2026-07-28, renamed to match the user's own
+idea:**
+```
+                   [Overclock]  (existing node, kept as root)
+                  /                \
+        [Rocket Barrage]         [Overcharged Rail]
+         active · Thermal AoE     passive · 1 slot
+         + guaranteed Burn        "+20% power, Rail Shot"
+         (new skill)                     |
+              |                  [KEYSTONE: Meltdown]
+      [Accelerant]                cost 3 SP · 2 slots
+       passive · 1 slot          "+25% damage vs. Burning targets"
+      "+1 turn Burn duration"
+```
+
+The remaining 2 classes (Mentalist, Saboteur) follow the same shape — 1 kept root node + 2 branches of 2
+nodes each + a keystone-capped branch — authored during the Content Authoring build step (§3.7 step 3),
+not fully specified here; the four worked examples above are the template every class's tree follows.
+
+**Proposed personal affinities for the 3 previously-empty classes, 2026-07-28 (first draft, tunable via
+sim like every number here):** `merc: { physical: MILD_WEAK }` (an augmented human, no special armor),
+`dreadKnight: { physical: RESIST }` (the armored tank — also a nice irony against his own Crack Armor
+skill above), `mechRunner: { thermal: RESIST }` (his own blast-resistant heavy-weapons gear).
 
 ### 4.2 Run persistence (HP + EN/SP carry over)
 Party state — **HP, EN, XP, level, SP, learned skills, inventory, Limit charge** — **persists between

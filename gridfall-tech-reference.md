@@ -84,13 +84,14 @@ All content is data read by a small engine. Shapes as they exist today:
 ```
 Damaging skills also carry **`damageType`** — one of 8 flavors: `kinetic`, `corrosive`, `thermal`,
 `shock`, `cyber`, `psionic`, `void`, `gravity`. **(2026-07-26 battle-mechanics overhaul, design doc
-§3.2a/§3.7, SPEC ONLY — not yet built.)** `damageType` is checked against the target's `affinities` in
-`applyToTarget`, but NOT directly — it resolves through `DAMAGE_TYPE_CATEGORY[damageType]` first, which
-maps each of the 8 flavors to one of 4 resistance buckets: `kinetic`/`corrosive` → `physical`;
-`thermal`/`shock`/`cyber` → `energy`; `psionic` → `mind`; `void`/`gravity` → `exotic` (a non-numeric
-category — see below). This is what lets a skill keep its full flavor-word vocabulary and message text
-while the actual resistance math only has 4 numbers to track. `gravity` is new (see §5 for its
-pierce-based DEF-ignore).
+§3.2a/§3.7, corrected 2026-07-28, SPEC ONLY — not yet built.)** `damageType` is checked against the
+target's `affinities` in `applyToTarget`, but NOT directly — it resolves through
+`DAMAGE_TYPE_CATEGORY[damageType]` first, which maps each of the 8 flavors to one of 4 resistance
+buckets: `kinetic`/`corrosive` → `physical`; `thermal` → `thermal` (its own bucket); `shock`/`cyber` →
+`shock`; `psionic` → `mind`; `void`/`gravity` → `exotic` (a non-numeric category — see below). This is
+what lets a skill keep its full flavor-word vocabulary and message text while the actual resistance math
+only has 4 numbers to track. `gravity` is new (see §5 for its pierce-based DEF-ignore). Also new:
+`drain` (0-1, attack skills only) — heals the actor for that fraction of damage dealt.
 Heals have no `damageType`. Skills may also have **`kind: "status"`** (no damage/heal, pure effect)
 and an **`applies: [{ type, magnitude, duration }, ...]`** array of status effects to lay on the
 target (see STATUSES). Example: `terror` = `{kind:"status", target:"enemy", applies:[{type:"confuse",…}]}`.
@@ -210,15 +211,16 @@ these, never hard-coded fighters):
 `WEAK 1.5`, `DOUBLE_WEAK 2.0`. **No true immunity** — a hard-resisted hit still chips ≥1.
 CLASSES/ENEMIES templates now also carry an `affinities` field.
 
-**(2026-07-26 battle-mechanics overhaul, design doc §3.2a/§3.7, SPEC ONLY — not yet built.)** As of this
-plan, `affinities` keys stop being raw `damageType`s and become the 4 resistance-bucket names instead:
-`physical`, `energy`, `mind` — plus `exotic`, which is NOT a key any template ever sets (Exotic-flavored
-skills bypass the affinity lookup entirely — `affinityMultiplier` returns `1` unconditionally when
-`DAMAGE_TYPE_CATEGORY[damageType] === "exotic"`, no per-combatant authoring needed). All 42 existing
-CLASS/ENEMY `affinities` tables need migrating from the old 7-flavor keys to the 3 new bucket keys — see
-§12 for the full methodology, engine-change list, and regression plan. **Governing rule:** `physical`
-values are clamped to `RESIST`–`DOUBLE_WEAK` (0.5–2.0) game-wide — never `HARD_RESIST`, since Kinetic is
-every hero's free universal Attack and must never read as a dead button.
+**(2026-07-26 battle-mechanics overhaul, design doc §3.2a/§3.7, corrected 2026-07-28, SPEC ONLY — not
+yet built.)** As of this plan, `affinities` keys stop being raw `damageType`s and become the 4
+resistance-bucket names instead: `physical`, `thermal`, `shock`, `mind` — plus `exotic`, which is NOT a
+key any template ever sets (Exotic-flavored skills bypass the affinity lookup entirely —
+`affinityMultiplier` returns `1` unconditionally when `DAMAGE_TYPE_CATEGORY[damageType] === "exotic"`,
+no per-combatant authoring needed). All 42 existing CLASS/ENEMY `affinities` tables need migrating from
+the old 7-flavor keys to the 4 new bucket keys — see §12 for the full (now fully hand-verified, not just
+methodology) table, engine-change list, and regression plan. **Governing rule:** `physical` values are
+clamped to `RESIST`–`DOUBLE_WEAK` (0.5–2.0) game-wide — never `HARD_RESIST`, since Kinetic is every
+hero's free universal Attack and must never read as a dead button.
 
 **STATUSES[type]** — status-effect registry (Phase C): `{ name, pip, buff?, requiresNature? }`.
 Current seven: `burn` (magnitude = DoT damage/turn), `weaken` (−ATK), `sunder` (−DEF),
@@ -1107,7 +1109,8 @@ touched, per the user's explicit request to think through effects/breakage first
 ```
 const DAMAGE_TYPE_CATEGORY = {
   kinetic: "physical", corrosive: "physical",
-  thermal: "energy",   shock: "energy",   cyber: "energy",
+  thermal: "thermal",
+  shock: "shock",       cyber: "shock",
   psionic: "mind",
   void: "exotic",       gravity: "exotic"
 };
@@ -1165,14 +1168,21 @@ socketedPassives: [],                  // subset of unlockedNodes currently acti
   label (`" · " + capitalize(skill.damageType)`) both need ZERO changes — both already render whatever
   keys/strings exist generically.
 
-**The 42-affinity-table migration** — methodology is design doc §3.7; this is the mechanical checklist:
-1. Rewrite every CLASSES/ENEMIES `affinities: {...}` block, key by key: `kinetic`+`corrosive` → one
-   `physical` value (take the more extreme if both were set); `shock`+`thermal`+`cyber` → one `energy`
-   value (same rule — this bucket has the most real conflicts, check each by hand); `psionic` → `mind`
-   (usually 1:1).
-2. Clamp every resulting `physical` value into `[RESIST, DOUBLE_WEAK]` — bump any that would've landed
-   on `HARD_RESIST` up to `RESIST`.
-3. Re-run the sim suite (§9) after every ~5-10 templates, not all 42 at once — catches a bad
+**The 42-affinity-table migration** — fully hand-audited in design doc §3.7 (corrected 2026-07-28 after
+the Thermal/Shock split); this is the mechanical checklist, now backed by a completed audit rather than
+a methodology to apply later:
+1. `kinetic`+`corrosive` → `physical` (1 conflict found, `demon`, both sources already agreed — pure
+   rename in practice). `thermal` → `thermal` (pure rename, no template ever had a second Thermal
+   source). `psionic` → `mind` (pure rename, always single-source). `shock`+`cyber` → `shock` (the only
+   bucket with real conflicts — see design doc §3.7 for the full resolved case list: same-direction
+   conflicts take the more extreme value; organic-only single-source `cyber: HARD_RESIST` entries with
+   no `shock` companion dampen one step to `RESIST`).
+2. Clamp every resulting `physical` value into `[RESIST, DOUBLE_WEAK]` — checked, never actually
+   triggers on current content (nothing today sets `kinetic`/`corrosive` below `RESIST`).
+3. Also add the 3 new personal affinities for the previously-empty classes (design doc §4.1a):
+   `merc.affinities.physical = MILD_WEAK`, `dreadKnight.affinities.physical = RESIST`,
+   `mechRunner.affinities.thermal = RESIST`.
+4. Re-run the sim suite (§9) after every ~5-10 templates, not all 42 at once — catches a bad
    reconciliation call immediately instead of compounding it across a whole dungeon's roster.
 
 **Regression risk / save-compat / build sequencing:** design doc §3.7 has the full table and 6-step
