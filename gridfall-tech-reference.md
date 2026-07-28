@@ -804,6 +804,19 @@ numbers in the code are what they are, not just what they are:**
 ---
 
 ## 11. Changelog
+- **2026-07-28 — Battle mechanics overhaul, Slice 1 (Foundation) SHIPPED**, `battle-mechanics-overhaul`
+  branch, not merged to main. `DAMAGE_TYPE_CATEGORY` + bucket-aware `affinityMultiplier` (Exotic bypass
+  returns `1` unconditionally) — `data.js`/`state.js`. All 42 `affinities` tables migrated to
+  `physical`/`thermal`/`shock`/`mind` keys (corrected composition — Thermal split from Shock/Cyber after
+  a hand-audit found the original merge broke the Sun God's dual identity, see design doc §3.2a/§3.7's
+  dated addendum). 3 previously-`{}` classes got real affinities. New `irradiate`/`pin` STATUSES + their
+  engine hooks (`healMultiplier` folds into `applyToTarget`'s heal branch; `effectiveSpeed` replaces raw
+  `stats.speed` in `turnOrder`'s sort) + a new `drain` skill field (heals the actor a fraction of damage
+  dealt, hooked right after the Limit-gauge calls in `applyToTarget`'s attack branch) — `engine.js`. No
+  `jsc` in this environment; rebuilt the sim harness on `py_mini_racer`/V8 (see §12's tooling note) —
+  verified via 800 simulated boss battles (10 bosses × naive/smart × N=40, zero crashes, smart HP-
+  remaining at/above the usual target band everywhere) plus a zero-crash sweep of all 36 `ENEMIES`
+  templates. Skill-tree engine (Slices 2-3) not started.
 - **2026-07-26 — Battle mechanics overhaul: schema + migration plan written, SPEC ONLY, nothing built.**
   Full technical detail in the new §12. Schema changes previewed inline above: `damageType` gains
   `gravity` (§2 SKILLS), `affinities` keys move from 7 raw flavors to 4 resistance buckets
@@ -1098,12 +1111,19 @@ numbers in the code are what they are, not just what they are:**
     mentions "EN Cell" as a future item; still not authored. Worth adding if EN-starvation attrition
     resurfaces once more content (skill trees, equipment) changes the numbers again.
 
-## 12. Battle mechanics overhaul — migration & schema reference (2026-07-26, SPEC ONLY, not yet built)
+## 12. Battle mechanics overhaul — migration & schema reference (2026-07-26; Slice 1 SHIPPED 2026-07-28
+on `battle-mechanics-overhaul`, not yet merged to main; Slices 2-3 skill trees NOT yet built)
 
 Design rationale and locked decisions live in `gridfall-design.md` §3.2a (damage buckets), §3.3 (new
-statuses), §3.7 (full plan this section elaborates), §4.1a (skill trees). This section is the concrete
-"what code actually changes" reference for whoever builds it — written as a plan, before any file was
-touched, per the user's explicit request to think through effects/breakage first.
+statuses), §3.7 (full plan + Slice 1 results this section elaborates), §4.1a (skill trees). Everything
+below this line describes what was actually implemented for Slice 1 (Foundation) — treat it as accurate
+code reference now, not a forward-looking plan. Skill-tree engine code (Slices 2-3) is still pending.
+
+**Verification tooling note (2026-07-28):** this environment had no `jsc` (every prior sim session's
+tool). `py-mini-racer` (old PyPI name) installed but shipped a Linux-only `.dylib`/`.so` and failed at
+runtime on this arm64 Mac; the actively-maintained successor package, `pip3 install mini-racer` (still
+imports as `from py_mini_racer import MiniRacer`), installs a real V8 with full ES6 support and works
+cleanly. Worth remembering directly if `jsc` is ever unavailable again — no need to re-discover this.
 
 **New/changed constants (data.js):**
 ```

@@ -438,6 +438,62 @@ charm/notch system (the direct model for Tactic Slots, §4.1a — a small team's
 beats a huge tech tree for real build depth); Path of Exile's Keystone/Notable node philosophy (one
 rule-changing node beats ten `+2%` nodes — the direct model for the Keystone node type, §4.1a).
 
+**Slice 1 SHIPPED 2026-07-28 (Foundation only — skill trees are still Slices 2-3, not started).**
+`DAMAGE_TYPE_CATEGORY`, bucket-aware `affinityMultiplier` + Exotic bypass, all 42 affinity tables
+migrated (including the 3 new personal affinities, §4.1a), `irradiate`/`pin` STATUSES +
+`healMultiplier`/`effectiveSpeed`/`drain` engine hooks — all in `data.js`/`state.js`/`engine.js` on the
+`battle-mechanics-overhaul` branch, nothing merged to `main` yet.
+
+**Verification note:** this environment had no JS runtime available (`jsc`, which every prior sim session
+in this project used, isn't installed here) — bootstrapped `py_mini_racer` (an embedded real V8) instead
+after a failed first attempt at an old, Linux-only build of the same library. Rebuilt the sim harness from
+scratch (the historical `stub.js`/`overrides.js` were scratchpad-only and gone, per this project's
+established "rebuild if lost" pattern) — stubs every `ui.js` function `engine.js`/`state.js` call into
+(DOM/localStorage/`setTimeout` as an immediate synchronous call, no real event loop needed at this scale)
+and drives real combat through the actual `startRound`/`turnOrder`/`applyToTarget`/`chooseEnemyAction`
+functions, nothing about combat resolution reimplemented. **Scope note:** this drives isolated encounters
+directly (`createHero`/`createEnemy`/`runBattle`), not the full `startDungeon`→`onNodeClick` node-graph
+replay every historical full-chain session used — that would need the entire map/town/UI stub layer
+rebuilt too, a bigger and largely orthogonal lift for a slice that only touched combat math. A genuine
+full-chain pass is a good follow-up once real `node`/`jsc` tooling is available again, not required to
+trust this slice's own correctness.
+
+- **Unit-level checks, all passed exactly as specified:** Sun God takes `0.2×` from Thermal ("Barely a
+  scratch") and `2.0×` from both Shock and Cyber ("Super effective!") — both shipped properties intact,
+  zero tradeoff, confirming the Thermal/Shock split fix. Void and Gravity always resolve at flat neutral
+  (`1.0×`) regardless of target, confirmed on multiple combatants. Irradiate halves incoming healing
+  (Mend 35 power → 18 HP restored while afflicted). Pin correctly reduces `effectiveSpeed` (20 speed, 15
+  Pin magnitude → 5 effective) without touching `stats.speed` itself. The new `drain` field heals the
+  actor for the specified fraction of damage dealt (30% of 32 damage → 10 HP), logged distinctly.
+- **Boss battery (all 10 named bosses across all 7 dungeons, N=40 trials each, naive + smart autoplay,
+  the full 5-hero roster at each boss's own encoded arrival level):** zero crashes across 800 simulated
+  battles. Smart-play HP-remaining landed at 75-98% across every single boss — at or above this project's
+  own established "~55-70%" target band (§3.6) in every case, naive floor read punishing/mixed as
+  expected (Warden 10% win/1.2% HP is the sharpest, matching its historical "mashing dies" reputation).
+  **Absolute numbers aren't directly cross-comparable to older sim sessions** — this slice's autoplay
+  policy is a fresh reimplementation (real `enemyThreatScore`/`estimateEnemyDamage` argmax, heals
+  opportunistically, Limit Break at 100%, zero items), not a byte-identical port of any historical
+  harness — same caveat this project's own past sim sessions always gave themselves about cross-session
+  comparisons.
+
+  | Fight | Lv | naive win% | naive HP% | smart win% | smart HP% |
+  |---|---|---|---|---|---|
+  | Prologue (Voraxx) | 1 | 100% | 64% | 100% | 85% |
+  | Sector 1 (Warden) | 4 | 10% | 1% | 100% | 75% |
+  | Erebus (Broodmarshal) | 5 | 100% | 70% | 100% | 93% |
+  | D4 (Proteus) | 6 | 100% | 27% | 100% | 85% |
+  | D5 bossSoul | 2 | 100% | 55% | 100% | 93% |
+  | D5 bossSun | 2 | 100% | 82% | 100% | 95% |
+  | D6 forestGate | 3 | 100% | 93% | 100% | 98% |
+  | D6 Phthora | 4 | 100% | 56% | 100% | 93% |
+  | D6b cagedGod | 6 | 100% | 67% | 100% | 94% |
+  | D6b chthon | 7 | 95% | 29% | 100% | 86% |
+- **Full-roster structural sweep:** every one of the 36 `ENEMIES` templates fought (2-enemy squad vs. the
+  full 5-hero party at level 5) with zero crashes and zero out-of-range HP fractions.
+- **Not yet done:** a true full node-graph chain replay (see scope note above); real playtest (this
+  project's own history — D4's map, D6's radial layout, D5's squad-swap request — is that real play finds
+  things sim doesn't, same expectation here).
+
 ---
 
 ## 4. Progression & leveling
@@ -2089,7 +2145,7 @@ then graphics, then story. Graphics can slot in partially earlier as a coat of p
 | **I. Graphics pass** | ✅ combat sprites (all 5 heroes + all 17 enemies, idle bob + hit flash, tier-scaled), ✅ hex-node map + per-region backdrops, ✅ combat backdrops (mining/station/hive). Also this phase: the single `game.html` was split into 5 classic `<script>` files (data/state/ui/engine/main). **Sprite-quality pass RESUMED 2026-07-25/26 (was paused since 2026-07-24) — new repo tooling `tools/sprite-review/` generates a live pixel-accurate status page straight from the game data, regenerate via `python3 tools/sprite-review/build.py`:** ✅ **all 9 bosses now bespoke** (Voraxx "Ledger & Lash," Broodmarshal redone as a Starship-Troopers-style Warrior Bug, Warden, Proteus, Void Soul Eater, Sun God, Phthora, Caged God, Chthon the true final boss); ✅ Merc redrawn again as "Poster Ready" (diagonal held rifle, reworked face). Remaining, now scoped as a **full redo of every Hero/Mob** (not just gaps): Merc's right arm is a confirmed missing shape + the rifle wants more detail; Mech Runner/Netrunner/Dread Knight each have confirmed concrete issues (cannon-arm clipped at frame edge, flat face + undrawn waist-taper, sword sitting dead-center reading as anatomy instead of being angled); Mentalist still on the old 18×28 grid; Saboteur has zero sprite; all 27 mob entries across every faction get redrawn with per-section unique silhouettes instead of the current shared-shape recolor economy. UI/menu theming polish still open |
 | **J. Story arc → finished game** *(canon locked 2026-07-23, §9; map-system spec locked 2026-07-24, §5.4; Dungeon 6 fully speced + Talos retconned 2026-07-25, §5.4c)* | The 3-act Sol arc to a finite ending. Act I shipped (Kharon's Reach → Vossmark Station Sector 1); Act II = Erebus (shipped) + **Dungeon 4 ✅ SHIPPED 2026-07-24** (Talos bio-foundry, §5.4a — 14 nodes, two pool-differentiated wings, Six the Psionic Mentalist recruit, boss Proteus, sim-verified end-to-end) — debuted the §5.4 map upgrade (fog of war, Unknown nodes, loot variance, dead-end spurs) as reusable systemic mechanics, not one-off content; Act III = **Dungeon 5 "Helios Station" ✅ SHIPPED 2026-07-24/25** (§5.4b — a new radial/circular map shape, the double boss, a narrow Void/Entropy preview roster; **balance-tuned 2026-07-25** — a full-chain sim caught the bosses' encounter levels were hardcoded 7/8 against a party that actually arrives around level 2, fixed and re-verified) + **Dungeon 6 "the Cradle" ✅ SHIPPED 2026-07-25 (finale, §5.4c — designed AND built same day)**: Vossmark's Chancellor merges with the Loom into the true final boss (Chthon, God of the Breach) in a two-phase double-boss finale that directly causes the Helios wormhole to finally open; Talos's own leader (Phthora, the Fleshspring) fails a mirrored merge attempt earlier in the dungeon; two new recruits (Vincent/Dread Knight, Sexias/new Corrosive class) close real content/system gaps; 22 nodes, biggest map yet; the game's first branching ending (all 3 §9.5 choices) implemented. **The Sol arc is now content-complete, start to finish.** Sim-verified as a first-pass baseline (structurally clean, zero crashes, one squad clears the full chain at 36% win rate) — NOT yet balance-tuned to the game's usual target band, that's its own later roadmap phase. Sprite art for Dungeon 4/5/6's new rosters still outstanding (generic-blob fallback). See §9.4 for story beats, §5.4/§5.4a/§5.4b/§5.4c for the map-system + Dungeon 4/5/6 specs |
 | ~~**K. Town/hub layer**~~ *(retired 2026-07-23 — absorbed into Phase H, §5.2)* | superseded: towns/roster/save could not wait for a "future" phase once story-mode start was decided |
-| **M. Battle mechanics overhaul** *(locked 2026-07-26, spec only — not yet built)* | 7→4 damage-type resistance buckets (Physical/Energy/Mind/Exotic — §3.2a) decoupling flavor from math, with zero flavor-text/skill rewrites; 2 new statuses (Irradiate, Pin — §3.3); two-layer Hollow-Knight-style skill trees (permanent branching Unlock Pool + a swappable Tactic Slot budget — §4.1a); full migration methodology + engine changes + regression-risk inventory + build sequencing in §3.7. Touches every shipped dungeon's balance — requires a full sim re-verification pass (§3.6) before real-play. See §13 changelog for the session summary |
+| **M. Battle mechanics overhaul** *(locked 2026-07-26; Slice 1 SHIPPED 2026-07-28 on the `battle-mechanics-overhaul` branch, not yet merged to main)* | 7→4 damage-type resistance buckets (Physical/Thermal/Shock/Mind, +Exotic — §3.2a, corrected 2026-07-28) decoupling flavor from math, with zero flavor-text/skill rewrites; 2 new statuses (Irradiate, Pin — §3.3) + a new `drain` mechanic; two-layer Hollow-Knight-style skill trees (permanent branching Unlock Pool + a swappable Tactic Slot budget — §4.1a, Slices 2-3, NOT yet built). Slice 1 (Foundation: buckets + all 42 tables migrated + new statuses) sim-verified — see §3.7's results writeup. Slices 2-6 (skill-tree engine, content authoring, flavor seeding, full regression, real playtest) still ahead. |
 
 *(B and C are close cousins and may be built together; I is flexible and can start once F lands.)*
 
@@ -2282,6 +2338,29 @@ pointer):**
 ---
 
 ## 13. Changelog
+- **2026-07-28 — Battle mechanics overhaul, Slice 1 (Foundation) SHIPPED on `battle-mechanics-overhaul`,
+  not yet merged to main.** Full detail in §3.7's results writeup + §11 roadmap row M. Two real corrections
+  found during this session's own pre-code audit, both fixed before any code was written: (1) the original
+  4-bucket split had Thermal sharing a number with Shock/Cyber — a full hand-audit of all 42 tables found
+  this broke the Sun God's shipped dual identity (secretly-a-machine Cyber weakness vs. fire-immune Thermal
+  resistance); fixed by splitting Thermal into its own bucket (§3.2a), which also turned out to be a strict
+  improvement (Mech Runner and Netrunner each own a clean number now instead of sharing one). (2) A branch
+  hygiene issue: 5 real sprite-pass commits had landed on this branch instead of `main` (the branch was
+  just sitting checked out when that work happened in a separate session) — cherry-picked onto `main` and
+  force-pushed `battle-mechanics-overhaul` back to just the spec commit, verified byte-for-byte before and
+  after. Implementation: `DAMAGE_TYPE_CATEGORY`, bucket-aware `affinityMultiplier` + Exotic bypass, all 42
+  affinity tables migrated (methodology: same-direction Shock/Cyber conflicts take the more extreme value;
+  organic-only single-source `cyber: HARD_RESIST` entries dampen one step since "no mind to hack" doesn't
+  imply "immune to being shocked"), 3 previously-empty classes (Merc/Dread Knight/Mech Runner) get real
+  personal affinities, `irradiate`/`pin` STATUSES, a new `drain` skill mechanic (foundation for a future
+  Dread Knight skill), and worked skill-tree examples locked for 4 of 6 classes from the user's own ideas
+  (Crack Armor/Bloodfeed, Rocket Barrage, Armor-Piercing Rounds). **This environment had no JS runtime**
+  (`jsc`, every prior sim session's tool, isn't installed) — bootstrapped `py_mini_racer` (embedded V8) to
+  rebuild the sim harness from scratch, verified with 800 simulated boss battles (10 bosses × naive+smart ×
+  N=40) at zero crashes and smart-play HP-remaining at or above this project's usual target band across
+  every fight, plus a zero-crash structural sweep of all 36 enemy templates. **Slices 2-6 (skill-tree
+  engine, content authoring, full regression, real playtest) still ahead — nothing merged to main yet,
+  awaiting the user's review per the agreed pause-after-every-slice cadence.**
 - **2026-07-26 — Battle mechanics overhaul: full design lock (damage-type consolidation + skill-tree
   rework), SPEC ONLY, nothing built yet.** A dedicated multi-round planning session (external research:
   Pokémon/Persona press-turn/Destiny elemental-verb design/Mass Effect defense layers/Hollow Knight
