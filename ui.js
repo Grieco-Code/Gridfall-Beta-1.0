@@ -1316,26 +1316,50 @@
       document.getElementById("actions").innerHTML = "";
     }
 
-    function renderActions(hero) {
+    // Label shows the damage type (so players can reason about weaknesses)
+    // and the EN cost, e.g. "EMP Blast · Shock (12 EN)". Shared by the
+    // top-level Attack button and every button in the Skill submenu below.
+    function skillButtonLabel(skill) {
+      let label = skill.name;
+      if (skill.kind === "attack" && skill.damageType) {
+        label += " · " + capitalize(skill.damageType);
+      }
+      if (skill.enCost > 0) label += " (" + skill.enCost + " EN)";
+      return label;
+    }
+
+    function makeSkillButton(skillKey, hero) {
+      const skill = SKILLS[skillKey];
+      const btn = document.createElement("button");
+      btn.textContent = skillButtonLabel(skill);
+      btn.disabled = hero.stats.en < skill.enCost;
+      btn.onclick = function () { chooseSkill(skillKey); };
+      return btn;
+    }
+
+    // Battle command menu (Phase battle-mechanics-overhaul: two-tier "Skill"
+    // submenu). A class's full skill list no longer dumps every button into
+    // one flat wrapping bar — that broke down once a class's skill tree filled
+    // in (a fully-specced Mentalist hit 9 buttons in one bar, crowding out
+    // Attack and pushing Limit Break to a wrapped-off row). Now the top level
+    // is a fixed set of commands (Attack always gets its own button since
+    // it's every class's free universal fallback; everything else in
+    // `hero.skills` lives behind "Skill"), so the button count stays bounded
+    // no matter how many skill-tree nodes a class accumulates later.
+    function renderActions(hero, mode) {
+      if (mode === "skills") { renderSkillSubmenu(hero); return; }
+
       const bar = document.getElementById("actions");
       bar.innerHTML = "";
 
-      hero.skills.forEach(function (skillKey) {
-        const skill = SKILLS[skillKey];
-        // Label shows the damage type (so players can reason about weaknesses)
-        // and the EN cost, e.g. "EMP Blast · Shock (12 EN)".
-        let label = skill.name;
-        if (skill.kind === "attack" && skill.damageType) {
-          label += " · " + capitalize(skill.damageType);
-        }
-        if (skill.enCost > 0) label += " (" + skill.enCost + " EN)";
+      bar.appendChild(makeSkillButton("attack", hero));
 
-        const btn = document.createElement("button");
-        btn.textContent = label;
-        btn.disabled = hero.stats.en < skill.enCost;
-        btn.onclick = function () { chooseSkill(skillKey); };
-        bar.appendChild(btn);
-      });
+      const otherSkills = hero.skills.filter(function (k) { return k !== "attack"; });
+      const skillBtn = document.createElement("button");
+      skillBtn.textContent = "Skill";
+      skillBtn.disabled = otherSkills.length === 0;
+      skillBtn.onclick = function () { renderActions(hero, "skills"); };
+      bar.appendChild(skillBtn);
 
       // Limit Break button: shows charge progress, only clickable at 100%.
       const lbSkillKey = CLASSES[hero.classKey].limitBreak;
@@ -1380,6 +1404,26 @@
       runBtn.textContent = "Run";
       runBtn.onclick = onRun;
       bar.appendChild(runBtn);
+    }
+
+    // "Skill" submenu: every non-Attack skill the hero currently has (base
+    // kit + whatever's been learned from SKILL_TREES), plus a Back button to
+    // return to the main command row. Reuses chooseSkill/makeSkillButton
+    // unchanged — this only changes which bar a skill's button lives in, not
+    // how choosing it works.
+    function renderSkillSubmenu(hero) {
+      const bar = document.getElementById("actions");
+      bar.innerHTML = "";
+
+      const backBtn = document.createElement("button");
+      backBtn.className = "cancel";
+      backBtn.textContent = "Back";
+      backBtn.onclick = function () { renderActions(hero, "main"); };
+      bar.appendChild(backBtn);
+
+      hero.skills
+        .filter(function (k) { return k !== "attack"; })
+        .forEach(function (skillKey) { bar.appendChild(makeSkillButton(skillKey, hero)); });
     }
 
 
