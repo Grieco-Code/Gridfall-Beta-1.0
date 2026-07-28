@@ -82,8 +82,16 @@ All content is data read by a small engine. Shapes as they exist today:
           for "heal"   = HP restored
   message: verb phrase for the log, e.g. "fires at" → "Merc fires at Spider Drone A — 11 damage!"
 ```
-Damaging skills also carry **`damageType`** (one of the core six: kinetic, shock, thermal,
-corrosive, psionic, cyber) — checked against the target's `affinities` in `applyToTarget`.
+Damaging skills also carry **`damageType`** — one of 8 flavors: `kinetic`, `corrosive`, `thermal`,
+`shock`, `cyber`, `psionic`, `void`, `gravity`. **(2026-07-26 battle-mechanics overhaul, design doc
+§3.2a/§3.7, corrected 2026-07-28, SPEC ONLY — not yet built.)** `damageType` is checked against the
+target's `affinities` in `applyToTarget`, but NOT directly — it resolves through
+`DAMAGE_TYPE_CATEGORY[damageType]` first, which maps each of the 8 flavors to one of 4 resistance
+buckets: `kinetic`/`corrosive` → `physical`; `thermal` → `thermal` (its own bucket); `shock`/`cyber` →
+`shock`; `psionic` → `mind`; `void`/`gravity` → `exotic` (a non-numeric category — see below). This is
+what lets a skill keep its full flavor-word vocabulary and message text while the actual resistance math
+only has 4 numbers to track. `gravity` is new (see §5 for its pierce-based DEF-ignore). Also new:
+`drain` (0-1, attack skills only) — heals the actor for that fraction of damage dealt.
 Heals have no `damageType`. Skills may also have **`kind: "status"`** (no damage/heal, pure effect)
 and an **`applies: [{ type, magnitude, duration }, ...]`** array of status effects to lay on the
 target (see STATUSES). Example: `terror` = `{kind:"status", target:"enemy", applies:[{type:"confuse",…}]}`.
@@ -199,17 +207,29 @@ these, never hard-coded fighters):
 }
 ```
 `affinities` come from an `affinities` field on the CLASS/ENEMY template (copied per-instance via
-`Object.assign`). Named tiers in code: `NEUTRAL 1.0`, `WEAK 1.5`, `RESIST 0.5`, `HARD_RESIST 0.2` (a literal
-like `2.0` = doubly-weak). **No true immunity** — a hard-resisted hit still chips ≥1.
+`Object.assign`). Named tiers in code: `HARD_RESIST 0.2`, `RESIST 0.5`, `NEUTRAL 1.0`, `MILD_WEAK 1.25`,
+`WEAK 1.5`, `DOUBLE_WEAK 2.0`. **No true immunity** — a hard-resisted hit still chips ≥1.
 CLASSES/ENEMIES templates now also carry an `affinities` field.
-*Current enemies only deal Kinetic, so heroes' non-Kinetic affinities are dormant.*
+
+**(2026-07-26 battle-mechanics overhaul, design doc §3.2a/§3.7, corrected 2026-07-28, SPEC ONLY — not
+yet built.)** As of this plan, `affinities` keys stop being raw `damageType`s and become the 4
+resistance-bucket names instead: `physical`, `thermal`, `shock`, `mind` — plus `exotic`, which is NOT a
+key any template ever sets (Exotic-flavored skills bypass the affinity lookup entirely —
+`affinityMultiplier` returns `1` unconditionally when `DAMAGE_TYPE_CATEGORY[damageType] === "exotic"`,
+no per-combatant authoring needed). All 42 existing CLASS/ENEMY `affinities` tables need migrating from
+the old 7-flavor keys to the 4 new bucket keys — see §12 for the full (now fully hand-verified, not just
+methodology) table, engine-change list, and regression plan. **Governing rule:** `physical` values are
+clamped to `RESIST`–`DOUBLE_WEAK` (0.5–2.0) game-wide — never `HARD_RESIST`, since Kinetic is every
+hero's free universal Attack and must never read as a dead button.
 
 **STATUSES[type]** — status-effect registry (Phase C): `{ name, pip, buff?, requiresNature? }`.
 Current seven: `burn` (magnitude = DoT damage/turn), `weaken` (−ATK), `sunder` (−DEF),
 `guard` (magnitude = incoming-damage multiplier e.g. 0.5; `buff:true`), `disable` (skip turn),
 `confuse` (magnitude = redirect chance; `requiresNature:"organic"`), `overclock` (magnitude = +ATK;
 `buff:true`). Effects tick at the START of the afflicted's turn; **one instance per type, refresh +
-keep-strongest** on re-apply.
+keep-strongest** on re-apply. **+2 new, SPEC ONLY (§12):** `irradiate` (DoT like `burn`, PLUS halves
+incoming healing via a new `healMultiplier` helper) and `pin` (flat Speed reduction, read by a new
+`effectiveSpeed` helper that the initiative sort uses instead of raw `stats.speed`).
 
 **EQUIPMENT_SLOTS** — `["head","body","legs","arms","weapon","ring"]`, iteration order for the UI.
 
@@ -257,12 +277,25 @@ doesn't get refunded). UI: a `.limit-btn` in the action bar (progress text below
 Name" and enabled at 100%) and a purple `.limit-fill` bar on hero panels only (`c.side==="heroes"`).
 
 **SKILL_TREES[classKey]** — Phase E skill trees (array of nodes): `{ key, skillKey, name, cost, prereq }`.
-`prereq` is another node's `key` in the same tree (or `null`). Learning a node (`learnNode`) pushes
+`prereq` is another node's `key` in the same tree (or `null`) — multiple nodes may already share one
+`prereq`, so branching needs no engine change, only content. Learning a node (`learnNode`) pushes
 `skillKey` onto the hero's `skills` array — it's usable in combat immediately, no extra wiring. Current
 trees: `merc` [suppressingFire], `dreadKnight` [cleave], `mechRunner` [overclock], `netrunner`
 [systemShock → firewallBreach], `mentalist` [terror → cerebralOverload] (the last two are 2-tier
 prereq chains). Hero fields: `sp` (Skill Points, earned via `SP_PER_LEVEL` per level-up) and
 `unlockedNodes` (learned node keys, for prereq/already-learned checks).
+
+**(2026-07-26 battle-mechanics overhaul, design doc §4.1a/§3.7, SPEC ONLY — not yet built.)** Node shape
+grows a `type` field (`"active" | "passive" | "keystone" | "econ" | "meta"`) and, for every non-`active`
+type, a `slotCost` (1-3). `learnNode`'s behavior for `type:"active"` nodes is UNCHANGED (pushes
+`skillKey` onto `hero.skills` immediately, permanent). For every other type, learning only adds the node
+to `unlockedNodes` (SP spent, permanent) — it does NOT take effect until also socketed into a new,
+separate budget: `hero.tacticSlots` (total capacity, from `tacticSlotsForLevel(hero.level)`, proposed
+curve `2 + floor(level/4)`) and `hero.socketedPassives` (array of currently-active non-active node keys,
+sum of their `slotCost` ≤ `tacticSlots`). Socketing/unsocketing is only callable from Rest-node and Town
+screens (mirrors how squad-swap and equipment already work), never mid-combat. Socketed passives' actual
+effects fold into `effectiveAttack`/`effectiveDefense`/EN-cost/gauge-gain the same way Weaken/Sunder/
+Guard already do — see §12 for the full engine-change list.
 
 **pendingAction** (transient, during a hero's target pick): `{ key: skillKey, isItem: bool }`.
 
@@ -771,6 +804,23 @@ numbers in the code are what they are, not just what they are:**
 ---
 
 ## 11. Changelog
+- **2026-07-28 — `battle-mechanics-overhaul` merged into `main`.** `git merge-tree` dry run first, then
+  a real `git merge --no-ff`: `data.js`/`engine.js`/`state.js`/`ui.js` all auto-merged with zero
+  conflicts (the sprite-quality pass and Slice 1's damage-bucket work never touched the same regions of
+  `data.js`); only `gridfall-design.md` and this file conflicted, both from each branch inserting its
+  own newest changelog entry at the same spot — resolved by keeping both, reordered chronologically.
+  Also fixed, on both branches before the merge: the idle-bob animation (`drawSpriteFrame`/
+  `spriteCanvasSize` in `ui.js`, formerly also a `bobShape()` helper) assumed every `SPRITE_SHAPES`
+  entry had its own blank padding row on top, and used that row as the headroom for the bob's up-shift.
+  Not true for `heroDread` (helm) / `heroMech` (canopy) pre-sprite-pass, and true for **zero** hero
+  shapes post-sprite-pass (all 5 redrawn flush to row 0) — so the bob was deleting the top row of
+  hero/mob art every other animation tick instead of shifting into blank space. Fix: canvas height is
+  now always `(shape.length + 1) * scale`, i.e. one guaranteed extra row; `drawSpriteFrame` draws the
+  rest frame one row down and the bob frame flush with the top, so the shift is always into real
+  headroom regardless of the art. Verified headless: every `SPRITE_SHAPES` entry (30 pre-merge on
+  `battle-mechanics-overhaul`, 43 on `main`) fits its padded canvas in both frames with zero overflow.
+  No browser-automation tool was available this session, so this substitutes for the usual
+  `getBoundingClientRect()` layout check.
 - **2026-07-27 — Sprite-quality pass completes: mob roster finished, full hero rebuild pass.** All in
   `data.js` (`SPRITE_SHAPES`/`SPRITES`), validated each time via the standard 3-layer check (Python
   re-parse of shape/palette in a scratchpad `extract.py`, a `jsc` parse-check on `cat data.js state.js
@@ -798,6 +848,19 @@ numbers in the code are what they are, not just what they are:**
   the same horizontal flip the real battle display uses. `candidates.json` entries that came to exactly
   match a just-shipped live shape were deleted (redundant with the main roster view); everything else —
   true alternates and legacy archives — was kept.
+- **2026-07-28 — Battle mechanics overhaul, Slice 1 (Foundation) SHIPPED**, now merged into `main` (see
+  this date's merge entry above). `DAMAGE_TYPE_CATEGORY` + bucket-aware `affinityMultiplier` (Exotic bypass
+  returns `1` unconditionally) — `data.js`/`state.js`. All 42 `affinities` tables migrated to
+  `physical`/`thermal`/`shock`/`mind` keys (corrected composition — Thermal split from Shock/Cyber after
+  a hand-audit found the original merge broke the Sun God's dual identity, see design doc §3.2a/§3.7's
+  dated addendum). 3 previously-`{}` classes got real affinities. New `irradiate`/`pin` STATUSES + their
+  engine hooks (`healMultiplier` folds into `applyToTarget`'s heal branch; `effectiveSpeed` replaces raw
+  `stats.speed` in `turnOrder`'s sort) + a new `drain` skill field (heals the actor a fraction of damage
+  dealt, hooked right after the Limit-gauge calls in `applyToTarget`'s attack branch) — `engine.js`. No
+  `jsc` in this environment; rebuilt the sim harness on `py_mini_racer`/V8 (see §12's tooling note) —
+  verified via 800 simulated boss battles (10 bosses × naive/smart × N=40, zero crashes, smart HP-
+  remaining at/above the usual target band everywhere) plus a zero-crash sweep of all 36 `ENEMIES`
+  templates. Skill-tree engine (Slices 2-3) not started — now built directly on `main`.
 - **2026-07-26 — Battle mechanics overhaul: schema + migration plan written, SPEC ONLY, nothing built.**
   Full technical detail in the new §12. Schema changes previewed inline above: `damageType` gains
   `gravity` (§2 SKILLS), `affinities` keys move from 7 raw flavors to 4 resistance buckets
@@ -1091,3 +1154,102 @@ numbers in the code are what they are, not just what they are:**
   - **Known gap carried forward:** no EN-restoring item exists yet (only Stim, HP-only) — design §4.2
     mentions "EN Cell" as a future item; still not authored. Worth adding if EN-starvation attrition
     resurfaces once more content (skill trees, equipment) changes the numbers again.
+
+## 12. Battle mechanics overhaul — migration & schema reference (2026-07-26; Slice 1 SHIPPED 2026-07-28
+on `battle-mechanics-overhaul`, not yet merged to main; Slices 2-3 skill trees NOT yet built)
+
+Design rationale and locked decisions live in `gridfall-design.md` §3.2a (damage buckets), §3.3 (new
+statuses), §3.7 (full plan + Slice 1 results this section elaborates), §4.1a (skill trees). Everything
+below this line describes what was actually implemented for Slice 1 (Foundation) — treat it as accurate
+code reference now, not a forward-looking plan. Skill-tree engine code (Slices 2-3) is still pending.
+
+**Verification tooling note (2026-07-28):** this environment had no `jsc` (every prior sim session's
+tool). `py-mini-racer` (old PyPI name) installed but shipped a Linux-only `.dylib`/`.so` and failed at
+runtime on this arm64 Mac; the actively-maintained successor package, `pip3 install mini-racer` (still
+imports as `from py_mini_racer import MiniRacer`), installs a real V8 with full ES6 support and works
+cleanly. Worth remembering directly if `jsc` is ever unavailable again — no need to re-discover this.
+
+**New/changed constants (data.js):**
+```
+const DAMAGE_TYPE_CATEGORY = {
+  kinetic: "physical", corrosive: "physical",
+  thermal: "thermal",
+  shock: "shock",       cyber: "shock",
+  psionic: "mind",
+  void: "exotic",       gravity: "exotic"
+};
+const HARD_RESIST = 0.2, RESIST = 0.5, NEUTRAL = 1.0,
+      MILD_WEAK = 1.25, WEAK = 1.5, DOUBLE_WEAK = 2.0;   // MILD_WEAK/DOUBLE_WEAK newly named
+const TACTIC_SLOTS_BASE = 2;
+function tacticSlotsForLevel(level) { return TACTIC_SLOTS_BASE + Math.floor(level / 4); }  // tunable
+```
+
+**Changed functions (state.js):**
+- `affinityMultiplier(target, damageType)` — resolve via `DAMAGE_TYPE_CATEGORY[damageType]`; return `1`
+  unconditionally when the category is `"exotic"` (no table lookup at all for Void/Gravity).
+- New `healMultiplier(c)` (mirrors `guardMultiplier`, ~line 137) — `let m=1; c.effects.forEach(e => { if
+  (e.type==="irradiate") m *= 0.5; }); return m;` (flat 50% heal-block while irradiated, not a magnitude
+  field — simplest shape, matches how `guard`'s multiplier is authored per-skill rather than per-status).
+- New `effectiveSpeed(c)` (mirrors `effectiveAttack`/`effectiveDefense`, ~line 123-135) — subtracts
+  `pin` magnitude, floors at 0.
+
+**Changed functions (engine.js):**
+- `applyToTarget`'s heal branch — multiply the restored amount by `healMultiplier(target)` before the
+  `clamp`, same pattern as the damage branch's `guardMultiplier(target)` call.
+- The initiative sort (currently `combatants.slice().sort((a,b) => b.stats.speed - a.stats.speed)`) —
+  switch to `effectiveSpeed(b) - effectiveSpeed(a)`.
+- `learnNode` — branch on `node.type`. `"active"` keeps today's exact behavior (push `skillKey` onto
+  `hero.skills`). Every other type instead only records the unlock (`hero.unlockedNodes.push(nodeKey)`,
+  SP spent) — no `hero.skills` push, no combat-facing effect until socketed.
+- New `canSocket(hero, nodeKey)` / `socketPassive(hero, nodeKey)` / `unsocketPassive(hero, nodeKey)` —
+  enforce `sum(socketed slotCosts) + node.slotCost <= tacticSlotsForLevel(hero.level)`; callable only
+  from Rest-node and Town code paths (not from the in-combat action bar).
+- Passive effects need a resolution hook wherever their target stat/roll already gets computed —
+  e.g. a `+pierce%` passive folds into the `pierce` term of the damage formula in `applyToTarget`
+  (currently `def = effectiveDefense(target) * (1 - (skill.pierce || 0))`), a weakness-payoff passive
+  hooks the existing `gainLimit` call right after the `mult > 1` check. Exact hook points depend on the
+  specific passives authored in the Content Authoring build step — no generic "effect interpreter" is
+  being built up front; each passive gets a small, explicit hook, matching how Weaken/Sunder/Guard were
+  each added individually rather than via a generic buff engine.
+- No changes needed: `chooseEnemyAction`/`pickEnemyTarget`/`enemyThreatScore`/`estimateEnemyDamage` (call
+  `affinityMultiplier` generically already) — smoke-test only, not expected to need edits.
+
+**Changed schema (hero object, state.js `createHero`):**
+```
+tacticSlots: tacticSlotsForLevel(1),   // recomputed on level-up, same place growth/xpToNext update
+socketedPassives: [],                  // subset of unlockedNodes currently active, sum(slotCost) ≤ tacticSlots
+```
+
+**UI changes (ui.js):**
+- `skillsSectionHtml` (engine.js) — group nodes by branch (indent/label under their tree's root) instead
+  of one flat list; add a "learned but not socketed / socketed" state per non-active node.
+- New Tactic Slots sub-panel in the Character Sheet Skills tab — lists a hero's unlocked non-active
+  nodes with a socket/unsocket toggle, a running `used/total` slot counter, disabled when not at a
+  Rest/Town screen. No visual node-graph — stays a data-driven text list, matching this project's
+  established "cheap, text-first, graphics later" discipline (same choice the dungeon map itself made
+  before the hex-icon pass).
+- `statsSectionHtml`'s affinity display (`capitalize(k) + " ×" + value`) and the skill-menu damage-type
+  label (`" · " + capitalize(skill.damageType)`) both need ZERO changes — both already render whatever
+  keys/strings exist generically.
+
+**The 42-affinity-table migration** — fully hand-audited in design doc §3.7 (corrected 2026-07-28 after
+the Thermal/Shock split); this is the mechanical checklist, now backed by a completed audit rather than
+a methodology to apply later:
+1. `kinetic`+`corrosive` → `physical` (1 conflict found, `demon`, both sources already agreed — pure
+   rename in practice). `thermal` → `thermal` (pure rename, no template ever had a second Thermal
+   source). `psionic` → `mind` (pure rename, always single-source). `shock`+`cyber` → `shock` (the only
+   bucket with real conflicts — see design doc §3.7 for the full resolved case list: same-direction
+   conflicts take the more extreme value; organic-only single-source `cyber: HARD_RESIST` entries with
+   no `shock` companion dampen one step to `RESIST`).
+2. Clamp every resulting `physical` value into `[RESIST, DOUBLE_WEAK]` — checked, never actually
+   triggers on current content (nothing today sets `kinetic`/`corrosive` below `RESIST`).
+3. Also add the 3 new personal affinities for the previously-empty classes (design doc §4.1a):
+   `merc.affinities.physical = MILD_WEAK`, `dreadKnight.affinities.physical = RESIST`,
+   `mechRunner.affinities.thermal = RESIST`.
+4. Re-run the sim suite (§9) after every ~5-10 templates, not all 42 at once — catches a bad
+   reconciliation call immediately instead of compounding it across a whole dungeon's roster.
+
+**Regression risk / save-compat / build sequencing:** design doc §3.7 has the full table and 6-step
+build order (Foundation → skill-tree engine → content authoring → optional flavor seeding → full-game
+regression sim → real playtest). Not duplicated here — that section is the source of truth for
+sequencing; this section is the source of truth for exact code shape.

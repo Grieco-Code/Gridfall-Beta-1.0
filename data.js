@@ -4,30 +4,64 @@
        A) DATA
        ================================================================ */
 
-    // DAMAGE TYPES & AFFINITIES (Phase B).
-    // Core six types: kinetic, shock, thermal, corrosive, psionic, cyber.
-    // Each combatant has an `affinities` table of multipliers; any type NOT
-    // listed defaults to NEUTRAL (x1). Named tiers keep the tables readable and
-    // let us retune the whole game's affinities from one place.
-    // Affinity ladder: 2.0 doubly-weak · 1.5 weak · 1.0 neutral · 0.5 resist · 0.2 hard-resist.
-    // Nothing is fully immune — even a hard-resisted hit chips for at least 1, so no class is
-    // ever dead weight. (Status effects, Phase C, give resisted classes other ways to contribute.)
+    // DAMAGE TYPES & AFFINITIES (Phase B; consolidated to a 4-bucket resistance
+    // system 2026-07-28, design doc §3.2a/§3.7 — SLICE 1 of the battle-mechanics
+    // overhaul, gridfall-battle-mechanics-overhaul memory).
+    // 8 flavors (`damageType` on skills, unchanged vocabulary/messages):
+    // kinetic, corrosive, thermal, shock, cyber, psionic, void, gravity.
+    // Each flavor resolves through DAMAGE_TYPE_CATEGORY into one of 4 resistance
+    // BUCKETS — combatants author `affinities` against the bucket, not the raw
+    // flavor, so a skill keeps its full narrative vocabulary while the actual
+    // resistance math only has 4 numbers to track:
+    //   physical (kinetic, corrosive) · thermal (thermal) · shock (shock, cyber)
+    //   · mind (psionic) · exotic (void, gravity — NOT a normal bucket, see below)
+    // Any bucket NOT listed on a combatant defaults to NEUTRAL (x1). Named tiers
+    // keep the tables readable and let us retune the whole game from one place.
+    // Affinity ladder: 2.0 doubly-weak · 1.5 weak · 1.25 mildly weak · 1.0 neutral
+    // · 0.5 resist · 0.2 hard-resist. Nothing is fully immune — even a
+    // hard-resisted hit chips for at least 1, so no class is ever dead weight.
+    // GOVERNING RULE: `physical` is never HARD_RESIST anywhere (clamped to
+    // RESIST-DOUBLE_WEAK) — Kinetic is every hero's free universal Attack and
+    // must never read as a dead button. Thermal/Shock/Mind may use the full range.
     const NEUTRAL     = 1.0;
+    const MILD_WEAK    = 1.25;
     const WEAK        = 1.5;   // takes extra damage ("Super effective!")
+    const DOUBLE_WEAK  = 2.0;
     const RESIST      = 0.5;   // takes reduced damage ("Resisted.")
     const HARD_RESIST = 0.2;   // barely a scratch — the floor for "immune-flavored" matchups
 
-    // STATUS EFFECTS (Phase C). Each status is data: skills apply them via an
-    // `applies: [{ type, magnitude, duration }]` field; they tick at the start
-    // of the afflicted's turn (see tickEffects). `pip` is the panel badge,
-    // `buff` flags a good effect, `requiresNature` locks it to organic/synthetic.
-    //   burn    — magnitude = damage per turn (DoT)
-    //   weaken  — magnitude = ATK reduction
-    //   sunder  — magnitude = DEF reduction
-    //   guard   — magnitude = incoming-damage multiplier (e.g. 0.5)  [buff]
-    //   disable — skip the turn (magnitude unused)
-    //   confuse — magnitude = chance to strike a random target; organic minds only
+    const DAMAGE_TYPE_CATEGORY = {
+      kinetic: "physical", corrosive: "physical",
+      thermal: "thermal",
+      shock: "shock",       cyber: "shock",
+      psionic: "mind",
+      void: "exotic",       gravity: "exotic"
+    };
+    // "exotic" is deliberately NOT a normal bucket — no combatant is ever given
+    // an `exotic` affinity value. Void/Gravity skills bypass the affinity table
+    // entirely (see affinityMultiplier, state.js) and each defines its own
+    // special rule instead (Void: always neutral, punches through resistance;
+    // Gravity: ignores DEF via `pierce:1`, applies Pin — see below).
+
+    // STATUS EFFECTS (Phase C; +2 new 2026-07-28, design doc §3.3). Each status
+    // is data: skills apply them via an `applies: [{ type, magnitude, duration }]`
+    // field; they tick at the start of the afflicted's turn (see tickEffects).
+    // `pip` is the panel badge, `buff` flags a good effect, `requiresNature`
+    // locks it to organic/synthetic.
+    //   burn      — magnitude = damage per turn (DoT)
+    //   weaken    — magnitude = ATK reduction
+    //   sunder    — magnitude = DEF reduction
+    //   guard     — magnitude = incoming-damage multiplier (e.g. 0.5)  [buff]
+    //   disable   — skip the turn (magnitude unused)
+    //   confuse   — magnitude = chance to strike a random target; organic minds only
     //   overclock — magnitude = ATK increase  [buff]
+    //   irradiate — magnitude = DoT/turn (like burn), PLUS halves all incoming
+    //               healing on the afflicted while active (see healMultiplier,
+    //               state.js). Radiation flavor, carried by Physical/Thermal/
+    //               Shock-flavored skills — no dedicated damage type needed.
+    //   pin       — magnitude = flat Speed reduction, read by effectiveSpeed()
+    //               (state.js) instead of raw stats.speed for turn order.
+    //               Gravity flavor exclusively.
     const STATUSES = {
       burn:      { name: "Burn",      pip: "BURN"  },
       weaken:    { name: "Weaken",    pip: "ATK↓" },
@@ -39,7 +73,9 @@
       // Regen (§5.4, debuts on Dungeon 4's Bio-Tank) — a HoT, Burn's mirror.
       // Ticks in tickEffects alongside Burn; the "race Regen before it heals
       // more than you can burst" tension is the Bio-Tank's whole design.
-      regen:     { name: "Regen",     pip: "REGEN", buff: true }
+      regen:     { name: "Regen",     pip: "REGEN", buff: true },
+      irradiate: { name: "Irradiate", pip: "RAD"   },
+      pin:       { name: "Pinned",    pip: "PIN"   }
     };
 
     // SKILLS are data. Each says its ENERGY cost, KIND, TARGET, and (for
@@ -629,7 +665,8 @@
         nature: "organic",
         baseStats: { hp: 120, en: 30, attack: 18, defense: 10, speed: 12 },
         skills: ["attack", "aimedShot", "fragGrenade"],
-        affinities: {},
+        // 2026-07-28 (§4.1a): an augmented human with no special armor.
+        affinities: { physical: MILD_WEAK },
         growth: { hp: 12, en: 3, attack: 2, defense: 1, speed: 1 },   // gained per level
         limitBreak: "fullAuto"
       },
@@ -638,7 +675,8 @@
         nature: "organic",
         baseStats: { hp: 160, en: 20, attack: 16, defense: 16, speed: 8 },
         skills: ["attack", "crushingBlow", "guard"],
-        affinities: {},
+        // 2026-07-28 (§4.1a): the armored tank of the roster.
+        affinities: { physical: RESIST },
         growth: { hp: 18, en: 2, attack: 2, defense: 2, speed: 0 },
         limitBreak: "unbreakableLine"
       },
@@ -647,7 +685,8 @@
         nature: "organic",
         baseStats: { hp: 130, en: 25, attack: 22, defense: 11, speed: 9 },
         skills: ["attack", "railShot", "incendiaryRounds"],
-        affinities: {},
+        // 2026-07-28 (§4.1a): his own blast-resistant heavy-weapons gear.
+        affinities: { thermal: RESIST },
         growth: { hp: 14, en: 2, attack: 3, defense: 1, speed: 1 },
         limitBreak: "orbitalStrike"
       },
@@ -656,7 +695,7 @@
         nature: "synthetic",
         baseStats: { hp: 95, en: 35, attack: 12, defense: 8, speed: 13 },
         skills: ["attack", "hack", "empBlast"],
-        affinities: { shock: WEAK, cyber: WEAK, psionic: RESIST },   // synthetic
+        affinities: { shock: WEAK, mind: RESIST },   // synthetic
         growth: { hp: 9, en: 4, attack: 2, defense: 1, speed: 1 },
         limitBreak: "totalHack"
       },
@@ -665,7 +704,7 @@
         nature: "organic",
         baseStats: { hp: 90, en: 40, attack: 10, defense: 8, speed: 11 },
         skills: ["attack", "psiBurst", "mindSpike", "mend"],
-        affinities: { cyber: HARD_RESIST, psionic: RESIST },             // organic, trained mind
+        affinities: { shock: RESIST, mind: RESIST },             // organic, trained mind
         growth: { hp: 8, en: 5, attack: 1, defense: 1, speed: 1 },
         limitBreak: "mindsMercy"
       },
@@ -682,7 +721,7 @@
         nature: "organic",
         baseStats: { hp: 105, en: 30, attack: 17, defense: 9, speed: 13 },
         skills: ["attack", "corrodedEdge", "acidCharge"],
-        affinities: { corrosive: WEAK },
+        affinities: { physical: WEAK },
         growth: { hp: 10, en: 3, attack: 2, defense: 1, speed: 1 },
         limitBreak: "acidPurge"
       }
@@ -786,7 +825,7 @@
         nature: "synthetic", tier: "fodder",
         baseStats: { hp: 40, en: 0, attack: 15, defense: 7, speed: 11 },
         skills: ["attack"],
-        affinities: { shock: WEAK, cyber: WEAK, psionic: HARD_RESIST }
+        affinities: { shock: WEAK, mind: HARD_RESIST }
       },
       // Hull Roach — organic bug fodder; swarms; burn/psi counter it.
       hullRoach: {
@@ -794,7 +833,7 @@
         nature: "organic", tier: "fodder",
         baseStats: { hp: 24, en: 0, attack: 12, defense: 4, speed: 12 },
         skills: ["attack"],
-        affinities: { thermal: WEAK, psionic: WEAK }
+        affinities: { thermal: WEAK, mind: WEAK }
       },
 
       // ---------- STANDARD (one gimmick each — mid nodes) ----------
@@ -806,7 +845,7 @@
         skills: ["arcBolt", "arcDischarge"],
         // shock is NEUTRAL (not resisted) as of 2026-07-24 — an EMP hitting a
         // drone shouldn't feel bad; Cyber/Hack stays its best (weak) counter.
-        affinities: { cyber: WEAK, psionic: HARD_RESIST }
+        affinities: { shock: WEAK, mind: HARD_RESIST }
       },
       // Vossmark Grunt (was "Tiangong Pvt.", 2026-07-25) — organic bruiser; Suppressing Fire applies Weaken.
       vossmarkGrunt: {
@@ -814,7 +853,7 @@
         nature: "organic", tier: "standard",
         baseStats: { hp: 60, en: 0, attack: 16, defense: 8, speed: 10 },
         skills: ["attack", "suppressingFire"],
-        affinities: { psionic: 1.25, cyber: HARD_RESIST }
+        affinities: { mind: MILD_WEAK, shock: RESIST }
       },
 
       // ---------- ELITE (mini-boss — late nodes only) ----------
@@ -824,7 +863,7 @@
         nature: "synthetic", tier: "elite",
         baseStats: { hp: 120, en: 0, attack: 17, defense: 15, speed: 7 },
         skills: ["attack", "rocketBarrage"],
-        affinities: { kinetic: RESIST, shock: WEAK, cyber: 2.0, psionic: HARD_RESIST }  // 2.0 = doubly weak to hacking
+        affinities: { physical: RESIST, shock: DOUBLE_WEAK, mind: HARD_RESIST }  // 2.0 = doubly weak to hacking
       },
       // Vossmark Officer (was "Tiangong Lt.", originally "Squad Leader") —
       // mini-boss: Command Strike + Mark Target (Sunder) + heal.
@@ -833,7 +872,7 @@
         nature: "organic", tier: "elite",
         baseStats: { hp: 100, en: 0, attack: 16, defense: 11, speed: 12 },
         skills: ["attack", "commandStrike", "markTarget", "repairProtocol"],
-        affinities: { psionic: 1.25, cyber: HARD_RESIST }
+        affinities: { mind: MILD_WEAK, shock: RESIST }
       },
 
       // ---------- TALOS SYSTEMS (Phase G, §5.1) ----------
@@ -846,7 +885,7 @@
         nature: "organic", tier: "fodder",
         baseStats: { hp: 22, en: 0, attack: 13, defense: 4, speed: 14 },
         skills: ["venomClaws"],
-        affinities: { psionic: WEAK, thermal: WEAK }
+        affinities: { mind: WEAK, thermal: WEAK }
       },
       // Talos Phantom — organic stealth striker; Phantom Strike applies Sunder.
       talosPhantom: {
@@ -854,7 +893,7 @@
         nature: "organic", tier: "standard",
         baseStats: { hp: 55, en: 0, attack: 15, defense: 8, speed: 13 },
         skills: ["phantomBlade", "phantomStrike"],
-        affinities: { psionic: WEAK, kinetic: RESIST }
+        affinities: { mind: WEAK, physical: RESIST }
       },
       // Talos Vanguard — heavy organic frontliner; Plasma Cleave is a big armor-piercing burst.
       talosVanguard: {
@@ -862,7 +901,7 @@
         nature: "organic", tier: "elite",
         baseStats: { hp: 110, en: 0, attack: 18, defense: 12, speed: 9 },
         skills: ["vanguardEdge", "plasmaCleave"],
-        affinities: { psionic: 2.0, corrosive: RESIST }  // 2.0 = doubly weak to Psionic
+        affinities: { mind: DOUBLE_WEAK, physical: RESIST }  // 2.0 = doubly weak to Psionic
       },
 
       // ---------- DUNGEON 4 "SPECIMEN WING" (§5.4a) ----------
@@ -876,14 +915,14 @@
         nature: "organic", tier: "fodder",
         baseStats: { hp: 22, en: 0, attack: 11, defense: 3, speed: 10 },
         skills: ["witheredGrasp"],
-        affinities: { psionic: WEAK }
+        affinities: { mind: WEAK }
       },
       bioTank: {
         typeName: "Bio-Tank", role: "Talos containment specimen",
         nature: "organic", tier: "standard",
         baseStats: { hp: 62, en: 0, attack: 15, defense: 9, speed: 7 },
         skills: ["fusedSlam", "boundedGrowth"],
-        affinities: { psionic: WEAK, kinetic: RESIST }
+        affinities: { mind: WEAK, physical: RESIST }
       },
       chimeraSpecimen: {
         typeName: "Chimera Specimen", role: "Talos chimeric specimen",
@@ -896,7 +935,7 @@
         // the gameplay-direction memory for the full diagnosis.
         baseStats: { hp: 85, en: 0, attack: 17, defense: 11, speed: 10 },
         skills: ["chimeraRend", "unmakingHowl"],
-        affinities: { psionic: 2.0, kinetic: RESIST }
+        affinities: { mind: DOUBLE_WEAK, physical: RESIST }
       },
 
       // ---------- BOSS (Phase G, §5.1 — this dungeon's finale) ----------
@@ -920,7 +959,7 @@
         // it — resisting the one damage type everyone can always afford turned
         // the fight into an unwinnable attrition spiral. Cyber/Shock remain the
         // reward for a squad that brings (and manages EN for) the counter.
-        affinities: { shock: WEAK, cyber: 2.0, psionic: HARD_RESIST },
+        affinities: { shock: DOUBLE_WEAK, mind: HARD_RESIST },
         // The Warden fights with its station: it opens flanked by hardware and
         // calls a second wave of sentinels + a repair drone at half HP (§1d).
         reinforceAt: 0.5,
@@ -937,7 +976,7 @@
         // intended counterplay (don't ignore it, but you CAN kill it fast).
         baseStats: { hp: 32, en: 0, attack: 12, defense: 6, speed: 3 },
         skills: ["sentryShot"],
-        affinities: { kinetic: RESIST, cyber: WEAK, psionic: HARD_RESIST }
+        affinities: { physical: RESIST, shock: WEAK, mind: HARD_RESIST }
       },
       // Repair Drone — squishy heal source. A killable weak point: leave it up
       // and it keeps the Warden alive; the threat-AI also flags it as a priority.
@@ -946,7 +985,7 @@
         nature: "synthetic", tier: "fodder",
         baseStats: { hp: 22, en: 0, attack: 8, defense: 6, speed: 13 },
         skills: ["attack", "nanoRepair"],
-        affinities: { cyber: WEAK, psionic: HARD_RESIST }
+        affinities: { shock: WEAK, mind: HARD_RESIST }
       },
 
       // ---------- KHARON'S REACH (Phase H3 prologue, §5.2) ----------
@@ -956,7 +995,7 @@
         nature: "organic", tier: "fodder",
         baseStats: { hp: 32, en: 0, attack: 10, defense: 5, speed: 9 },
         skills: ["attack", "batonStrike"],
-        affinities: { psionic: 1.25 }   // consistent with other Vossmark organics
+        affinities: { mind: MILD_WEAK }   // consistent with other Vossmark organics
       },
       // ---------- KRELL BOSS-SUPPORT ADD (2026-07-24) ----------
       // Riot Enforcer — tanky organic; braces (self-Guard) and stuns heroes with
@@ -970,7 +1009,7 @@
         // that braces (self-Guard) and stuns, not a mini-boss.
         baseStats: { hp: 38, en: 0, attack: 10, defense: 8, speed: 8 },
         skills: ["attack", "stunBaton", "braceUp"],
-        affinities: { psionic: 1.25 }
+        affinities: { mind: MILD_WEAK }
       },
       // Overseer Voraxx — the colony's chief overseer, hand-tuned finale for a
       // level-1/2 DUO (not derived from Sector 1's depth/level-scaling curve,
@@ -980,7 +1019,7 @@
         nature: "organic", tier: "boss",
         baseStats: { hp: 140, en: 0, attack: 20, defense: 10, speed: 10 },
         skills: ["attack", "ironDiscipline", "overseersLash", "overseersCrackdown"],
-        affinities: { psionic: 1.25 }
+        affinities: { mind: MILD_WEAK }
         // Voraxx's "add" is a Riot Enforcer at his side from the start (see the
         // p4 encounter) — no mid-fight wave, keeping the L1 duo opener forgiving.
       },
@@ -997,14 +1036,14 @@
         nature: "organic", tier: "fodder",
         baseStats: { hp: 26, en: 0, attack: 13, defense: 4, speed: 13 },
         skills: ["chitinBite"],
-        affinities: { psionic: WEAK, thermal: WEAK }
+        affinities: { mind: WEAK, thermal: WEAK }
       },
       erebusWarrior: {
         typeName: "Erebus Warrior", role: "hive bruiser",
         nature: "organic", tier: "standard",
         baseStats: { hp: 58, en: 0, attack: 16, defense: 8, speed: 11 },
         skills: ["mandibleStrike", "carapaceRend"],
-        affinities: { psionic: WEAK, thermal: WEAK }
+        affinities: { mind: WEAK, thermal: WEAK }
       },
       // Shaman — the hive-mind caste. Squishy caster body (weak Kinetic, a
       // "just hit it" glass cannon), hard-resists Psionic (its own domain).
@@ -1015,7 +1054,7 @@
         nature: "organic", tier: "standard",
         baseStats: { hp: 45, en: 0, attack: 14, defense: 6, speed: 11 },
         skills: ["psiLash", "hiveShriek"],
-        affinities: { kinetic: WEAK, psionic: HARD_RESIST }
+        affinities: { physical: WEAK, mind: HARD_RESIST }
       },
       // Armored Warrior — the "counter-pick" fight, same design language as
       // the Vossmark Security Mech: resists the one damage type every class
@@ -1025,7 +1064,7 @@
         nature: "organic", tier: "elite",
         baseStats: { hp: 115, en: 0, attack: 18, defense: 13, speed: 8 },
         skills: ["clawSlash", "crushingPincer"],
-        affinities: { kinetic: RESIST, psionic: WEAK, thermal: WEAK }
+        affinities: { physical: RESIST, mind: WEAK, thermal: WEAK }
       },
       // The Broodmarshal — leadership caste, wears a fused Vossmark control
       // rig that never worked (§5.3). Hard-resists Psionic (commands it,
@@ -1040,7 +1079,7 @@
         nature: "organic", tier: "boss",
         baseStats: { hp: 160, en: 0, attack: 17, defense: 12, speed: 9 },
         skills: ["marshalClaws", "hiveCommand", "marshalRend", "psychicDominion"],
-        affinities: { thermal: WEAK, psionic: HARD_RESIST },
+        affinities: { thermal: WEAK, mind: HARD_RESIST },
         reinforceAt: 0.5,
         // Trimmed to 2 roaches (was +1 warrior): the global HP/damage knobs made
         // the old wave far deadlier than when it was first tuned pre-knobs.
@@ -1063,7 +1102,7 @@
         nature: "organic", tier: "boss",
         baseStats: { hp: 150, en: 0, attack: 19, defense: 12, speed: 10 },
         skills: ["proteusLash", "proteusBloom", "proteusUnraveling"],
-        affinities: { psionic: 2.0, kinetic: RESIST },
+        affinities: { mind: DOUBLE_WEAK, physical: RESIST },
         reinforceAt: 0.5,
         reinforceWave: [{ key: "bioTank", count: 1 }],
         reinforceMessage: "Proteus calls out, and the containment ward's other specimens answer."
@@ -1081,21 +1120,21 @@
         nature: "void", tier: "fodder",
         baseStats: { hp: 20, en: 0, attack: 12, defense: 3, speed: 15 },
         skills: ["restlessGrasp"],
-        affinities: { thermal: WEAK, kinetic: RESIST }
+        affinities: { thermal: WEAK, physical: RESIST }
       },
       shade: {
         typeName: "Void Shade", role: "Helios wraith",
         nature: "void", tier: "standard",
         baseStats: { hp: 48, en: 0, attack: 15, defense: 7, speed: 13 },
         skills: ["umbralCut", "witherTouch"],
-        affinities: { thermal: WEAK, kinetic: RESIST }
+        affinities: { thermal: WEAK, physical: RESIST }
       },
       terror: {
         typeName: "Void Terror", role: "Helios dread-caste",
         nature: "void", tier: "standard",
         baseStats: { hp: 50, en: 0, attack: 13, defense: 7, speed: 10 },
         skills: ["creepingDread", "hollowScream"],
-        affinities: { thermal: WEAK, kinetic: RESIST, psionic: RESIST }
+        affinities: { thermal: WEAK, physical: RESIST, mind: RESIST }
       },
       // Void Horror — the counter-pick elite, doubly weak Thermal (the
       // designated "bring the Mech Runner" fight, same shape as Security
@@ -1105,21 +1144,21 @@
         nature: "void", tier: "elite",
         baseStats: { hp: 95, en: 0, attack: 18, defense: 11, speed: 9 },
         skills: ["rendingClaw", "consumeLight"],
-        affinities: { thermal: 2.0, kinetic: RESIST }
+        affinities: { thermal: DOUBLE_WEAK, physical: RESIST }
       },
       demon: {
         typeName: "Void Demon", role: "Helios burning horror",
         nature: "void", tier: "elite",
         baseStats: { hp: 105, en: 0, attack: 17, defense: 12, speed: 9 },
         skills: ["clawRake", "hellbrand"],
-        affinities: { thermal: WEAK, kinetic: RESIST, corrosive: RESIST }
+        affinities: { thermal: WEAK, physical: RESIST }
       },
       devil: {
         typeName: "Void Devil", role: "Helios tormentor caste",
         nature: "void", tier: "elite",
         baseStats: { hp: 100, en: 0, attack: 15, defense: 12, speed: 11 },
         skills: ["tormentLash", "damnationDecree"],
-        affinities: { thermal: WEAK, psionic: RESIST }
+        affinities: { thermal: WEAK, mind: RESIST }
       },
       // ---------- DUNGEON 5 DOUBLE BOSS (§5.4b) ----------
       // Void Soul Eater — the gatekeeper, fought first, no rest before or
@@ -1133,7 +1172,7 @@
         nature: "void", tier: "boss",
         baseStats: { hp: 145, en: 0, attack: 19, defense: 12, speed: 10 },
         skills: ["soulRend", "devouringMaw", "witheringGaze"],
-        affinities: { thermal: WEAK, kinetic: RESIST }
+        affinities: { thermal: WEAK, physical: RESIST }
       },
       // Sol's Acolyte — the Sun God's reinforceWave add (2026-07-25): a
       // "reskinned Void" in the literal sense the name implies — a station
@@ -1146,7 +1185,7 @@
         nature: "void", tier: "standard",
         baseStats: { hp: 40, en: 0, attack: 12, defense: 6, speed: 12 },
         skills: ["fanaticStrike", "devotedChant"],
-        affinities: { thermal: WEAK, kinetic: RESIST }
+        affinities: { thermal: WEAK, physical: RESIST }
       },
       // The Sun God — Helios's own regulator core, corrupted; secretly a
       // machine wearing a god's face, not a literal deity (§5.4b). Fought
@@ -1175,7 +1214,7 @@
         nature: "synthetic", tier: "boss",
         baseStats: { hp: 100, en: 0, attack: 15, defense: 10, speed: 11 },
         skills: ["solarLash", "coronalFlare", "unmakingPulse", "eclipseProtocol"],
-        affinities: { cyber: 2.0, thermal: HARD_RESIST },
+        affinities: { shock: DOUBLE_WEAK, thermal: HARD_RESIST },
         reinforceAt: 0.5,
         reinforceWave: [{ key: "solAcolyte", count: 1 }],
         reinforceMessage: "The Sun God's voice splits into a chorus. Sol's Acolytes answer the call."
@@ -1204,7 +1243,7 @@
         // number — deep balance tuning is its own later roadmap phase.
         baseStats: { hp: 100, en: 0, attack: 14, defense: 9, speed: 11 },
         skills: ["fleshspringGrasp", "fleshspringRupture", "originUnbinding"],
-        affinities: { psionic: 2.0, kinetic: RESIST },
+        affinities: { mind: DOUBLE_WEAK, physical: RESIST },
         reinforceAt: 0.5,
         reinforceWave: [{ key: "chimeraSpecimen", count: 1 }],
         reinforceMessage: "Phthora's ritual falters, and the lineage answers anyway. A Chimera " +
@@ -1222,7 +1261,7 @@
         nature: "void", tier: "boss",
         baseStats: { hp: 140, en: 0, attack: 20, defense: 13, speed: 10 },
         skills: ["boundLash", "fracturingWill"],
-        affinities: { thermal: WEAK, kinetic: RESIST }
+        affinities: { thermal: WEAK, physical: RESIST }
       },
       // Chthon, God of the Breach (double-boss Phase 2 — the fused
       // Kredex+entity, the TRUE final boss of the game, §5.4c). Fought
@@ -1246,7 +1285,7 @@
         // number — deep balance tuning is its own later roadmap phase.
         baseStats: { hp: 115, en: 0, attack: 18, defense: 12, speed: 12 },
         skills: ["breachLash", "worldUnmaking", "chorusOfBreach", "kredexEcho"],
-        affinities: { psionic: 2.0, thermal: WEAK, kinetic: RESIST },
+        affinities: { mind: DOUBLE_WEAK, thermal: WEAK, physical: RESIST },
         reinforceAt: 0.5,
         reinforceWave: [{ key: "voidHorror", count: 1 }],
         reinforceMessage: "A piece of the Breach tears through with it. Something that was never " +

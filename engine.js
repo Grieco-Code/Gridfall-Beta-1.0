@@ -47,6 +47,16 @@
         if (actor.side === "heroes") gainLimit(actor, damage * GAUGE_PER_DAMAGE_DEALT);
         if (target.side === "heroes") gainLimit(target, damage * GAUGE_PER_DAMAGE_TAKEN);
 
+        // Drain (2026-07-28, §3.7/§4.1a foundation for Dread Knight's future
+        // "Bloodfeed" — no skill uses this yet, added ahead of Content
+        // Authoring so the mechanism exists when that skill is authored).
+        if (skill.drain) {
+          const before = actor.stats.hp;
+          actor.stats.hp = clamp(actor.stats.hp + Math.round(damage * skill.drain), 0, actor.stats.maxHp);
+          const healed = actor.stats.hp - before;
+          if (healed > 0) log(actor.name + " drains " + healed + " HP from the attack.");
+        }
+
         if (!isAlive(target)) {
           log(target.name +
               (target.side === "enemies" ? " is destroyed!" : " goes down!"),
@@ -74,8 +84,10 @@
           target.effects = target.effects.filter(function (e) { return STATUSES[e.type].buff; });
         }
 
+        // 2026-07-28 (§3.2a/§3.3): Irradiate halves incoming healing.
         const before = target.stats.hp;
-        target.stats.hp = clamp(target.stats.hp + skill.power, 0, target.stats.maxHp);
+        const healAmount = Math.round(skill.power * healMultiplier(target));
+        target.stats.hp = clamp(target.stats.hp + healAmount, 0, target.stats.maxHp);
         const healed = target.stats.hp - before;
         const who = (target.id === actor.id) ? "themselves" : target.name;
         log(actor.name + " " + skill.message + " " + who +
@@ -241,9 +253,11 @@
       return disabled;
     }
 
+    // 2026-07-28 (§3.2a/§3.3): uses effectiveSpeed (folds in Pin) instead of
+    // raw stats.speed, mirroring effectiveAttack/effectiveDefense's pattern.
     function turnOrder(combatants) {
       return combatants.slice().sort(function (a, b) {
-        return b.stats.speed - a.stats.speed;
+        return effectiveSpeed(b) - effectiveSpeed(a);
       });
     }
 

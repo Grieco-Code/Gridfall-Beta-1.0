@@ -108,10 +108,17 @@
     function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
     // The target's damage multiplier for a given damage type (1 if unlisted).
+    // 2026-07-28 (battle-mechanics overhaul, design doc §3.2a/§3.7): resolves
+    // through DAMAGE_TYPE_CATEGORY into the target's bucket-keyed affinities,
+    // not the raw flavor. Exotic-flavored types (void, gravity) bypass the
+    // table entirely and always resolve neutral — no combatant is ever given
+    // an `exotic` affinity, that's not a normal bucket, see data.js.
     function affinityMultiplier(target, damageType) {
       if (!damageType) return 1;
+      const category = DAMAGE_TYPE_CATEGORY[damageType];
+      if (!category || category === "exotic") return 1;
       const a = target.affinities || {};
-      return (damageType in a) ? a[damageType] : 1;
+      return (category in a) ? a[category] : 1;
     }
 
     // --- Status-effect helpers (Phase C) ---
@@ -133,11 +140,26 @@
       c.effects.forEach(function (e) { if (e.type === "sunder") d -= e.magnitude; });
       return Math.max(0, d);
     }
+    // 2026-07-28 (§3.2a/§3.3): Pin (Gravity flavor) reduces effective Speed,
+    // read by the initiative sort instead of raw stats.speed — mirrors
+    // effectiveAttack/effectiveDefense's pattern exactly.
+    function effectiveSpeed(c) {
+      let s = c.stats.speed;
+      c.effects.forEach(function (e) { if (e.type === "pin") s -= e.magnitude; });
+      return Math.max(0, s);
+    }
     // Guard multiplies incoming damage (e.g. x0.5); multiple stack multiplicatively.
     function guardMultiplier(c) {
       let m = 1;
       c.effects.forEach(function (e) { if (e.type === "guard") m *= e.magnitude; });
       return m;
+    }
+    // 2026-07-28 (§3.2a/§3.3): Irradiate halves incoming healing while active —
+    // mirrors guardMultiplier's pattern, folded into the heal branch of
+    // applyToTarget the same way guardMultiplier folds into the damage branch.
+    const IRRADIATE_HEAL_MULT = 0.5;
+    function healMultiplier(c) {
+      return hasStatus(c, "irradiate") ? IRRADIATE_HEAL_MULT : 1;
     }
 
     // Add or refresh a status on a target. Respects nature-locks (e.g. Confuse
