@@ -1074,17 +1074,6 @@
     let spriteAnimFrame = 0;            // 0 or 1, swapped on the idle-bob timer
     let spriteAnimTimer = null;
 
-    // A second "idle bob" frame, generated from the base grid instead of
-    // hand-authored twice: shift every row up one and pad a blank row at the
-    // bottom. Every shape has blank padding rows at top/bottom, so this reads
-    // as a subtle 1px "alive" bob rather than actually clipping the art.
-    // Blank-row width matches the shape's own width, not a fixed constant —
-    // hero shapes (16x22) and enemy shapes (16x16) can differ.
-    function bobShape(shape) {
-      const blankRow = ".".repeat(shape[0].length);
-      return shape.slice(1).concat([blankRow]);
-    }
-
     // Which sprite a combatant draws: its own class/enemy entry if one exists
     // yet, else the nature-colored generic blob (see GENERIC_PALETTES above).
     function spriteFor(c) {
@@ -1110,25 +1099,35 @@
     // off its own grid rather than a fixed constant, since hero shapes are
     // taller than enemy shapes and elite/boss enemies render bigger still.
     // Used both to size the <canvas> element (panelHtml) and to clear it
-    // correctly before each redraw.
+    // correctly before each redraw. +1 row of headroom (see drawSpriteFrame)
+    // for the idle bob to shift into — it can't just borrow the shape's own
+    // top row, since not every shape draws a blank padding row up there (the
+    // Dread Knight's helm and the Mech Runner's canopy both run flush to
+    // row 0, so bobbing "into" that row used to clip the head each tick).
     function spriteCanvasSize(spriteData, scale) {
       scale = scale || SPRITE_SCALE;
       const shape = SPRITE_SHAPES[spriteData.shape];
-      return { w: shape[0].length * scale, h: shape.length * scale };
+      return { w: shape[0].length * scale, h: (shape.length + 1) * scale };
     }
 
+    // frameIndex 0 (rest) draws one row down from the canvas top, leaving the
+    // padded row above it empty; frameIndex 1 (idle bob) draws flush with the
+    // top, shifting the whole sprite up exactly one pixel-row into that empty
+    // space. Canvas size (spriteCanvasSize) already reserves the row, so the
+    // bob never has to borrow space from the art itself — safe regardless of
+    // whether a given shape happens to have its own blank top row.
     function drawSpriteFrame(ctx, spriteData, frameIndex, flash, scale) {
       scale = scale || SPRITE_SCALE;
       const shape = SPRITE_SHAPES[spriteData.shape];
-      const rows = frameIndex === 0 ? shape : bobShape(shape);
+      const rowOffset = frameIndex === 0 ? 1 : 0;
       const size = spriteCanvasSize(spriteData, scale);
       ctx.clearRect(0, 0, size.w, size.h);
-      rows.forEach(function (line, row) {
+      shape.forEach(function (line, row) {
         for (let col = 0; col < line.length; col++) {
           const ch = line[col];
           if (ch === ".") continue;
           ctx.fillStyle = flash ? "#f4fff8" : spriteData.palette[ch];
-          ctx.fillRect(col * scale, row * scale, scale, scale);
+          ctx.fillRect(col * scale, (row + rowOffset) * scale, scale, scale);
         }
       });
     }
