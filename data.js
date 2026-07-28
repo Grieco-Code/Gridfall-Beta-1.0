@@ -1338,9 +1338,10 @@
     // SHAPE and just supply a different palette — that's the data-driven win
     // here: adding a sprite for a new class/enemy is usually a palette, not a
     // new grid. drawSpriteFrame() (Section E) is the one function that reads
-    // any of these; a second "idle bob" frame is derived from the grid at
-    // draw time (bobShape()), not hand-authored twice. Grids don't all have
-    // to be the same size — width/height are read off the shape itself
+    // any of these; it derives the "idle bob" frame at draw time by shifting
+    // the whole shape up one row within a padded canvas, not by hand-authoring
+    // a second frame or relying on the art having its own blank top row.
+    // Grids don't all have to be the same size — width/height are read off the shape itself
     // (Section E), which is what lets the hero shapes below be taller/more
     // detailed than the still-16x16 enemy shapes without any engine change.
     //
