@@ -763,6 +763,24 @@
     }
     .skill-node em { color: #6f8278; font-style: normal; }
     .skill-node button { flex: none; padding: 4px 10px; font-size: 12px; }
+    /* Depth-based indent (inline style, set per node) is how a branching
+       tree reads as branches in this plain list — no graph/SVG rendering
+       (§4.1a Tactic Slots). */
+
+    /* Tactic Slots section (§4.1a Layer 2) — same row idiom as .equip-row. */
+    .slot-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 0;
+      border-top: 1px solid #1e2a24;
+      font-size: 12px;
+    }
+    .slot-row .slot-name { flex: 1 1 auto; min-width: 90px; color: #e6f2ea; }
+    .slot-row button { flex: none; padding: 4px 8px; font-size: 11px; }
+    .slot-budget { font-size: 11px; color: #7a8c83; margin: -2px 0 4px; }
+    .slot-note { color: #6f8278; font-size: 11px; font-style: italic; margin: 4px 0; }
 
     .equip-row {
       display: flex;

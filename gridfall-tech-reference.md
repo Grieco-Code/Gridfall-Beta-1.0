@@ -804,6 +804,59 @@ numbers in the code are what they are, not just what they are:**
 ---
 
 ## 11. Changelog
+- **2026-07-28 — Unlock Pool + Tactic Slots (§4.1a) engine built, plus the Cyber->Overload/
+  Netrunner->Synth Medic/Mentalist->Psion rename that preceded it.** Planned via EnterPlanMode (2 Explore
+  passes over `state.js`/`engine.js`/`ui.js`, 1 Plan pass), plan saved at
+  `~/.claude/plans/greedy-squishing-curry.md`.
+  **Rename**: `CLASSES.netrunner`/`CLASSES.mentalist` — only `className`/`role` string values and kit
+  content changed, internal object keys (`netrunner`, `mentalist`, `hack`, sprite keys) untouched, so
+  existing saves aren't affected. `DAMAGE_TYPE_CATEGORY`'s `cyber` key renamed `overload` (still maps to
+  the `"shock"` bucket); every hero-facing `damageType:"cyber"` skill relabeled, the Warden's `corePurge`
+  (enemy-only, never shown to a player) relabeled for consistency only. New skill `naniteWeave` (heal +
+  Regen, `data.js`).
+  **Schema**: `SKILL_TREES` nodes gained `type` (`"active"` default)/`slotCost`/`effect` (`data.js` ~770,
+  full legend in the comment there). **Hero field**: `socketedPassives: []` (`createHero`, `state.js`
+  ~213); Tactic Slot budget is NOT stored — `tacticSlotsForLevel(level)` (`state.js`) is a pure function
+  of level, called live everywhere it's needed, can't desync.
+  **Engine reads** (`state.js`): `socketedEffects(c)` is the one shared lookup every other reader builds
+  on; `socketedStatMods(c, stat, scope)` folds into `effectiveAttack`/`effectiveDefense` (new lines
+  there), a new `effectiveEnCost(hero, skillKey)` (used at `chooseSkill`/`resolveSkill`), and a
+  statusDuration mod inside the new `applySkillEffects` helper (below). `limitGaugeMult(hero)` is now the
+  sole multiplier in `gainLimit`'s one-line body. `lootRarityBonus()` is the one exception that scans the
+  whole `party` instead of one hero (loot isn't attributed to a single hero) — wired into
+  `pickWeightedLootItem` (`ui.js`). `keystoneLimitBreakSkillKey(hero)`/`hasKeystoneRule(hero, name)` back
+  keystones; `chooseLimitBreak` (`engine.js`) and the Limit Break button (`renderActions`, `ui.js`) both
+  now do `keystoneLimitBreakSkillKey(hero) || CLASSES[hero.classKey].limitBreak`.
+  **Combat resolution** (`applyToTarget`, `engine.js`): pierce now reads `(skill.pierce||0) +
+  socketedStatMods(actor,"pierce",{bucket}).flat`; a new `applyWeaknessPayoff(actor, target, skill)` fires
+  right after the affinity `mult` is computed, gated on `mult >= WEAK`; the three separate
+  `skill.applies.forEach(addEffect)` call sites (attack/heal/status branches) are now one shared
+  `applySkillEffects(actor, target, skill)` — also the single hook point for `bonusApplies` keystones
+  (matched by `SKILLS[e.skillKey] === skill` object-reference comparison, skills don't carry their own
+  key) and statusDuration statMods. `learnNode` (`engine.js`) only pushes to `hero.skills` when
+  `node.type === "active"` — every other type just becomes eligible to socket, not live.
+  **UI** (`engine.js`/`ui.js`): new `tacticSlotsSectionHtml(h, canReconfigure)` between Skills and
+  Equipment in `showCharacterPanel`; `skillsSectionHtml` now renders nodes in depth-first branch order
+  (inline `padding-left: depth*18px`) instead of raw authoring order, so a real branch reads as a branch
+  in this plain list. `charPanelReturnTo` gained a third value `"rest"` (alongside `"battle"`/`"town"`) —
+  sockets render `disabled` at the endbar, live at Town/Rest. Rest nodes had zero UI before this
+  (`resolvePassiveNode`'s rest branch was a bare function call) — new `justRested` flag (`state.js`,
+  cleared on the next `onNodeClick`) drives a "Reconfigure Tactic Slots" button on the Map.
+  **Content**: Synth Medic (`netrunner` key) — `cascadeFailure` (weaknessPayoff, Shock/enRefund),
+  `repairSwarm` (new AoE heal skill), `adaptiveNanites` (keystone, bespoke `healCleansesDisable` rule,
+  checked in `applyToTarget`'s heal branch via `hasKeystoneRule`). Psion (`mentalist` key) —
+  `shatteredWill` (weaknessPayoff, Mind/limitGauge), `calmMind` (new heal+Guard skill), `mindscape`
+  (keystone, `bonusApplies` on `terror`). Saboteur — `corrodingGrip` (new attack+Weaken skill),
+  `necroticPayload` (statMod, +1 Sunder duration), `scavengersIngenuity` (economy, `lootRarity` statMod,
+  first real use of that subtype), `corrosiveEndgame` (keystone, `limitBreakOverride` -> new
+  `acidPurgePlus` skill). All three: ~10 SP to fully clear, 4-5 Tactic Slots if fully socketed.
+  **Verified headless** throughout (no browser-automation tool this session): every node-type mechanism
+  unit-tested against scratch `SKILL_TREES`/`CLASSES` entries (not shipped content) before any real
+  content was authored; each class's full tree got a learn->socket->combat check after authoring; a final
+  270-battle sim (9 bosses x 15 trials x 2 parties, one built entirely from new content, driven directly
+  via `resolveSkill`/`chooseEnemyAction`/`tickEffects`/`turnOrder` rather than the real async UI turn-flow)
+  hit zero crashes/exceptions. Explicitly a crash/regression check, not a balance pass — see the design
+  doc's changelog entry for why the two test parties' win-rates diverged (team composition, not a defect).
 - **2026-07-28 — `battle-mechanics-overhaul` merged into `main`.** `git merge-tree` dry run first, then
   a real `git merge --no-ff`: `data.js`/`engine.js`/`state.js`/`ui.js` all auto-merged with zero
   conflicts (the sprite-quality pass and Slice 1's damage-bucket work never touched the same regions of

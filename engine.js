@@ -6,21 +6,76 @@
 
     function resolveSkill(skillKey, actor, targets) {
       const skill = SKILLS[skillKey];
-      actor.stats.en = clamp(actor.stats.en - skill.enCost, 0, actor.stats.maxEn);
+      actor.stats.en = clamp(actor.stats.en - effectiveEnCost(actor, skillKey), 0, actor.stats.maxEn);
       targets.forEach(function (t) { applyToTarget(skill, actor, t); });
+    }
+
+    // Shared by all three applyToTarget branches below (used to be three
+    // separate `skill.applies.forEach(addEffect)` calls). Also the one hook
+    // point for two of the five §4.1a node types at once: a socketed
+    // "bonusApplies" keystone tacks extra `applies` entries onto a specific
+    // skillKey (matched by object reference, not a string key — SKILLS
+    // objects don't carry their own key), and a socketed "statusDuration"
+    // statMod extends/shortens whatever duration each spec already has.
+    function applySkillEffects(actor, target, skill) {
+      const specs = (skill.applies || []).slice();
+      socketedEffects(actor).forEach(function (node) {
+        const e = node.effect;
+        if (e.kind === "ruleOverride" && e.rule === "bonusApplies" && SKILLS[e.skillKey] === skill) {
+          specs.push(e.applies);
+        }
+      });
+      let applied = false;
+      specs.forEach(function (spec) {
+        const mod = socketedStatMods(actor, "statusDuration", { statusType: spec.type });
+        const finalSpec = (mod.flat || mod.percent)
+          ? Object.assign({}, spec, { duration: Math.max(1, Math.round((spec.duration + mod.flat) * (1 + mod.percent))) })
+          : spec;
+        if (addEffect(target, finalSpec)) applied = true;
+      });
+      return applied;
+    }
+
+    // Weakness-payoff passive (§4.1a Layer 1): while socketed, a hero's own
+    // hit that lands on the target's bucket-weakness (mult >= WEAK) grants a
+    // bonus. Called from applyToTarget's attack branch right after the
+    // affinity multiplier is known.
+    function applyWeaknessPayoff(actor, target, skill) {
+      const bucket = DAMAGE_TYPE_CATEGORY[skill.damageType];
+      if (!bucket) return;
+      socketedEffects(actor).forEach(function (node) {
+        const e = node.effect;
+        if (e.kind !== "weaknessPayoff" || e.bucket !== bucket) return;
+        if (e.bonus === "enRefund") {
+          actor.stats.en = clamp(actor.stats.en + e.amount, 0, actor.stats.maxEn);
+          log(actor.name + "'s " + node.name + " refunds " + e.amount + " EN.");
+        } else if (e.bonus === "limitGauge") {
+          gainLimit(actor, e.amount);
+          log(actor.name + "'s " + node.name + " surges the Limit gauge.");
+        } else if (e.bonus === "forceStatus" && e.forceStatus) {
+          if (addEffect(target, e.forceStatus)) {
+            log(actor.name + "'s " + node.name + " forces " + STATUSES[e.forceStatus.type].name +
+                " onto " + target.name + ".");
+          }
+        }
+      });
     }
 
     function applyToTarget(skill, actor, target) {
       if (skill.kind === "attack") {
         // Base damage uses EFFECTIVE stats (Weaken lowers attack, Sunder lowers defense).
-        // `pierce` ignores a fraction of the target's defense (armor-piercing hits).
-        const def = effectiveDefense(target) * (1 - (skill.pierce || 0));
+        // `pierce` ignores a fraction of the target's defense (armor-piercing hits) —
+        // a socketed "pierce" statMod (scoped to the skill's damage bucket) adds on top.
+        const pierce = (skill.pierce || 0) +
+          socketedStatMods(actor, "pierce", { bucket: DAMAGE_TYPE_CATEGORY[skill.damageType] }).flat;
+        const def = effectiveDefense(target) * (1 - pierce);
         const base = effectiveAttack(actor) + skill.power - def;
         let damage = Math.max(1, base + randomBetween(-2, 2));
 
         // Affinity multiplier — always ≥1, so a hard-resisted hit still chips.
         const mult = affinityMultiplier(target, skill.damageType);
         damage = Math.max(1, Math.round(damage * mult));
+        if (mult >= WEAK && actor.side === "heroes") applyWeaknessPayoff(actor, target, skill);
 
         // Guard on the target reduces incoming damage.
         damage = Math.max(1, Math.round(damage * guardMultiplier(target)));
@@ -62,9 +117,8 @@
               (target.side === "enemies" ? " is destroyed!" : " goes down!"),
               target.side === "enemies");
           if (actor.side === "heroes") gainLimit(actor, GAUGE_PER_KILL);
-        } else if (skill.applies) {
-          let applied = false;
-          skill.applies.forEach(function (spec) { if (addEffect(target, spec)) applied = true; });
+        } else {
+          const applied = applySkillEffects(actor, target, skill);
           if (applied && actor.side === "heroes") gainLimit(actor, GAUGE_PER_STATUS_APPLIED);
         }
 
@@ -93,14 +147,21 @@
         log(actor.name + " " + skill.message + " " + who +
             " — restores " + healed + " HP!" + (skill.cleanse ? " Cleansed!" : ""));
         if (actor.side === "heroes") gainLimit(actor, healed * GAUGE_PER_HEAL);
-        if (skill.applies) skill.applies.forEach(function (spec) { addEffect(target, spec); });
+        applySkillEffects(actor, target, skill);
+
+        // Adaptive Nanites keystone (Synth Medic, §4.1a bespoke rule): this
+        // hero's heals also cleanse Disable off the target.
+        if (actor.side === "heroes" && hasKeystoneRule(actor, "healCleansesDisable")) {
+          const before = target.effects.length;
+          target.effects = target.effects.filter(function (e) { return e.type !== "disable"; });
+          if (target.effects.length < before) log(target.name + "'s Disable is cleansed!");
+        }
 
       } else if (skill.kind === "status") {
         // Pure status skill: no damage/heal, just applies its effects.
         const who = (target.id === actor.id) ? "" : (" " + target.name);
         log(actor.name + " " + skill.message + who + ".");
-        let applied = false;
-        if (skill.applies) skill.applies.forEach(function (spec) { if (addEffect(target, spec)) applied = true; });
+        const applied = applySkillEffects(actor, target, skill);
         if (applied && actor.side === "heroes") gainLimit(actor, GAUGE_PER_STATUS_APPLIED);
       }
     }
@@ -121,7 +182,7 @@
 
     function chooseSkill(skillKey) {
       const skill = SKILLS[skillKey];
-      if (activeCombatant.stats.en < skill.enCost) {
+      if (activeCombatant.stats.en < effectiveEnCost(activeCombatant, skillKey)) {
         log("Not enough EN for " + skill.name + ".");
         return;
       }
@@ -138,11 +199,14 @@
       enterTargeting(SKILLS[itemKey]);
     }
 
-    // Spend a full (100%) Limit Break gauge on its class ultimate.
+    // Spend a full (100%) Limit Break gauge on its class ultimate. The
+    // skillKey resolves through keystoneLimitBreakSkillKey first (§4.1a) —
+    // a socketed limitBreakOverride keystone swaps in a stronger skill,
+    // falling back to the class's normal Limit Break otherwise.
     function chooseLimitBreak() {
       const hero = activeCombatant;
       if (hero.limit < 100) return;   // guard; the button is disabled below 100 anyway
-      const skillKey = CLASSES[hero.classKey].limitBreak;
+      const skillKey = keystoneLimitBreakSkillKey(hero) || CLASSES[hero.classKey].limitBreak;
       pendingAction = { key: skillKey, isItem: false, isLimit: true };
       enterTargeting(SKILLS[skillKey]);
     }
@@ -718,13 +782,17 @@
       return true;
     }
 
-    // Spend SP to learn a tree node; the unlocked skill joins the hero's kit immediately.
+    // Spend SP to learn a tree node (Layer 1, permanent — unchanged by
+    // §4.1a). An "active" node's skill joins the hero's kit immediately,
+    // exactly as before. Any other type only becomes usable once SOCKETED
+    // (Layer 2, socketNode/unsocketNode in state.js) — learning it just
+    // makes it eligible to socket, it isn't live yet.
     function learnNode(hero, nodeKey) {
       if (!canLearnNode(hero, nodeKey)) return false;
       const node = SKILL_TREES[hero.classKey].find(function (n) { return n.key === nodeKey; });
       hero.sp -= node.cost;
       hero.unlockedNodes.push(nodeKey);
-      hero.skills.push(node.skillKey);
+      if (node.type === "active" || !node.type) hero.skills.push(node.skillKey);
       log(hero.name + " learns " + node.name + "!", true);
       return true;
     }
@@ -1229,14 +1297,18 @@
     // internal re-render calls (`showCharacterPanel(h.id)` from Learn/Equip/
     // Unequip handlers) omit these and reuse whatever was already set.
     let charPanelHeroList = null;
-    let charPanelReturnTo = "battle";   // "battle" | "town"
+    let charPanelReturnTo = "battle";   // "battle" | "town" | "rest"
 
     // Minimal debug/testing Character Sheet: per-hero tabs, then Stats / Skills
-    // / Equipment sections. Text/button-driven — the graphical paperdoll (using
-    // each item's `spriteKey`) arrives with the Phase I graphics pass.
+    // / Tactic Slots / Equipment sections. Text/button-driven — the graphical
+    // paperdoll (using each item's `spriteKey`) arrives with the Phase I
+    // graphics pass.
     // Phase H4: generalized beyond the post-battle endbar — Town opens it
     // with `heroList = roster` (review/equip ANY recruited hero, not just
     // whoever's in the active party) and `returnTo = "town"`.
+    // §4.1a: a third `returnTo = "rest"` (from a Rest node) joins "town" as
+    // the only two places Tactic Slots can be reconfigured — narrower than
+    // Equipment's reach (which also allows the post-battle endbar).
     function showCharacterPanel(heroId, heroList, returnTo) {
       removeEndbar();
       removeCharacterPanel();
@@ -1266,14 +1338,26 @@
       });
       wrap.appendChild(tabs);
 
+      // §4.1a: Tactic Slots can only be reconfigured at a Rest node or in
+      // Town — read-only (buttons render disabled) at the post-battle
+      // endbar, unlike Equipment which stays changeable there.
+      const canReconfigure = charPanelReturnTo === "town" || charPanelReturnTo === "rest";
+
       const body = document.createElement("div");
       body.className = "char-body";
-      body.innerHTML = statsSectionHtml(h) + skillsSectionHtml(h) + equipmentSectionHtml(h);
+      body.innerHTML = statsSectionHtml(h) + skillsSectionHtml(h) +
+        tacticSlotsSectionHtml(h, canReconfigure) + equipmentSectionHtml(h);
       wrap.appendChild(body);
 
       // Wire up every interactive control inside the freshly-built body.
       body.querySelectorAll(".learn-btn:not(:disabled)").forEach(function (btn) {
         btn.onclick = function () { learnNode(h, btn.dataset.node); showCharacterPanel(h.id); };
+      });
+      body.querySelectorAll(".socket-btn:not(:disabled)").forEach(function (btn) {
+        btn.onclick = function () { socketNode(h, btn.dataset.node); showCharacterPanel(h.id); };
+      });
+      body.querySelectorAll(".unsocket-btn:not(:disabled)").forEach(function (btn) {
+        btn.onclick = function () { unsocketNode(h, btn.dataset.node); showCharacterPanel(h.id); };
       });
       body.querySelectorAll(".equip-btn").forEach(function (btn) {
         btn.onclick = function () {
@@ -1290,11 +1374,14 @@
       doneBtn.textContent = "Done";
       doneBtn.onclick = function () {
         removeCharacterPanel();
-        if (charPanelReturnTo === "town") { showTown(); } else { renderEndbar(lastOutcome); }
+        if (charPanelReturnTo === "town") { showTown(); }
+        else if (charPanelReturnTo === "rest") { showMap(); }
+        else { renderEndbar(lastOutcome); }
       };
       wrap.appendChild(doneBtn);
 
-      const hostId = charPanelReturnTo === "town" ? "town-scene" : "battle";
+      const hostId = charPanelReturnTo === "town" ? "town-scene" :
+        charPanelReturnTo === "rest" ? "map" : "battle";
       document.getElementById(hostId).appendChild(wrap);
     }
 
@@ -1345,21 +1432,73 @@
         "</div>";
     }
 
+    // §4.1a: nodes now render in DEPTH-FIRST branch order (a root, then its
+    // whole descendant chain, before the next root) with indentation scaled
+    // by depth — instead of raw SKILL_TREES authoring order — so a real
+    // branching tree (root -> 2 branches -> keystone capstones) reads as
+    // branches in this plain list. No graph/SVG rendering, just indentation.
+    // Non-"active" nodes get a bracketed [type · N slots] tag since learning
+    // them isn't enough to use them — see tacticSlotsSectionHtml below for
+    // actually socketing them.
     function skillsSectionHtml(h) {
       const tree = SKILL_TREES[h.classKey] || [];
       let html = "<div class='char-section'><h4>Skills · SP: " + h.sp + "</h4>";
       if (tree.length === 0) html += "<p class='char-empty'>No skills available yet.</p>";
-      tree.forEach(function (node) {
+
+      function renderNode(node, depth) {
         const learned = h.unlockedNodes.indexOf(node.key) >= 0;
         const can = !learned && canLearnNode(h, node.key);
         const prereqNode = node.prereq && tree.find(function (n) { return n.key === node.prereq; });
+        const isActive = node.type === "active" || !node.type;
+        const typeTag = isActive ? "" :
+          " <em>[" + node.type + " · " + node.slotCost + " slot" + (node.slotCost > 1 ? "s" : "") + "]</em>";
         html +=
-          "<div class='skill-node'>" +
-            "<span>" + node.name + " <em>(" + node.cost + " SP" +
+          "<div class='skill-node' style='padding-left:" + (depth * 18) + "px'>" +
+            "<span>" + node.name + typeTag + " <em>(" + node.cost + " SP" +
               (prereqNode ? ", needs " + prereqNode.name : "") + ")</em></span>" +
             "<button class='learn-btn' data-node='" + node.key + "'" +
               (learned || !can ? " disabled" : "") + ">" +
               (learned ? "Learned" : "Learn") +
+            "</button>" +
+          "</div>";
+        tree.filter(function (n) { return n.prereq === node.key; })
+            .forEach(function (child) { renderNode(child, depth + 1); });
+      }
+      tree.filter(function (n) { return !n.prereq; }).forEach(function (root) { renderNode(root, 0); });
+
+      return html + "</div>";
+    }
+
+    // Tactic Slots (§4.1a Layer 2): every LEARNED non-"active" node gets a
+    // socket/unsocket toggle here — learning (above) only makes a node
+    // eligible, socketing is what actually turns it on. `canReconfigure` is
+    // false at the post-battle endbar (spec: only Rest nodes + Town can
+    // reconfigure); sockets still render there, just disabled, so a player
+    // can see what they have without being able to change it mid-run.
+    function tacticSlotsSectionHtml(h, canReconfigure) {
+      const tree = SKILL_TREES[h.classKey] || [];
+      const socketable = tree.filter(function (n) {
+        return n.type !== "active" && h.unlockedNodes.indexOf(n.key) >= 0;
+      });
+      const budget = tacticSlotsForLevel(h.level);
+      const used = usedTacticSlots(h);
+      let html = "<div class='char-section'><h4>Tactic Slots · " + used + "/" + budget + "</h4>";
+      if (!canReconfigure) {
+        html += "<p class='slot-note'>Reconfigure at a Rest node or in Town.</p>";
+      }
+      if (socketable.length === 0) {
+        html += "<p class='char-empty'>Learn a passive, weakness-payoff, economy, or keystone node to socket it here.</p>";
+      }
+      socketable.forEach(function (node) {
+        const socketed = h.socketedPassives.indexOf(node.key) >= 0;
+        const canToggle = canReconfigure && (socketed || canSocketNode(h, node.key));
+        html +=
+          "<div class='slot-row'>" +
+            "<span class='slot-name'>" + node.name +
+              " <em>[" + node.type + " · " + node.slotCost + " slot" + (node.slotCost > 1 ? "s" : "") + "]</em></span>" +
+            "<button class='" + (socketed ? "unsocket-btn" : "socket-btn") + "' data-node='" + node.key + "'" +
+              (canToggle ? "" : " disabled") + ">" +
+              (socketed ? "Unsocket" : "Socket") +
             "</button>" +
           "</div>";
       });

@@ -22,6 +22,11 @@
     let visitedNodeIds = [];       // node ids already resolved (win/loot claimed/rested)
     let lastMapMessage = "";       // most recent Loot/Rest result, shown on the Map screen
     const REST_HEAL_FRACTION = 0.65;   // Rest nodes restore this fraction of max HP/EN
+    // §4.1a: true right after resolving a Rest node, cleared on the next node
+    // click (onNodeClick) — drives whether renderMap shows the "Reconfigure
+    // Tactic Slots" button, since Rest is one of only two places (with Town)
+    // that reconfiguring is allowed.
+    let justRested = false;
 
     // Town (Phase H4). lastTownMessage mirrors lastMapMessage's role but for
     // Town (e.g. the one-time ship-salvage grant). sector1BriefingShown gates
@@ -64,6 +69,12 @@
     function xpForNext(level) { return 40 * level; }          // XP needed to reach the next level
     let SP_PER_LEVEL = 1;   // Skill Points earned per level-up, spent in SKILL_TREES
 
+    // Tactic Slot budget (§4.1a) — how many non-"active" SKILL_TREES nodes a
+    // hero can have SOCKETED at once. Deliberately NOT a stored hero field:
+    // it's a pure function of level, so it can never desync from hero.level
+    // and level-up code (levelUp/fastForwardHeroToLevel) needs zero changes.
+    function tacticSlotsForLevel(level) { return 2 + Math.floor(level / 4); }
+
     // Limit Break gauge (Phase D½). Heroes only; the gauge PERSISTS across the dungeon (never reset
     // between nodes — only a fresh startDungeon zeroes it, since it's set at hero creation).
     // Rates roughly doubled (Phase H4 tightening pass) — the original "once per ~2 fights" pacing
@@ -75,7 +86,7 @@
     let GAUGE_PER_HEAL = 0.21;          // per point of HP the hero restores (was 0.05)
     let GAUGE_PER_STATUS_APPLIED = 3;   // flat, when a status the hero applied actually lands (was 1)
     let GAUGE_PER_KILL = 11;            // flat, when the hero's hit finishes off a target (was 3)
-    function gainLimit(hero, amount) { hero.limit = clamp(hero.limit + amount, 0, 100); }
+    function gainLimit(hero, amount) { hero.limit = clamp(hero.limit + amount * limitGaugeMult(hero), 0, 100); }
 
     // Interim loot source until the map's real loot nodes exist (Phase G).
     let LOOT_DROP_CHANCE = 0.4;   // chance of a random unowned item dropping after a win
@@ -125,6 +136,121 @@
     function hasStatus(c, type) { return c.effects.some(function (e) { return e.type === type; }); }
     function getStatus(c, type) { return c.effects.find(function (e) { return e.type === type; }); }
 
+    // --- Tactic Slots (§4.1a Layer 2) — reading/managing a hero's SOCKETED
+    // non-"active" tree nodes. `c` is any combatant here (enemies pass
+    // through effectiveAttack/effectiveDefense too), so every reader is
+    // defensive about `socketedPassives` not existing on non-heroes.
+
+    // Every socketed node's { name, effect } for this hero, joined against
+    // its class's SKILL_TREES entry. The one shared lookup every other
+    // socketed-node reader below builds on — mirrors how SKILLS/STATUSES/
+    // ENEMIES already keep engine code generic instead of per-node checks.
+    function socketedEffects(c) {
+      if (!c.socketedPassives || !c.socketedPassives.length) return [];
+      const tree = SKILL_TREES[c.classKey] || [];
+      return c.socketedPassives
+        .map(function (key) { return tree.find(function (n) { return n.key === key; }); })
+        .filter(function (n) { return n && n.effect; });
+    }
+
+    // Sums every socketed "statMod" node matching `stat` (and, if given, a
+    // `scope` — e.g. { statusType: "sunder" } for a duration mod that only
+    // touches one status). `flat` and `percent` amounts are kept separate
+    // since a caller may want to apply them differently (percent multiplies
+    // a computed base, flat just adds).
+    function socketedStatMods(c, stat, scope) {
+      scope = scope || {};
+      let flat = 0, percent = 0;
+      socketedEffects(c).forEach(function (node) {
+        const e = node.effect;
+        if (e.kind !== "statMod" || e.stat !== stat) return;
+        if (e.scope) {
+          if (e.scope.statusType && e.scope.statusType !== scope.statusType) return;
+          if (e.scope.bucket && e.scope.bucket !== scope.bucket) return;
+          if (e.scope.skillKey && e.scope.skillKey !== scope.skillKey) return;
+        }
+        if (e.mode === "percent") percent += e.amount; else flat += e.amount;
+      });
+      return { flat: flat, percent: percent };
+    }
+
+    function usedTacticSlots(hero) {
+      const tree = SKILL_TREES[hero.classKey] || [];
+      return hero.socketedPassives.reduce(function (sum, key) {
+        const node = tree.find(function (n) { return n.key === key; });
+        return sum + (node ? node.slotCost : 0);
+      }, 0);
+    }
+
+    function canSocketNode(hero, nodeKey) {
+      const tree = SKILL_TREES[hero.classKey] || [];
+      const node = tree.find(function (n) { return n.key === nodeKey; });
+      if (!node || node.type === "active") return false;             // actives are never socketed
+      if (hero.unlockedNodes.indexOf(nodeKey) < 0) return false;      // must be learned (Layer 1) first
+      if (hero.socketedPassives.indexOf(nodeKey) >= 0) return false;  // already socketed
+      return usedTacticSlots(hero) + node.slotCost <= tacticSlotsForLevel(hero.level);
+    }
+
+    function socketNode(hero, nodeKey) {
+      if (!canSocketNode(hero, nodeKey)) return false;
+      hero.socketedPassives.push(nodeKey);
+      return true;
+    }
+
+    function unsocketNode(hero, nodeKey) {
+      const idx = hero.socketedPassives.indexOf(nodeKey);
+      if (idx < 0) return false;
+      hero.socketedPassives.splice(idx, 1);
+      return true;
+    }
+
+    // A socketed "limitBreakOverride" keystone's skillKey, if any (there's
+    // at most one meaningfully active at a time — first found wins). Read
+    // live rather than cached on the hero so unsocketing it can't leave a
+    // stale pointer behind.
+    function keystoneLimitBreakSkillKey(hero) {
+      const node = socketedEffects(hero).find(function (n) {
+        return n.effect.kind === "ruleOverride" && n.effect.rule === "limitBreakOverride";
+      });
+      return node ? node.effect.skillKey : null;
+    }
+
+    // Any socketed keystone whose rule is a bespoke named flag rather than
+    // one of the generic ruleOverride shapes (bonusApplies/limitBreakOverride)
+    // — e.g. Synth Medic's Adaptive Nanites ("healCleansesDisable"). Each
+    // bespoke rule still gets its own small, isolated branch at the exact
+    // point it fires (matches the design doc's own Dread Knight Guard-reflect
+    // precedent) — this just answers "is it socketed," not what it does.
+    function hasKeystoneRule(hero, ruleName) {
+      return socketedEffects(hero).some(function (n) {
+        return n.effect.kind === "ruleOverride" && n.effect.rule === ruleName;
+      });
+    }
+
+    // A skill's EN cost after any socketed "enCost" statMod scoped to it
+    // (an economy node, e.g. "Firewall Breach costs 20% less EN").
+    function effectiveEnCost(hero, skillKey) {
+      const mod = socketedStatMods(hero, "enCost", { skillKey: skillKey });
+      let cost = SKILLS[skillKey].enCost + mod.flat;
+      if (mod.percent) cost = Math.round(cost * (1 + mod.percent));
+      return Math.max(0, cost);
+    }
+
+    // A socketed "limitGaugeRate" economy node speeds up Limit gauge fill —
+    // read by gainLimit below, the single chokepoint every gauge gain
+    // already passes through.
+    function limitGaugeMult(hero) {
+      return 1 + socketedStatMods(hero, "limitGaugeRate").percent;
+    }
+
+    // A socketed "lootRarity" economy node — unlike every other node type,
+    // loot isn't attributed to one hero (grantLoot/pickWeightedLootItem,
+    // ui.js, roll for the whole party), so this scans the whole `party`
+    // rather than reading one hero's sockets.
+    function lootRarityBonus() {
+      return party.reduce(function (sum, h) { return sum + socketedStatMods(h, "lootRarity").flat; }, 0);
+    }
+
     // Effective stats fold active debuffs into the base numbers on the fly
     // (we never mutate base stats, so nothing gets corrupted).
     function effectiveAttack(c) {
@@ -133,11 +259,13 @@
         if (e.type === "weaken") a -= e.magnitude;
         if (e.type === "overclock") a += e.magnitude;
       });
+      a += socketedStatMods(c, "attack").flat;
       return Math.max(0, a);
     }
     function effectiveDefense(c) {
       let d = c.stats.defense;
       c.effects.forEach(function (e) { if (e.type === "sunder") d -= e.magnitude; });
+      d += socketedStatMods(c, "defense").flat;
       return Math.max(0, d);
     }
     // 2026-07-28 (§3.2a/§3.3): Pin (Gravity flavor) reduces effective Speed,
@@ -219,7 +347,10 @@
         xp: 0,
         xpToNext: xpForNext(level),
         sp: 0,                   // Skill Points, earned per level, spent in SKILL_TREES
-        unlockedNodes: [],       // tree node keys this hero has learned
+        unlockedNodes: [],       // tree node keys this hero has learned (Layer 1, permanent)
+        socketedPassives: [],    // subset of unlockedNodes currently SOCKETED (Layer 2, §4.1a
+                                  // Tactic Slots — only non-"active" node types live here; the
+                                  // budget itself isn't stored, see tacticSlotsForLevel below)
         equipment: { head: null, body: null, legs: null, arms: null, weapon: null, ring: null },
         limit: 0,                // Limit Break gauge, 0-100, persists across the run
         subtitle: t.className + " · Lv " + level,   // "Merc · Lv 1"

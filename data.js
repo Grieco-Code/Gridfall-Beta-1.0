@@ -8,12 +8,17 @@
     // system 2026-07-28, design doc §3.2a/§3.7 — SLICE 1 of the battle-mechanics
     // overhaul, gridfall-battle-mechanics-overhaul memory).
     // 8 flavors (`damageType` on skills, unchanged vocabulary/messages):
-    // kinetic, corrosive, thermal, shock, cyber, psionic, void, gravity.
+    // kinetic, corrosive, thermal, shock, overload, psionic, void, gravity.
+    // ("cyber" renamed to "overload" 2026-07-28, Synth Medic rework — "Cyber"
+    // read as hacking/computer-breach flavor text landing on enemies with no
+    // systems to hack; "Overload" reads as a neural/circuit overload either
+    // way, so it works narrated against organic or synthetic targets alike.
+    // Purely a label change — same bucket, same numbers, see below.)
     // Each flavor resolves through DAMAGE_TYPE_CATEGORY into one of 4 resistance
     // BUCKETS — combatants author `affinities` against the bucket, not the raw
     // flavor, so a skill keeps its full narrative vocabulary while the actual
     // resistance math only has 4 numbers to track:
-    //   physical (kinetic, corrosive) · thermal (thermal) · shock (shock, cyber)
+    //   physical (kinetic, corrosive) · thermal (thermal) · shock (shock, overload)
     //   · mind (psionic) · exotic (void, gravity — NOT a normal bucket, see below)
     // Any bucket NOT listed on a combatant defaults to NEUTRAL (x1). Named tiers
     // keep the tables readable and let us retune the whole game from one place.
@@ -33,7 +38,7 @@
     const DAMAGE_TYPE_CATEGORY = {
       kinetic: "physical", corrosive: "physical",
       thermal: "thermal",
-      shock: "shock",       cyber: "shock",
+      shock: "shock",       overload: "shock",
       psionic: "mind",
       void: "exotic",       gravity: "exotic"
     };
@@ -122,19 +127,45 @@
         applies: [{ type: "burn", magnitude: 6, duration: 3 }]
       },
 
-      // --- Netrunner ---
-      hack: {   // signature: Cyber burst — the designated Security Mech killer (x2.0)
-        name: "Hack", enCost: 12, kind: "attack", target: "enemy",
-        damageType: "cyber", power: 16, message: "breaches the systems of"
+      // --- Synth Medic (Nyx) — 2026-07-28 rework: was Netrunner/"Hacker,"
+      // reframed as a nanite-support caster (design doc §4.1a's obsolete
+      // Netrunner branch superseded — see current changelog entry). Kept the
+      // Overload/Shock damage identity (still the anti-synthetic answer she
+      // always was — Security Mech, Arc Sentinel, the Warden, the Sun God all
+      // still resolve through the same "shock" bucket, just no hero is
+      // narratively required to be "the hacker" to deliver it) and added her
+      // first real heal, `naniteWeave`, for parity with Psion's `mend`. ---
+      hack: {   // signature: Overload burst — still the Security Mech/synthetic answer (x2.0)
+        name: "Nanite Surge", enCost: 12, kind: "attack", target: "enemy",
+        damageType: "overload", power: 16, message: "surges nanites through"
       },
-      empBlast: {   // utility: Shock AoE (anti-swarm)
+      empBlast: {   // utility: Shock AoE (anti-swarm) — unchanged, already flavor-neutral
         name: "EMP Blast", enCost: 12, kind: "attack", target: "allEnemies",
         damageType: "shock", power: 8, message: "blasts"
       },
+      // Immediate-but-small heal + a short Regen tail — Mend's mirror-image:
+      // Mend front-loads one big burst, Nanite Weave trades burst size for
+      // extra total healing spread over 2 turns. Real tactical difference
+      // (need HP right now -> Mend; have a turn to spare -> Nanite Weave),
+      // not a reskinned duplicate of the same heal.
+      naniteWeave: {
+        name: "Nanite Weave", enCost: 10, kind: "heal", target: "ally",
+        power: 20, message: "weaves repair nanites into",
+        applies: [{ type: "regen", magnitude: 8, duration: 2 }]
+      },
       systemShock: {   // GATED (level / skill-tree later): shock hit + Disable (skip a turn)
-        name: "System Shock", enCost: 14, kind: "attack", target: "enemy",
+        name: "Neural Jolt", enCost: 14, kind: "attack", target: "enemy",
         damageType: "shock", power: 4, message: "jolts",
         applies: [{ type: "disable", magnitude: 1, duration: 1 }]
+      },
+      // Synth Medic tree branch (§4.1a, 2026-07-28): her first AoE heal —
+      // distinct in shape from Psion's ultimate-only Mind's Mercy (a regular
+      // skill, not a Limit Break) and from her own Nanite Weave (AoE instead
+      // of single-target).
+      repairSwarm: {   // tree, tier 2 (needs Neural Jolt): AoE heal + Regen
+        name: "Repair Swarm", enCost: 16, kind: "heal", target: "allAllies",
+        power: 14, message: "sends a swarm of repair nanites through",
+        applies: [{ type: "regen", magnitude: 5, duration: 2 }]
       },
 
       // --- Mentalist (debuff specialist) ---
@@ -155,6 +186,14 @@
       mend: {
         name: "Mend", enCost: 8, kind: "heal", target: "ally",
         power: 35, message: "channels Mend into"
+      },
+      // Psion tree branch (§4.1a, 2026-07-28): a heal+shield hybrid — distinct
+      // in shape from both Mend (pure heal) and Synth Medic's Repair Swarm
+      // (AoE+regen, no shielding).
+      calmMind: {   // tree, tier 2 (needs Terror): single-target heal + Guard
+        name: "Calm Mind", enCost: 10, kind: "heal", target: "ally",
+        power: 18, message: "settles a calm mind into",
+        applies: [{ type: "guard", magnitude: 0.7, duration: 2 }]
       },
 
       // --- Shared item ---
@@ -434,11 +473,14 @@
         name: "Overload Coils", enCost: 0, kind: "attack", target: "allEnemies",
         damageType: "shock", power: 9, message: "floods the deck with overload coils, hitting"
       },
-      corePurge: {   // special — heavy single-target Cyber burst, partly armor-piercing
+      corePurge: {   // special — heavy single-target Overload burst, partly armor-piercing
         name: "Core Purge", enCost: 0, kind: "attack", target: "enemy",
         // power 22→16 (2026-07-24): with add-support the Warden fight runs longer,
         // giving it more nuke turns — softened so the longer fight stays fair.
-        damageType: "cyber", power: 16, pierce: 0.3, message: "unleashes a Core Purge into"
+        // damageType relabeled cyber->overload 2026-07-28 (Synth Medic rework) —
+        // an enemy skill's type is never shown to the player, so this is purely
+        // for internal consistency, no behavior or text change.
+        damageType: "overload", power: 16, pierce: 0.3, message: "unleashes a Core Purge into"
       },
       lockdownProtocol: {   // special — Kinetic hit + Disable (locks down a hero's gear)
         name: "Lockdown Protocol", enCost: 0, kind: "attack", target: "enemy",
@@ -511,9 +553,9 @@
         message: "overclocks their weapon systems",
         applies: [{ type: "overclock", magnitude: 6, duration: 3 }]
       },
-      firewallBreach: {   // Netrunner tree, tier 2 (needs System Shock): Cyber + Sunder
-        name: "Firewall Breach", enCost: 10, kind: "attack", target: "enemy",
-        damageType: "cyber", power: 6, message: "breaches the firewall of",
+      firewallBreach: {   // Synth Medic tree, tier 2 (needs Neural Jolt): Overload + Sunder
+        name: "Overload Surge", enCost: 10, kind: "attack", target: "enemy",
+        damageType: "overload", power: 6, message: "surges overload through",
         applies: [{ type: "sunder", magnitude: 6, duration: 3 }]
       },
       cerebralOverload: {   // Mentalist tree, tier 2 (needs Terror): Psionic AoE
@@ -534,9 +576,9 @@
         name: "Shoulder Rocket", enCost: 14, kind: "attack", target: "allEnemies",
         damageType: "thermal", power: 10, message: "unloads a shoulder rocket volley on"
       },
-      terminalProbe: {   // Netrunner: Terminal Probe Rig
-        name: "Terminal Probe", enCost: 12, kind: "attack", target: "enemy",
-        damageType: "cyber", power: 20, message: "drives a terminal probe into"
+      terminalProbe: {   // Synth Medic: Nanite Lance Rig
+        name: "Nanite Lance", enCost: 12, kind: "attack", target: "enemy",
+        damageType: "overload", power: 20, message: "drives a nanite lance into"
       },
       psiConduit: {   // Mentalist: Psi Conduit Glove
         name: "Psi Conduit", enCost: 12, kind: "attack", target: "enemy",
@@ -557,12 +599,12 @@
         name: "Orbital Strike", enCost: 0, kind: "attack", target: "enemy",
         damageType: "thermal", power: 34, pierce: 0.6, message: "calls down an Orbital Strike on"
       },
-      totalHack: {   // Netrunner: Cyber AoE + Disable on every target hit
-        name: "Total Hack", enCost: 0, kind: "attack", target: "allEnemies",
-        damageType: "cyber", power: 12, message: "unleashes Total Hack on",
+      totalHack: {   // Synth Medic: Overload AoE + Disable on every target hit
+        name: "Full Override", enCost: 0, kind: "attack", target: "allEnemies",
+        damageType: "overload", power: 12, message: "unleashes a Full Override on",
         applies: [{ type: "disable", magnitude: 1, duration: 1 }]
       },
-      mindsMercy: {   // Mentalist: full-party heal + cleanse (strips debuffs/DoTs, keeps buffs)
+      mindsMercy: {   // Psion: full-party heal + cleanse (strips debuffs/DoTs, keeps buffs)
         name: "Mind's Mercy", enCost: 0, kind: "heal", target: "allAllies",
         power: 60, cleanse: true, message: "channels Mind's Mercy into"
       },
@@ -589,6 +631,20 @@
         name: "Acid Purge", enCost: 0, kind: "attack", target: "allEnemies",
         damageType: "corrosive", power: 15, message: "unleashes Acid Purge across",
         applies: [{ type: "sunder", magnitude: 8, duration: 2 }]
+      },
+
+      // --- Saboteur skill-tree branch (§4.1a, 2026-07-28): his tree was a
+      // single root node; fills his one real kit gap (no Weaken — only
+      // Sunder via acidCharge) and gives the tree its first branch+keystone.
+      corrodingGrip: {   // tree, tier 2 (needs Corrosion Field): Corrosive + Weaken
+        name: "Corroding Grip", enCost: 10, kind: "attack", target: "enemy",
+        damageType: "corrosive", power: 12, message: "clamps a corroding grip around",
+        applies: [{ type: "weaken", magnitude: 5, duration: 2 }]
+      },
+      acidPurgePlus: {   // Corrosive Endgame keystone: Acid Purge, armor-piercing + harder Sunder
+        name: "Corrosive Overrun", enCost: 0, kind: "attack", target: "allEnemies",
+        damageType: "corrosive", power: 15, pierce: 0.25, message: "unleashes a Corrosive Overrun across",
+        applies: [{ type: "sunder", magnitude: 10, duration: 2 }]
       },
 
       // --- Phthora, the Fleshspring (boss — Talos's actual leader/origin
@@ -691,16 +747,25 @@
         limitBreak: "orbitalStrike"
       },
       netrunner: {
-        className: "Netrunner", race: "Synthetic", role: "Hacker · anti-machine + Disable",
+        // 2026-07-28: renamed Netrunner -> Synth Medic (design doc §4.1a's
+        // "Hacker/anti-machine" framing retired — see current changelog
+        // entry). Internal key/object identity (`netrunner`, `hack`,
+        // `heroNetrunner` sprite, save-game classKey) all kept stable —
+        // this only changes the display className/role and her kit content.
+        className: "Synth Medic", race: "Synthetic", role: "Support caster · Shock attacks + heals",
         nature: "synthetic",
         baseStats: { hp: 95, en: 35, attack: 12, defense: 8, speed: 13 },
-        skills: ["attack", "hack", "empBlast"],
+        skills: ["attack", "hack", "empBlast", "naniteWeave"],
         affinities: { shock: WEAK, mind: RESIST },   // synthetic
         growth: { hp: 9, en: 4, attack: 2, defense: 1, speed: 1 },
         limitBreak: "totalHack"
       },
       mentalist: {
-        className: "Mentalist", race: "Human (Earth)", role: "Psion · damage + debuff + heal",
+        // 2026-07-28: renamed Mentalist -> Psion (her own `role` already used
+        // this word — promoting it to the class name drops "Mentalist"'s
+        // real-world stage-performer connotation for free). Kit unchanged —
+        // she already had damage + debuff + heal, unlike Synth Medic.
+        className: "Psion", race: "Human (Earth)", role: "Mind caster · damage + debuff + heal",
         nature: "organic",
         baseStats: { hp: 90, en: 40, attack: 10, defense: 8, speed: 11 },
         skills: ["attack", "psiBurst", "mindSpike", "mend"],
@@ -727,35 +792,89 @@
       }
     };
 
-    // SKILL TREES (Phase E: Skill Points). Each class has a short tree of
-    // distinct, NAMED skills (not "ranks" of one skill) unlocked by spending
-    // Skill Points earned on level-up (see SP_PER_LEVEL). `prereq` (a node
-    // key within the same tree) must be learned first; `cost` is the SP
-    // price. Learning a node pushes `skillKey` onto the hero's skills, so it
-    // appears in combat immediately — no extra wiring needed.
+    // SKILL TREES (Phase E: Skill Points; node TYPES added 2026-07-28, design
+    // doc §4.1a — "Unlock Pool + Tactic Slots"). Each class has a short tree
+    // of distinct, NAMED skills (not "ranks" of one skill) unlocked by
+    // spending Skill Points earned on level-up (see SP_PER_LEVEL). `prereq`
+    // (a node key within the same tree) must be learned first; `cost` is the
+    // SP price to LEARN it (Layer 1, permanent, unchanged mechanism).
+    //
+    // `type` (defaults to "active" if omitted — every node before this pass
+    // was implicitly this type):
+    //   "active"         — learning pushes `skillKey` onto hero.skills
+    //                       forever, exactly as before. No `effect`/`slotCost`.
+    //   "passive"        — a combat-modifier, always-on once SOCKETED
+    //                       (Layer 2). `effect.kind: "statMod"`.
+    //   "weaknessPayoff" — while socketed, a hero's own hit that lands on the
+    //                       target's bucket-weakness (affinity mult >= WEAK)
+    //                       grants a bonus. `effect.kind: "weaknessPayoff"`.
+    //   "economy"        — a run-meta/economy bonus while socketed (EN cost,
+    //                       Limit-gauge rate, Rest-heal amount, loot rarity).
+    //                       `effect.kind` varies by subtype, see `effect.sub`.
+    //   "keystone"        — one per branch, usually the capstone; rewrites a
+    //                       RULE rather than a number. `effect.kind: "ruleOverride"`.
+    // `slotCost` (1-3) — SP-Tree Layer 2's socket budget cost; every type
+    // EXCEPT "active" has one (actives are never socketed — they're always
+    // on once learned, exactly like today). A hero's total slot budget is
+    // computed live, not stored — see `tacticSlotsForLevel` (state.js).
+    // `effect` — everything except "active" nodes sets this; deliberately
+    // generic shapes (not one-off `if (nodeKey === 'x')` engine conditionals)
+    // read by shared helpers in engine.js/state.js, same convention as
+    // SKILLS/STATUSES/ENEMIES already keeping engine code data-driven:
+    //   statMod:        { kind:"statMod", stat, scope:{statusType?}, amount, mode:"flat"|"percent" }
+    //   weaknessPayoff: { kind:"weaknessPayoff", bucket, bonus:"enRefund"|"limitGauge"|"forceStatus", amount, forceStatus?:{...} }
+    //   ruleOverride:   { kind:"ruleOverride", rule:"limitBreakOverride"|"bonusApplies"|<bespoke>, ... }
     const SKILL_TREES = {
       merc: [
-        { key: "suppressingFire", skillKey: "suppressingFire", name: "Suppressing Fire", cost: 1, prereq: null }
+        { key: "suppressingFire", skillKey: "suppressingFire", name: "Suppressing Fire", cost: 1, prereq: null, type: "active" }
       ],
       dreadKnight: [
-        { key: "cleave", skillKey: "cleave", name: "Cleave", cost: 1, prereq: null }
+        { key: "cleave", skillKey: "cleave", name: "Cleave", cost: 1, prereq: null, type: "active" }
       ],
       mechRunner: [
-        { key: "overclock", skillKey: "overclock", name: "Overclock", cost: 1, prereq: null }
+        { key: "overclock", skillKey: "overclock", name: "Overclock", cost: 1, prereq: null, type: "active" }
       ],
+      // Synth Medic (§4.1a, 2026-07-28): root kept, 2 branches — the
+      // existing Overload Surge branch gains a weakness-payoff leaf; a new
+      // branch adds her first AoE heal, capped by a bespoke keystone. 10 SP
+      // to fully clear (1+2+2+2+3); 4 slots if fully socketed (2+2).
       netrunner: [
-        { key: "systemShock", skillKey: "systemShock", name: "System Shock", cost: 1, prereq: null },
-        { key: "firewallBreach", skillKey: "firewallBreach", name: "Firewall Breach", cost: 2, prereq: "systemShock" }
+        { key: "systemShock", skillKey: "systemShock", name: "Neural Jolt", cost: 1, prereq: null, type: "active" },
+        { key: "firewallBreach", skillKey: "firewallBreach", name: "Overload Surge", cost: 2, prereq: "systemShock", type: "active" },
+        { key: "cascadeFailure", name: "Cascade Failure", cost: 2, prereq: "firewallBreach", type: "weaknessPayoff", slotCost: 2,
+          effect: { kind: "weaknessPayoff", bucket: "shock", bonus: "enRefund", amount: 4 } },
+        { key: "repairSwarm", skillKey: "repairSwarm", name: "Repair Swarm", cost: 2, prereq: "systemShock", type: "active" },
+        { key: "adaptiveNanites", name: "Adaptive Nanites", cost: 3, prereq: "repairSwarm", type: "keystone", slotCost: 2,
+          effect: { kind: "ruleOverride", rule: "healCleansesDisable" } }
       ],
+      // Psion (§4.1a, 2026-07-28): same shape as Synth Medic's tree above —
+      // existing Cerebral Overload branch gains a weakness-payoff leaf; a new
+      // branch adds a heal+shield hybrid, capped by a bonusApplies keystone.
+      // 10 SP to fully clear, 4 slots if fully socketed.
       mentalist: [
-        { key: "terror", skillKey: "terror", name: "Terror", cost: 1, prereq: null },
-        { key: "cerebralOverload", skillKey: "cerebralOverload", name: "Cerebral Overload", cost: 2, prereq: "terror" }
+        { key: "terror", skillKey: "terror", name: "Terror", cost: 1, prereq: null, type: "active" },
+        { key: "cerebralOverload", skillKey: "cerebralOverload", name: "Cerebral Overload", cost: 2, prereq: "terror", type: "active" },
+        { key: "shatteredWill", name: "Shattered Will", cost: 2, prereq: "cerebralOverload", type: "weaknessPayoff", slotCost: 2,
+          effect: { kind: "weaknessPayoff", bucket: "mind", bonus: "limitGauge", amount: 8 } },
+        { key: "calmMind", skillKey: "calmMind", name: "Calm Mind", cost: 2, prereq: "terror", type: "active" },
+        { key: "mindscape", name: "Mindscape", cost: 3, prereq: "calmMind", type: "keystone", slotCost: 2,
+          effect: { kind: "ruleOverride", rule: "bonusApplies", skillKey: "terror",
+            applies: { type: "weaken", magnitude: 4, duration: 2 } } }
       ],
-      // Single-node tree for now, matching Merc/Dread Knight/Mech Runner's
-      // simpler pattern — deeper branching skill trees are P2 build-depth
-      // work (§5.4c roadmap), out of scope for a brand-new class right now.
+      // Saboteur (§4.1a, 2026-07-28): first class to get a real branching
+      // tree — root kept, one branch adds an active + a duration passive,
+      // the other an economy node capped by a keystone. 8 SP to fully clear
+      // (1+1+2+1+3), matching the design doc's Merc worked example's band;
+      // 5 slots if fully socketed (2+1+2, all non-"active" nodes).
       saboteur: [
-        { key: "corrosionField", skillKey: "corrosionField", name: "Corrosion Field", cost: 1, prereq: null }
+        { key: "corrosionField", skillKey: "corrosionField", name: "Corrosion Field", cost: 1, prereq: null, type: "active" },
+        { key: "corrodingGrip", skillKey: "corrodingGrip", name: "Corroding Grip", cost: 1, prereq: "corrosionField", type: "active" },
+        { key: "necroticPayload", name: "Necrotic Payload", cost: 2, prereq: "corrodingGrip", type: "passive", slotCost: 2,
+          effect: { kind: "statMod", stat: "statusDuration", scope: { statusType: "sunder" }, amount: 1, mode: "flat" } },
+        { key: "scavengersIngenuity", name: "Scavenger's Ingenuity", cost: 1, prereq: "corrosionField", type: "economy", slotCost: 1,
+          effect: { kind: "statMod", stat: "lootRarity", amount: 8, mode: "flat" } },
+        { key: "corrosiveEndgame", name: "Corrosive Endgame", cost: 3, prereq: "scavengersIngenuity", type: "keystone", slotCost: 2,
+          effect: { kind: "ruleOverride", rule: "limitBreakOverride", skillKey: "acidPurgePlus" } }
       ]
     };
 
@@ -789,7 +908,7 @@
       wristRocketRig:    { name: "Wrist Rocket Rig",    slot: "arms", classRestrict: "merc",       statBonus: {}, grantsSkill: "wristRocket",   spriteKey: null },
       powerFistGauntlet: { name: "Power Fist Gauntlet",  slot: "arms", classRestrict: "dreadKnight", statBonus: {}, grantsSkill: "powerFist",     spriteKey: null },
       shoulderRocketPod: { name: "Shoulder Rocket Pod",  slot: "arms", classRestrict: "mechRunner",  statBonus: {}, grantsSkill: "shoulderRocket", spriteKey: null },
-      terminalProbeRig:  { name: "Terminal Probe Rig",   slot: "arms", classRestrict: "netrunner",   statBonus: {}, grantsSkill: "terminalProbe",  spriteKey: null },
+      terminalProbeRig:  { name: "Nanite Lance Rig",   slot: "arms", classRestrict: "netrunner",   statBonus: {}, grantsSkill: "terminalProbe",  spriteKey: null },
       psiConduitGlove:   { name: "Psi Conduit Glove",    slot: "arms", classRestrict: "mentalist",   statBonus: {}, grantsSkill: "psiConduit",     spriteKey: null },
 
       // --- Ring (class-restricted, stat only) ---

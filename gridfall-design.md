@@ -2338,6 +2338,38 @@ pointer):**
 ---
 
 ## 13. Changelog
+- **2026-07-28 — Slice 2/3 (skill-tree engine + content authoring) SHIPPED: the "Unlock Pool + Tactic
+  Slots" system from §4.1a is real, not just a doc.** Same day as the rename below, later in the
+  session. Also renamed the Cyber flavor to **Overload** (still the same "shock" resistance bucket —
+  Security Mech/Arc Sentinel/the Warden/the Sun God are all unaffected numerically; the word "Cyber" just
+  doesn't read right narrated against non-machine enemies) and rebuilt **Netrunner into Synth Medic**
+  ("Support caster · Shock attacks + heals") and **Mentalist into Psion** (her own `role` field already
+  used the word — free rename, drops "Mentalist"'s stage-performer connotation). Synth Medic finally has
+  a heal (`Nanite Weave`, a small burst + Regen — Mend's deliberate mirror-image, not a reskin); her
+  hacking-flavored kit (Hack/Firewall Breach/Terminal Probe/Total Hack) renamed to Nanite Surge/Overload
+  Surge/Nanite Lance/Full Override. Psion's kit was untouched — she already had damage+debuff+heal.
+  **Engine**: 5 node types now real (`type`/`slotCost`/`effect` on `SKILL_TREES` nodes) — active (existing
+  behavior), passive (`statMod`, folds into `effectiveAttack`/`effectiveDefense`/pierce/EN-cost/status-
+  duration), weakness-payoff (bonus on a hit landing on a bucket weakness — EN refund/Limit gauge/forced
+  status), economy (EN discount/Limit-gauge rate/loot-rarity — new `lootRarityBonus` hook in
+  `pickWeightedLootItem`), keystone (`limitBreakOverride`, `bonusApplies`, or a bespoke named rule via
+  `hasKeystoneRule`, e.g. Synth Medic's Adaptive Nanites cleansing Disable on heal). A hero's Tactic Slot
+  budget (`2 + floor(level/4)`) is computed live, never stored, so it can't desync from level. New
+  Character Sheet section (between Skills and Equipment) for socketing; reconfiguring is gated to Rest
+  nodes + Town only (narrower than Equipment, which also allows the post-battle endbar) — Rest nodes
+  needed genuinely new plumbing (`justRested` flag, a "Reconfigure Tactic Slots" button on the Map).
+  **Content**: real 5-node branching trees (root kept + 2 branches + keystone capstone, ~10 SP to fully
+  clear) authored for Synth Medic, Psion, and Saboteur — deliberately varied node-type/bonus-flavor
+  across all three so nothing mechanically overlaps (3 different weakness-payoff bonus flavors, 3
+  different keystone implementation patterns). Merc/Dread Knight/Mech Runner's own worked examples in
+  §4.1a are still just documented, not built — deliberately out of scope this pass. **Verified headless**
+  (no browser-automation tool this session, same limitation as the earlier sprite fix): every node type's
+  mechanism unit-tested against scratch data, all 3 new trees run a full learn→socket→combat check, and a
+  270-battle regression battery (9 bosses × 15 trials × 2 test parties, one built entirely from the new
+  content) hit zero crashes. Win-rate varied between the two test parties, but it tracks team composition
+  (the new-content party happened to have no tank and lower total HP, not a Tactic Slots defect) — **this
+  was a crash/regression check, not a balance pass**; SP costs and node numbers are first-draft and
+  untuned, same as every new system's first landing in this project.
 - **2026-07-28 — `battle-mechanics-overhaul` merged into `main`; the two branches are consolidated
   back into one.** No conflicts in any code file (`data.js`/`engine.js`/`state.js`/`ui.js` all
   auto-merged cleanly — the sprite-quality pass and the Slice 1 damage-bucket work never touched the

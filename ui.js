@@ -142,6 +142,11 @@
       }
 
       roster = data.roster;
+      // Migration (2026-07-28, §4.1a Tactic Slots): a save made before this
+      // field existed has heroes with no socketedPassives array at all —
+      // every read of it below calls array methods that throw on undefined,
+      // so this default-fill has to happen before anything else touches it.
+      roster.forEach(function (h) { if (!h.socketedPassives) h.socketedPassives = []; });
       party = data.activePartyIds
         .map(function (id) { return roster.find(function (h) { return h.id === id; }); })
         .filter(Boolean);   // defensive: drop any id that no longer matches a roster hero
@@ -591,6 +596,16 @@
         wrap.appendChild(msg);
       }
 
+      // §4.1a: Rest is one of only two places (with Town) Tactic Slots can be
+      // reconfigured — offer it right after resting, cleared on the next
+      // node click (justRested, set in resolvePassiveNode/onNodeClick).
+      if (justRested && party.length) {
+        const slotsBtn = document.createElement("button");
+        slotsBtn.textContent = "Reconfigure Tactic Slots";
+        slotsBtn.onclick = function () { showCharacterPanel(undefined, party, "rest"); };
+        wrap.appendChild(slotsBtn);
+      }
+
       const layout = computeMapLayout(dungeon);
       const foggy = !!dungeon.foggy;
 
@@ -734,6 +749,7 @@
     function onNodeClick(nodeId) {
       if (unlockedNodeIds.indexOf(nodeId) === -1) return;   // locked
       if (visitedNodeIds.indexOf(nodeId) !== -1) return;    // already resolved
+      justRested = false;   // any new node interaction clears the Rest-node reconfigure button
 
       const node = DUNGEONS[currentDungeonKey].nodes[nodeId];
       if (node.type === "combat" || node.type === "elite" || node.type === "boss") {
@@ -791,7 +807,13 @@
     // tier; falls back to any remaining unowned item if the rolled tier is
     // fully owned. Shared by grantLoot() and rollLootDrop() (engine.js).
     function pickWeightedLootItem(heavy) {
-      const weights = heavy ? LOOT_RARITY_WEIGHTS_HEAVY : LOOT_RARITY_WEIGHTS;
+      // §4.1a economy node ("lootRarity" statMod, e.g. Saboteur's Scavenger's
+      // Ingenuity): a flat weight bump added to "rare" at roll time, summed
+      // across the whole party (loot isn't tied to one hero — lootRarityBonus,
+      // state.js). Copy the base table first; never mutate the shared const.
+      const weights = Object.assign({}, heavy ? LOOT_RARITY_WEIGHTS_HEAVY : LOOT_RARITY_WEIGHTS);
+      const bonus = lootRarityBonus();
+      if (bonus) weights.rare = (weights.rare || 0) + bonus;
       const byRarity = {};
       Object.keys(ITEMS).forEach(function (k) {
         if (partyOwnedItems[k]) return;
@@ -839,7 +861,7 @@
       const node = DUNGEONS[currentDungeonKey].nodes[nodeId];
 
       if (node.type === "loot") lastMapMessage = grantLoot();
-      else if (node.type === "rest") lastMapMessage = restParty();
+      else if (node.type === "rest") { lastMapMessage = restParty(); justRested = true; }
 
       node.connectsTo.forEach(function (id) {
         if (unlockedNodeIds.indexOf(id) === -1) unlockedNodeIds.push(id);
@@ -1319,20 +1341,24 @@
     // Label shows the damage type (so players can reason about weaknesses)
     // and the EN cost, e.g. "EMP Blast · Shock (12 EN)". Shared by the
     // top-level Attack button and every button in the Skill submenu below.
-    function skillButtonLabel(skill) {
+    // `cost` is the EFFECTIVE EN cost (post any socketed economy-node
+    // discount, see effectiveEnCost in state.js) — passed in rather than
+    // read off `skill` here so this stays a pure label formatter.
+    function skillButtonLabel(skill, cost) {
       let label = skill.name;
       if (skill.kind === "attack" && skill.damageType) {
         label += " · " + capitalize(skill.damageType);
       }
-      if (skill.enCost > 0) label += " (" + skill.enCost + " EN)";
+      if (cost > 0) label += " (" + cost + " EN)";
       return label;
     }
 
     function makeSkillButton(skillKey, hero) {
       const skill = SKILLS[skillKey];
+      const cost = effectiveEnCost(hero, skillKey);
       const btn = document.createElement("button");
-      btn.textContent = skillButtonLabel(skill);
-      btn.disabled = hero.stats.en < skill.enCost;
+      btn.textContent = skillButtonLabel(skill, cost);
+      btn.disabled = hero.stats.en < cost;
       btn.onclick = function () { chooseSkill(skillKey); };
       return btn;
     }
@@ -1362,7 +1388,11 @@
       bar.appendChild(skillBtn);
 
       // Limit Break button: shows charge progress, only clickable at 100%.
-      const lbSkillKey = CLASSES[hero.classKey].limitBreak;
+      // §4.1a: a socketed limitBreakOverride keystone swaps in a stronger
+      // skill (keystoneLimitBreakSkillKey, state.js); same fallback pattern
+      // as chooseLimitBreak (engine.js) so the button and the actual cast
+      // can never disagree about which skill fires.
+      const lbSkillKey = keystoneLimitBreakSkillKey(hero) || CLASSES[hero.classKey].limitBreak;
       const lbSkill = SKILLS[lbSkillKey];
       const lbBtn = document.createElement("button");
       lbBtn.className = "limit-btn";
