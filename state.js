@@ -36,6 +36,13 @@
     let sector1BriefingShown = false;
     let lastCheckpointScene = "map";   // "map" | "town" — which one loadGame() should resume onto
     const SHIP_STARTING_ITEMS = ["kevlarMesh", "tacticalSidearm"];   // limited, hand-picked salvage
+    // §9.5a (2026-07-29) — flips true in showDungeon6bEpilogue (Chthon's
+    // defeat), the same instant the wormhole permanently breaks open. Gates
+    // the new "Step into the Wormhole" button on Title (peeked from the save
+    // blob, ui.js `saveHasWormholeOpened`) and Town (read live, this
+    // variable). The endless mode it leads to isn't built yet — the button
+    // currently only shows a placeholder scene (ui.js `onStepIntoWormhole*`).
+    let wormholeOpened = false;
 
     let initiative = [];
     let turnIndex = 0;
@@ -445,6 +452,18 @@
         enrageSkill: t.enrageSkill,
         enrageMessage: t.enrageMessage,
         enraged: false,
+        // Generic boss FLEE hook (NEW 2026-07-29, §9.5a — Kredex's escape at
+        // Helios). Same family as reinforce/enrage above: a template may
+        // declare fleeAt (fraction of maxHp) + fleeMessage; undefined/
+        // harmless for every enemy that doesn't set them. Unlike enrage,
+        // this doesn't buff the boss — it ENDS its part in the fight early
+        // (see triggerFlee, engine.js): the boss survives, alive, off-screen,
+        // but stops being a combatant, same as a normal win for battle-end
+        // purposes (XP/loot still award normally — the squad still won the
+        // fight, the boss just didn't stick around to be finished).
+        fleeAt: t.fleeAt,
+        fleeMessage: t.fleeMessage,
+        fled: false,
         xpReward: Math.round((TIER_XP[t.tier] || 10) * level)
       };
     }

@@ -170,6 +170,15 @@
           triggerEnrage(target);
         }
 
+        // Boss FLEE hook (NEW 2026-07-29, §9.5a — generic, not Kredex-
+        // specific): fires once, the first time an enemy with a fleeAt
+        // threshold drops to/below it.
+        if (isAlive(target) && target.side === "enemies" && target.fleeAt != null &&
+            !target.fled && target.stats.hp <= target.stats.maxHp * target.fleeAt) {
+          target.fled = true;
+          triggerFlee(target);
+        }
+
         // Overwatch keystone (Merc, §4.1a bespoke rule): the first time this
         // hero is targeted each combat, fire back a free basic Attack.
         // Bounded recursion — the counter's own target.side is never "heroes"
@@ -686,6 +695,22 @@
       updateScreen();
     }
 
+    // Boss FLEE hook (NEW 2026-07-29, §9.5a — Kredex's escape at Helios, but
+    // generic like every other boss-template hook above, not hardcoded to
+    // him). Zeroes `stats.hp` directly rather than removing the combatant
+    // from `enemies` — the SAME representation a normally-defeated enemy
+    // already ends a fight in (dead enemies stay in the array; `isAlive`/
+    // `living()` filters are what everything else already reads), so
+    // `checkBattleEnd` needs zero changes to treat "the last living enemy
+    // fled" as an ordinary win. XP/loot still award normally — the squad
+    // still won the engagement, the boss just didn't stick around to be
+    // finished off.
+    function triggerFlee(enemy) {
+      enemy.stats.hp = 0;
+      log(enemy.fleeMessage || (enemy.name + " breaks off and flees!"), true);
+      updateScreen();
+    }
+
     function pickRandom(list) { return list[randomBetween(0, list.length - 1)]; }
 
     // Prologue encounters (Phase H3, §5.2) — hand-scripted per node, NOT
@@ -1011,18 +1036,26 @@
             "ledger it was holding open goes dark at once. Station 4 is clear.";
           else if (currentDungeonKey === "erebus") clearLine = "The Broodmarshal collapses. The hive scatters!";
           else if (currentDungeonKey === "dungeon4") clearLine = "Proteus finally stops moving. Whatever it was becoming, it's over.";
-          else if (currentDungeonKey === "dungeon5") clearLine = "The Sun God goes still. Helios finally goes dark.";
-          else if (currentDungeonKey === "dungeon6") clearLine = "Phthora finally stops moving. The lineage's founding transcendence dies with him.";
+          // §9.5a (2026-07-29): dungeon5's terminal boss is now bossKredex
+          // (he flees rather than dies, but that's still this dungeon's
+          // "clear" from the player's side); dungeon6's is Kredex's own
+          // Fleshspring fight (bossPhthora node, ENEMIES.phthora key kept
+          // stable — see that entry's comment).
+          else if (currentDungeonKey === "dungeon5") clearLine = "Kredex breaks off mid-sentence and runs for his shuttle. Whatever authorization he needed, he's not getting it out here.";
+          else if (currentDungeonKey === "dungeon6") clearLine = "Kredex finally stops moving. Whatever he thought he was reaching for, it was never going to be his to hold.";
           else if (currentDungeonKey === "dungeon6b") clearLine = "Chthon goes still. Whatever it was wearing, it isn't anymore.";
           else clearLine = "Victory!";
           log(clearLine, true);
         } else if (clearedNode.type === "boss") {
-          // The non-terminal half of a double boss (Dungeon 5's Void Soul
-          // Eater, Dungeon 6b's caged god) — dungeon-specific flavor line,
-          // generalized 2026-07-25 (was hardcoded to Void Soul Eater only).
+          // The non-terminal half of a double/triple boss chain — flavor
+          // line keyed by the NODE now (2026-07-29), not just the dungeon,
+          // since Dungeon 5 has two of these (bossSoul, then bossSun) once
+          // Kredex's own encounter (§9.5a) became its real terminal node.
           let midLine;
-          if (currentDungeonKey === "dungeon6b") midLine = "The caged god tears free of the ritual holding it. Kredex is already screaming.";
-          else midLine = "The Void Soul Eater unravels. Something colder is still waiting at the center of the station.";
+          if (currentNodeId === "bossSoul") midLine = "The Void Soul Eater unravels. Something colder is still waiting at the center of the station.";
+          else if (currentNodeId === "bossSun") midLine = "The Sun God goes still. Helios finally goes dark — except for the shuttle already burning hard toward the wreckage, running lights blazing like whoever's inside doesn't care who sees them coming.";
+          else if (currentDungeonKey === "dungeon6b") midLine = "The Caged God tears free of what was left restraining it. Whatever's coming next, it isn't holding back anymore.";
+          else midLine = "Victory!";
           log(midLine, true);
         }
 
@@ -1225,6 +1258,12 @@
           "something far older meant to keep a dying system fed. Something got into it long " +
           "before anyone came looking, and it stopped being able to tell the difference between " +
           "tending something and owning it.",
+        // §9.5a (2026-07-29): Kredex's own escape, added as a new beat right
+        // after the Sun God's death — he's not narrated as dead here, only
+        // driven off; he resurfaces at Dungeon 6.
+        "Kredex doesn't even wait for the wreckage to stop glowing before his shuttle burns hard " +
+          "for open space, his own security detail scrambling to keep up. Whatever chain of " +
+          "command he answers to, someone up it is about to have a very bad day explaining this.",
         "The coordinates it was guarding aren't out here at all. They're keyed to a world both " +
           "Vossmark and Talos wrote off generations ago, the one place scarred badly enough that " +
           "nobody thought to fight over it. Home, if the word still means anything by now."
@@ -1242,13 +1281,14 @@
     // the Core's short, tight, climactic sequence (dungeon6b).
     function showDungeon6Epilogue(nextDungeonKey) {
       showStoryScene([
-        "Phthora goes down mid-reach. Whatever the ritual was building toward collapses with him, " +
-          "and what's left on the cavern floor is just meat again.",
+        "Kredex goes down mid-reach. Whatever the stolen ritual was building toward collapses with " +
+          "him, and what's left on the cavern floor doesn't look like a Chancellor anymore, or much " +
+          "of anything else.",
         "Past his rig, the tunnel stops being rock. What's underneath is smooth and deliberate, " +
           "lit by nothing anyone can find the source of. Whoever built this never had to explain " +
           "themselves to anybody.",
         "This is the last door. Whatever's actually running this world's dead engine is down there, " +
-          "and Kredex already has a head start."
+          "and for the first time since Kharon's Reach, nobody's racing the squad to get to it first."
       ], "Go deeper.", function () {
         if (nextDungeonKey) currentDungeonKey = nextDungeonKey;
         startDungeon(lastSquad, nextDungeonKey);
@@ -1263,19 +1303,30 @@
     // own victory cost. The precursor Psionic lattice (§9.3 — already canon)
     // is the in-fiction reason the crew can feel/perceive something happening
     // at the Sun instantly from dead Earth.
+    // §9.5a (2026-07-29): this is now where the wormhole/portal fully and
+    // PERMANENTLY breaks open — Chthon's defeat, not Kredex's own death (he
+    // died a dungeon earlier, at the Fleshspring fight), is what does it,
+    // matching the plan's "once defeated the portal cracks... surprise
+    // final final fight" beat. `wormholeOpened` gates the new "Step into
+    // the Wormhole" button (Title + Town, ui.js) — set here, right as this
+    // consequence lands, before the player ever sees the ending choice.
     function showDungeon6bEpilogue(nextDungeonKey) {
+      wormholeOpened = true;
       showStoryScene([
-        "Kredex doesn't finish dying so much as stop being separate from what killed him. Whatever " +
-          "answered to Chthon a moment ago goes still, and the quiet that's left behind doesn't feel " +
-          "like an ending. It feels like something letting go of a held breath.",
+        "Chthon goes still. There's no death rattle, no last human moment flickering through — " +
+          "there was never anyone left in there to flicker. It's just gone, the way a held breath " +
+          "finally lets go, and the quiet left behind is the first honest quiet this chamber has had " +
+          "since something first got sealed inside it.",
         "That's when the lattice screams. Not a sound, every psion in the squad feels it at once, a " +
           "signal running through the same precursor thread the Erebus fragment was always a piece " +
           "of, out past the dead ground overhead, out past Sol's dark, all the way to a wound the " +
-          "crew tore open themselves at Helios months ago. It stops pretending to be sealed. " +
-          "Whatever was holding it shut just died down here, wearing a corporate title.",
+          "crew tore open themselves at Helios months ago. It doesn't crack further this time. It " +
+          "just stops being a wound at all, and starts being a door — all the way open, " +
+          "permanently, with nothing left down here or up there strong enough to ever shut it again.",
         "The Loom is still standing at the center of the chamber, patient in the specific way only " +
           "something built to outlast its makers can be. Nobody planted a flag on it. Nobody's told " +
-          "it what happens next. That part's still yours to decide."
+          "it what happens next. That part's still yours to decide. Somewhere behind you, past every " +
+          "door that led here, something is already listening to the one that just opened for good."
       ], "Decide what happens to the Loom.", function () {
         showEndingChoice();
       });
@@ -1352,9 +1403,10 @@
             "it, patient, buried, undecided, the one thing in this whole system nobody gets to own " +
             "because nobody took it.",
           "It's the smallest possible ending, and it might be the only honest one. Every hand that's " +
-            "ever reached for this thing, the precursors, both corps, Phthora's whole lineage, " +
-            "Kredex right up until it wasn't his hand anymore, reached for it wanting something. " +
-            "The squad is the first to walk away wanting nothing at all.",
+            "ever reached for this thing, the precursors, both corps, Talos's whole lineage, Kredex " +
+            "too, right up until his own stolen ritual decided it didn't need his hands anymore " +
+            "either, reached for it wanting something. The squad is the first to walk away wanting " +
+            "nothing at all.",
           "Out past Sol's dark, the Breach doesn't care what you chose. It's open either way, waiting " +
             "on something the squad never met and can't un-open. But whatever comes through it, it " +
             "won't be able to say Earth's own engine handed it the way in."

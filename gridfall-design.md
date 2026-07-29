@@ -43,14 +43,21 @@ real encounter shape instead of trusting the first number. Also fixed the boss-n
 (`.tile-name`/`.tile-sub` in `index.html`) at its ROOT CAUSE for the first time — a fixed-width
 `nowrap`+ellipsis was clipping any long name ("Phthora, the Fleshspring," etc.); the exact same bug
 previously got patched by shortening the Warden's name instead of fixing the CSS, which is why it kept
-resurfacing. Now wraps instead of truncating, so no future long name can clip again. **Also this
-session, SPEC ONLY, nothing built:** a story retcon (§9.5a) — Kredex and Phthora collapse into one
-character (human Kredex introduced early at Dungeon 5, escapes a fight via a new to-be-built "boss flee"
-mechanic, later becomes "Kredex, the Fleshspring" as the apparent finale), with a surprise TRUE final
-fight after that — the Caged God breaks free of the wormhole on its own once its jailer is dead, feeding
-directly into the not-yet-built endless-mode unlock (a new "Step into the Wormhole" button). Locked as a
-plan per direct user instruction to build it out later, after this difficulty/UI work. **Since the v4
-snapshot below (2026-07-25):** the sprite-quality pass
+resurfacing. Now wraps instead of truncating, so no future long name can clip again. **Later still,
+same day — the §9.5a story retcon was actually BUILT** (locked as a spec first, confirmed, then
+implemented once the shape was settled): Kredex and Phthora collapse into one character (human Kredex
+introduced at a new Dungeon 5 node right after the Sun God, flees at 25% HP via a new generic `fleeAt`
+"boss escape" engine mechanic, later becomes "Kredex, the Fleshspring" in Phthora's old Dungeon 6 slot as
+the apparent finale). The true ending stays the existing two-chained-fight Caged-God-then-Chthon shape
+(kept, not collapsed, per a direct user call to preserve the drama and reuse the Chthon sprite work) —
+just fully stripped of the Kredex-fusion premise, since he already died a dungeon earlier. Chthon's
+defeat still cracks the wormhole permanently open, now gated behind a real persistent `wormholeOpened`
+save flag driving a new "Step into the Wormhole" button (Title + Town) — which currently opens onto an
+honest placeholder, not the endless mode itself (still unbuilt, Phase P3). Verified headless: full
+dungeon-graph reachability/reference-integrity sweep, the flee mechanic's exact threshold behavior, a
+full-roster crash sweep, and save round-trip (including safe migration for saves missing the new flag).
+Full detail: §9.5a (updated in place to describe what shipped, not just what was planned) and §13. **Since
+the v4 snapshot below (2026-07-25):** the sprite-quality pass
 reached full completion (every mob + a full hero rebuild pass, zero blob/shared-shape fallbacks left,
 2026-07-27, shipped on `main`); a parallel `battle-mechanics-overhaul` branch shipped its Slice 1
 Foundation (7-flavor damage types consolidated into 4 resistance buckets, 2 new statuses — see §3.2a/
@@ -2150,46 +2157,64 @@ Earth's engine" in a vacuum; it's "what do we do with it, knowing we already cau
 before we ever got to choose this one." All three epilogues should acknowledge the freshly-cracked
 Breach in their own way (§5.4c has the framing for each).
 
-### 9.5a Retcon — Kredex/Fleshspring/Caged God, a surprise second finale (locked 2026-07-29, SPEC ONLY —
-not yet built; §5.4c's Phthora content and §9.4's "named human antagonists" section above are both
-SUPERSEDED by this entry where they conflict, kept as history rather than rewritten in place)
+### 9.5a Retcon — Kredex/Fleshspring/Caged God, a surprise second finale (locked 2026-07-29, ✅ BUILT
+2026-07-29, same day — §5.4c's Phthora content and §9.4's "named human antagonists" section above are
+both SUPERSEDED by this entry where they conflict, kept as history rather than rewritten in place)
 
 A dedicated planning session (user played through the shipped content and reported the game reads too
-easy outside early Elite nodes, §11 roadmap/§12 Decisions has the difficulty side of that finding)
-also produced a real story change: **Kredex and Phthora collapse into one character**, and the ending
-gains a surprise second climax that gives the already-locked endless-portal concept (§5.4b, Phase P3) a
-concrete, dramatic unlock trigger instead of a bare post-game menu option.
+easy outside early Elite nodes, §11 roadmap/§12 Decisions has the difficulty side of that finding) also
+produced a real story change: **Kredex and Phthora collapse into one character**, and the ending gains a
+surprise second climax that gives the already-locked endless-portal concept (§5.4b, Phase P3) a concrete,
+dramatic unlock trigger instead of a bare post-game menu option. Locked as a plan first, then built the
+same day once the shape was confirmed — see the build note at the end of this section for what actually
+shipped vs. what's still deferred.
 
-**The new beat sequence:**
+**The beat sequence, as built:**
 1. **Dungeon 5 "Helios Station"** — human Kredex is introduced here, not at the finale. Helios is
    already the established site where "the crew cracks the endless-mode wormhole open... sealed until
    after D6" (§5.4b) — Kredex personally overseeing the harnessing operation at the wormhole's own
-   origin point makes his first appearance load-bearing, not a cameo. He fights with his own kit and
-   **flees at a low-HP threshold instead of dying** — a new, generic "boss escape" engine mechanic
-   (see below), not a Kredex-only hack.
+   origin point makes his first appearance load-bearing, not a cameo. New node `bossKredex`, chained
+   after the existing `bossSun` (Sun God) exactly the way `bossSoul`→`bossSun` already chains — purely
+   additive, doesn't touch that fight's own sim-tuned pacing at all. He fights with his own kit
+   (`ENEMIES.kredex`: Directive Strike/Drone Barrage/Chain of Command — Kinetic/Shock, cage-doctrine
+   command flavor, no self-heal) and **flees at 25% HP instead of dying** — a new, generic `fleeAt`/
+   `fleeMessage` engine hook (state.js/engine.js `triggerFlee`), not a Kredex-only hack: zeroes `stats.hp`
+   directly, the exact representation a normally-defeated enemy already ends a fight in, so
+   `checkBattleEnd` needed zero changes to read "the last living enemy fled" as an ordinary win (XP/loot
+   still award normally).
 2. **Dungeon 6 "the Cradle," the apparent finale** — Kredex's own failed-transcendence attempt, in the
-   node slot currently written for Phthora (§5.4c's `bossPhthora`). He becomes **"Kredex, the
-   Fleshspring"** (combo-naming his own identity with her epithet — exact final wording still open).
-   Played straight as THE final boss: full climax framing, no narrative wink that it isn't really over.
-3. **The twist — the Caged God, the real final fight.** Kredex's death breaks whatever containment he
-   and Vossmark built around the wormhole at Helios; **the entity no longer needs his body at all** and
-   tears free on its own. This replaces the current Chthon *fusion* concept (entity wearing Kredex's
-   identity) with something cleaner: the Caged God fights as itself, no fusion-flavored kit needed.
-   Mechanically this repurposes the existing chained `cagedGod` → `bossChthon` two-node pattern (already
-   built for exactly this "no rest between boss nodes" shape, §5.4b) into `bossFleshspring` →
-   `bossCagedGod`, with the Caged God's stats/kit escalated for its new role as the actual hardest fight
-   in the game (a natural home for the phase/enrage mechanic from the difficulty pass below).
-4. **After the Caged God falls** — the existing 3-way ending choice (Reseed/Destroy/Deny, §9.5) moves to
-   fire here instead of after Chthon; every epilogue's framing updates from "one door already opened"
-   to "the door is now all the way open, and we just watched what came through it get put down." The
-   epilogue also flips a new persistent flag (working name `wormholeOpened`, same treatment as other
-   milestone flags like `sector1BriefingShown`) that unlocks a new **"Step into the Wormhole"** button on
-   the Title screen and on Town — the concrete doorway into the not-yet-built endless mode (Phase P3).
+   node slot Phthora used to occupy (`bossPhthora`, node id kept unchanged). He becomes **"Kredex, the
+   Fleshspring"** (combo-naming his own identity with her epithet). `ENEMIES.phthora`'s KEY is kept
+   stable (only display content/flavor text changed) — same discipline as the Netrunner→Synth Medic
+   rename (§4.1a): internal identifiers aren't player-facing, and keeping the node id/enemy key frozen
+   means old saves' `unlockedNodeIds`/`visitedNodeIds` and the `phthoraWreck` sprite all keep working
+   with zero migration. Played straight as THE final boss: full climax framing, no narrative wink that
+   it isn't really over.
+3. **The twist — the true finale, kept as TWO chained fights, not collapsed to one** (a direct user
+   call, weighed against a one-fight alternative specifically to preserve the drama/pacing and reuse the
+   `chthonBreach` dragon sprite work rather than retire it). Kredex's death breaks whatever containment
+   he and Vossmark built around the wormhole at Helios; the entity no longer needs his body at all.
+   `bossCagedGod` (phase 1 — "The Caged God," containment failing, no Kredex present) → `bossChthon`
+   (phase 2 — "Chthon, God of the Breach," fully unbound) keep their existing chained-node shape and
+   both boss names, but the FUSION premise is fully retired: Chthon fights as itself now, answering to
+   nothing human. `kredexEcho` (a "something almost human fighting for control" Disable skill) is
+   replaced by `realityFracture` — same mechanical shape, reflavored around the entity's own wrongness.
+4. **After Chthon falls** — the existing 3-way ending choice (Reseed/Destroy/Deny, §9.5) still fires from
+   here (`showDungeon6bEpilogue`, unchanged dispatch — Dungeon 6b was already the finale dungeon, this
+   just updates what the text says happened). Its rewrite is where the portal permanently breaks open and
+   a new persistent flag, `wormholeOpened` (state.js, serialized in `buildSaveData`/`loadGame`, safe-
+   default `false` for old saves), flips true — gating a new **"Step into the Wormhole"** button on the
+   Title screen (peeked from the save blob without a full load, `saveHasWormholeOpened`) and on Town
+   (read live). Clicking it currently shows an honest placeholder story-scene, NOT the endless mode
+   itself — that's still Phase P3, unbuilt.
 
-**What retires/gets repurposed:** Phthora as a separate character (her `phthoraWreck` sprite and boss
-slot get REASSIGNED to Kredex, not rebuilt from scratch); Chthon as a fusion identity, and its
-`kredexEcho` skill (no longer needed — the entity isn't wearing him anymore); the `bossPhthora` /
-`cagedGod` / `bossChthon` node graph in §5.4c's Dungeon 6 spec, restructured per the sequence above.
+**What retired/got repurposed:** Phthora as a separate character (her `phthoraWreck` sprite and
+`bossPhthora` node slot REASSIGNED to Kredex, not rebuilt); Chthon's fusion-with-Kredex premise and its
+`kredexEcho` skill (replaced by `realityFracture`); one skill message (`originUnbinding`, previously
+lineage-specific phrasing that didn't fit a single human) and several `reinforceMessage`/`enrageMessage`/
+`enterText`/epilogue strings across Dungeons 5, 6, and 6b, all rewritten for the new sequence. The
+`chthonBreach` sprite and the `cagedGod`/`chthon` ENEMIES stat blocks/tiers were NOT touched — kept
+exactly as shipped, only their surrounding narrative framing changed.
 
 **A real, named tradeoff, not a silent one.** §9.4's "named human antagonists" locked Kredex (cage
 doctrine, fails, becomes vessel) and Phthora (merge doctrine, fails, dies transforming) as a deliberate
@@ -2199,23 +2224,23 @@ of questions) as the wanted direction — recorded here so it reads as a decisio
 loses its own dedicated on-screen leader as a side effect; left as-is (a more collective/anonymous
 lineage identity reads fine) unless a replacement figure is wanted later.
 
-**Left open for the actual build/content-authoring session** (deliberately not decided here, matching
-this doc's own "not designed in the abstract" discipline for exact numbers/text):
-- Exact rewards on a fled fight (full XP as if won, partial, or none).
-- Whether the Caged God node is fog-of-war-hidden (D4's Unknown-node system, §5.4, could hide it for a
-  real mechanical surprise) or just narratively sold via `enterText`/story-scene framing.
-- Final exact boss name/epithet wording for both "Kredex, the Fleshspring" and the Caged God's
-  post-escape identity (does it keep "the Caged God" now that it's no longer caged, or get a new name?).
-- The generic boss-flee mechanic's exact shape (HP threshold field name, whether it's turn-based or
-  HP-based, what battle-end state it produces) — designed alongside the difficulty pass below, since
-  both need a new generic per-boss-template hook in the same family as the existing `reinforceAt`/
-  `reinforceWave` pattern.
+**Verified headless** (`mini_racer`): every DUNGEONS node graph reachable with every `bossEncounter`/
+skill/reinforceWave key resolving (catches exactly the kind of dangling-reference bug this size of a
+retcon risks); Dungeon 5's radial map layout still produces finite coordinates with the new 8th-depth
+`bossKredex` node; Kredex's fight resolves as a flee (not a kill) exactly at the 25% threshold, logs
+distinctly, and `checkBattleEnd` reads it as a normal win; a full ENEMIES-roster crash sweep (all 6
+classes × every enemy template, including `kredex` and the reworked `phthora`/`chthon`) at zero crashes;
+save round-trip preserves `wormholeOpened` (both a fresh save and an old save missing the field
+entirely, which correctly defaults to `false`). Kredex's own fight sim-read comfortable (100% "win"/flee,
+89% HP remaining) under a full 6-hero roster — first-draft, same as every new boss in this project's
+history; a real 3-hero deployed party will read meaningfully harder.
 
-**Sequencing (explicit, per direct user instruction):** this section is locked as a plan, not built.
-Next actual work is the difficulty pass (§11 roadmap/§12 Decisions, this date) and the `.tile-name`
-truncation fix (§8.1) — both already fully confirmed with no open questions. The Kredex content, the
-flee mechanic, the Dungeon 6 restructure, and the endless mode itself all stay untouched until a
-dedicated future build session.
+**Left open for a future pass** (deliberately not decided/built now):
+- Whether the Caged God node should be fog-of-war-hidden for a real mechanical surprise (D4's
+  Unknown-node system could do this) — currently sold narratively only, via `enterText`.
+- Deeper balance tuning on Kredex/Fleshspring/Chthon specifically for the new sequence (numbers are
+  largely unchanged from their pre-retcon values, which were themselves first-draft).
+- The endless mode itself (Phase P3) — the button/flag/placeholder exist; the destination doesn't yet.
 
 ### 9.6 Continuity — what this locks vs. what's already shipped
 This bible **contradicts nothing shipped.** It makes explicit: (a) the Erebus fragment = precursor
@@ -2511,6 +2536,56 @@ pointer):**
 ---
 
 ## 13. Changelog
+- **2026-07-29 — The §9.5a Kredex/Fleshspring/Caged God retcon BUILT** (a new session, later than the
+  difficulty-pass entry below — the plan was locked and confirmed first, per direct user instruction to
+  finish the difficulty/UI work before circling back to it). Full narrative detail in §9.5a (rewritten in
+  place to describe the shipped result, not just the plan); this entry is the code/verification pointer.
+  - **New generic engine mechanic: boss flee.** `fleeAt` (HP fraction) + `fleeMessage` on any ENEMIES
+    template, `fled` flag on the combatant (state.js, same shape as the existing `enrageAt`/`reinforceAt`
+    hooks), checked in `applyToTarget` (engine.js). `triggerFlee` zeroes `stats.hp` directly rather than
+    removing the combatant from `enemies` — the exact representation a normally-defeated enemy already
+    ends a fight in, so `checkBattleEnd`/`living()` needed ZERO changes to treat "the boss fled" as an
+    ordinary win. XP/loot still award normally.
+  - **Kredex, human form** (`ENEMIES.kredex`, new) — 3 new skills (`directiveStrike`/`droneBarrage`/
+    `chainOfCommand`, Kinetic/Shock command kit, no self-heal), `fleeAt: 0.25`. New node `bossKredex`,
+    chained after Dungeon 5's existing `bossSun` (`bossSun.connectsTo` changed from `[]` to
+    `["bossKredex"]`) — reuses the exact non-terminal-double-boss trick already proven by
+    `bossSoul`→`bossSun`, so the Void Soul Eater/Sun God fight's own sim-tuned pacing is completely
+    untouched, this is purely additive.
+  - **Kredex, the Fleshspring** (Dungeon 6's `bossPhthora` node + `ENEMIES.phthora` key) — Phthora
+    retired as a character; the ENEMIES key and node id both kept stable (same discipline as the
+    Netrunner→Synth Medic rename, §4.1a) so `phthoraWreck`'s sprite and any existing save's
+    `visitedNodeIds` need no migration. Only `typeName`/`role`/`reinforceMessage`/`enrageMessage` changed,
+    plus one skill message (`originUnbinding` — the old "every generation that led here" phrasing was
+    Talos-lineage-specific and didn't fit a single human).
+  - **The true finale, Caged God → Chthon** — kept as the existing TWO chained fights (a direct user
+    call over collapsing to one, specifically to preserve the pacing and reuse the `chthonBreach` sprite
+    work), but the Kredex-fusion premise is fully retired: both `enterText` blocks rewritten (Kredex is
+    dead, not present), `chthon`'s `kredexEcho` skill replaced by a new `realityFracture` (identical
+    mechanical shape — a Disable-applying hit — reflavored around the entity's own wrongness). `cagedGod`/
+    `chthon`'s own stat blocks were NOT touched.
+  - **`wormholeOpened`** (state.js, new persistent flag) — set in `showDungeon6bEpilogue` the moment
+    Chthon falls, before the ending choice; serialized in `buildSaveData`/`loadGame` with a safe `false`
+    default for saves that predate it. Gates a new **"Step into the Wormhole"** button: Title screen
+    (`ui.js` — peeked from the raw save blob via new `saveHasWormholeOpened()`, since Title renders
+    before any real `loadGame()` call) and Town (read live). Both click through to an honest placeholder
+    story-scene ("the ship isn't rigged to go looking for it. Not yet.") — the endless mode itself (Phase
+    P3) is still unbuilt, this only wires the doorway.
+  - **Ending-text updates:** `showDungeon5Epilogue` gained a paragraph for Kredex's escape;
+    `showDungeon6Epilogue` rewritten for his death (the old "Kredex already has a head start" line no
+    longer makes sense once he dies in this same scene, so the closing line was rewritten around nobody
+    racing the crew anymore); `showDungeon6bEpilogue` rewritten around the wormhole fully/permanently
+    opening; the `deny` ending's one Kredex/Phthora callback line updated to match the new sequence.
+  - **Verified headless** (`mini_racer`): every `DUNGEONS` node graph reachable from its `start` with
+    every `bossEncounter`/skill/`reinforceWave` key resolving (the kind of dangling-reference bug this
+    size of a retcon risks); Dungeon 5's radial map layout (`computeMapLayoutRadial`) still produces
+    finite coordinates with the new 8th-depth node; Kredex's fight resolves as a flee at exactly 25% HP,
+    logs distinctly from a normal kill, and `checkBattleEnd` reads it as a win; a full ENEMIES-roster
+    crash sweep (all 6 classes × every enemy template, including the new/reworked ones) at zero crashes;
+    save round-trip preserves `wormholeOpened`, including the old-save-migration case (field absent
+    entirely → safe `false`). Kredex's own fight balance sim-read comfortable under a full 6-hero roster
+    (100% flee rate, 89% HP remaining) — first-draft, same as every new boss's initial landing in this
+    project; not yet tuned against a real 3-hero deployed party.
 - **2026-07-29 — Difficulty pass (bosses + general knobs), boss-name CSS fix, and a locked-but-not-built
   story retcon.** Same day as the skill-tree entry below, later in the session, triggered by a full-
   playthrough report ("too easy outside early Elite nodes, bosses aren't hard enough"). Full rationale

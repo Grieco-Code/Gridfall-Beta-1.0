@@ -503,6 +503,26 @@
         applies: [{ type: "overclock", magnitude: 5, duration: 3 }]
       },
 
+      // --- Chancellor Kredex au Ra, HUMAN form (§9.5a, 2026-07-29) — his
+      // first appearance, personally overseeing the Helios harnessing
+      // operation. Not yet transformed: a Vossmark commander's kit
+      // (hardware/drone support, cage-doctrine authority), not a monster's.
+      // Fights with a `fleeAt` threshold (§9.5a's new generic mechanic) —
+      // he survives this encounter, alive, and resurfaces at Dungeon 6.
+      directiveStrike: {   // basic — Kinetic
+        name: "Directive Strike", enCost: 0, kind: "attack", target: "enemy",
+        damageType: "kinetic", power: 8, message: "levels a directive strike at"
+      },
+      droneBarrage: {   // special — Shock AoE (Directorate hardware support)
+        name: "Drone Barrage", enCost: 0, kind: "attack", target: "allEnemies",
+        damageType: "shock", power: 8, message: "calls down a drone barrage on"
+      },
+      chainOfCommand: {   // status — Weaken (an authority even discipline can't shake off)
+        name: "Chain of Command", enCost: 0, kind: "status", target: "allEnemies",
+        message: "barks an order that rattles the squad's own discipline, and the will of",
+        applies: [{ type: "weaken", magnitude: 5, duration: 2 }]
+      },
+
       // --- The Warden (boss) — corrupted Vossmark station AI core, §5.1 ---
       turretVolley: {   // basic — Kinetic
         name: "Turret Volley", enCost: 0, kind: "attack", target: "enemy",
@@ -697,10 +717,14 @@
         damageType: "corrosive", power: 24, pierce: 0.3,
         message: "ruptures into something that was never meant to finish becoming, tearing into"
       },
-      originUnbinding: {   // AoE status — Weaken (the failed ritual unraveling backward through the lineage)
+      originUnbinding: {   // AoE status — Weaken (the stolen ritual unraveling backward through a body never built for it)
+        // Message rewritten 2026-07-29 (§9.5a) — the original ("every
+        // generation that led here") was Phthora/Talos-lineage-specific and
+        // no longer fits Kredex, a single human undergoing someone else's
+        // ritual, not the latest link in a multi-generation transformation.
         name: "Origin Unbinding", enCost: 0, kind: "attack", target: "allEnemies",
         damageType: "corrosive", power: 0,
-        message: "unravels backward through every generation that led here, and the will of",
+        message: "unravels backward through a body that was never built to hold this much power at once, and the will of",
         applies: [{ type: "weaken", magnitude: 6, duration: 2 }]
       },
 
@@ -737,10 +761,14 @@
         message: "speaks with a chorus of voices that were never meant to share one throat, and the will of",
         applies: [{ type: "weaken", magnitude: 6, duration: 2 }]
       },
-      kredexEcho: {   // status — Disable (something almost human fights for control for one instant)
-        name: "Kredex's Echo", enCost: 0, kind: "attack", target: "enemy",
+      // Replaces `kredexEcho` (2026-07-29, §9.5a — see the chthon ENEMIES
+      // entry's comment) — same mechanical shape (a Disable-applying hit),
+      // reflavored around the entity's own wrongness instead of a trapped
+      // human mind, since Chthon no longer fuses with anyone.
+      realityFracture: {   // status — Disable (proximity to something this wrong breaks a mind's ability to act)
+        name: "Reality Fracture", enCost: 0, kind: "attack", target: "enemy",
         damageType: "void", power: 0,
-        message: "flickers with something almost human fighting for control, and the spasm that follows locks up",
+        message: "tears a fracture through reality itself, and the wrongness flooding through locks up",
         applies: [{ type: "disable", magnitude: 1, duration: 1 }]
       }
     };
@@ -1457,21 +1485,44 @@
         enrageMessage: "The Sun God's corrupted core overloads past its own limiters."
       },
 
+      // Chancellor Kredex au Ra, HUMAN form (§9.5a, 2026-07-29) — his real
+      // first appearance, right as the Sun God falls and the wormhole he and
+      // Vossmark were trying to harness cracks open for real. A commander,
+      // not yet a monster: cage-doctrine authority, Directorate hardware
+      // support, no self-heal or reinforcements — a short, sharp fight, not
+      // a long attrition one, since he's built to SURVIVE it, not win it.
+      // `fleeAt` (§9.5a's new generic mechanic): breaks off and escapes
+      // alive at 25% HP rather than dying here — he resurfaces at Dungeon 6.
+      kredex: {
+        typeName: "Chancellor Kredex au Ra", role: "Vossmark's supreme leader, in the flesh",
+        nature: "organic", tier: "boss",
+        baseStats: { hp: 110, en: 0, attack: 17, defense: 11, speed: 11 },
+        skills: ["directiveStrike", "droneBarrage", "chainOfCommand"],
+        affinities: { mind: MILD_WEAK, physical: RESIST },
+        fleeAt: 0.25,
+        fleeMessage: "Kredex doesn't wait to see how this ends. His retreat shuttle is already " +
+          "burning atmo before the squad can close the distance — whatever he came here to " +
+          "secure, he's leaving it behind."
+      },
+
       // ---------- DUNGEON 6 "THE CRADLE" (§5.4c, 2026-07-25) ----------
-      // Phthora, the Fleshspring — Talos's actual leader and origin-point,
-      // NOT a reuse of Proteus (D4's boss, already dead — Proteus paid off
-      // §9.4's "Talos figure" beat there). Races Vossmark to the Loom and
-      // attempts to complete the lineage's founding transcendence at the
-      // source — fails, stopped mid-transformation. The mirror-image ending
-      // to Kredex/Chthon below: Talos's doctrine (merge on purpose) fails
-      // outright, where Vossmark's doctrine (control it) produces the worst
-      // possible outcome. No self-heal (same lesson as every prior boss —
-      // Warden/Proteus/Void Soul Eater — a self-sustaining boss on
-      // EN-starved late rounds is an attrition slog, not a hard fight).
-      // Stats are a first-pass guess — sim-tune before locking, same
-      // discipline as every prior boss.
+      // 2026-07-29 REWORK (§9.5a): Phthora retired as a separate character —
+      // Kredex now takes this exact node/beat instead, having fled Helios
+      // and raced here on Vossmark's own resources ahead of the party,
+      // seizing Talos's own transcendence ritual himself in desperation.
+      // Internal KEY kept stable as `phthora` (same discipline as the
+      // Netrunner->Synth Medic rename, §4.1a, 2026-07-28 — internal
+      // identifiers are never player-facing, and an unchanged key means the
+      // sprite (`phthoraWreck`), the bossPhthora NODE ID, and every save's
+      // `unlockedNodeIds`/`visitedNodeIds` entries all keep working without
+      // a migration). Only display content changes below. Kit/skills
+      // (`fleshspringGrasp`/`fleshspringRupture`) read generically enough
+      // ("hands still deciding what they want to be," "something that was
+      // never meant to finish becoming") that they need no rewrite — a body
+      // mid-failed-transformation reads the same regardless of whose body it
+      // is. `originUnbinding`'s message DID need a rewrite — see that entry.
       phthora: {
-        typeName: "Phthora, the Fleshspring", role: "Talos's origin, mid-failed-transcendence",
+        typeName: "Kredex, the Fleshspring", role: "Vossmark's Chancellor, mid-failed-transcendence",
         nature: "organic", tier: "boss",
         // Base stats corrected down (2026-07-25 baseline sim pass) — the
         // original 210/24/15 guess was tuned for a much later encounter
@@ -1483,21 +1534,24 @@
         affinities: { mind: DOUBLE_WEAK, physical: RESIST },
         reinforceAt: 0.5,
         reinforceWave: [{ key: "chimeraSpecimen", count: 1 }],
-        reinforceMessage: "Phthora's ritual falters, and the lineage answers anyway. A Chimera " +
-          "Specimen claws free of the wreckage to finish what he can't.",
+        reinforceMessage: "Kredex's stolen ritual falters, and the wreckage around him answers " +
+          "anyway — old Talos experiments, still twitching on half-remembered instinct. A Chimera " +
+          "Specimen claws free to finish what he can't.",
         enrageAt: 0.5,
         enrageBuff: { atk: 1.45, speed: 1.2 },
-        enrageMessage: "Phthora's ritual accelerates past the point of any control at all."
+        enrageMessage: "Kredex's stolen ritual accelerates past the point of any control at all."
       },
-      // The caged god (double-boss Phase 1, §5.4c) — the Loom's true
-      // occupant, still bound, straining against Kredex's ritual as it
-      // fails. No self-heal/reinforceWave — same "gatekeeper hits, doesn't
-      // grind" shape as Void Soul Eater before it; its whole job is setting
-      // up the fusion into Chthon, not winning a long fight of its own.
-      // nature: "void" — it was never organic, and never will be, even
-      // wearing a human's body in Phase 2.
+      // The Caged God (double-boss Phase 1, §5.4c; REWORKED 2026-07-29,
+      // §9.5a) — the Loom's true occupant, straining against a containment
+      // that's failing for a DIFFERENT reason now: Kredex, the one running
+      // the Helios harnessing operation, already died a dungeon ago as the
+      // Fleshspring, and nobody's left minding the rig. No self-heal/
+      // reinforceWave — same "gatekeeper hits, doesn't grind" shape as Void
+      // Soul Eater before it; its whole job is setting up Phase 2's full
+      // escape, not winning a long fight of its own. nature: "void" — it was
+      // never organic, and never will be.
       cagedGod: {
-        typeName: "The Caged God", role: "the Loom's true occupant, still bound",
+        typeName: "The Caged God", role: "the Loom's true occupant, containment failing",
         nature: "void", tier: "boss",
         baseStats: { hp: 140, en: 0, attack: 20, defense: 13, speed: 10 },
         skills: ["boundLash", "fracturingWill"],
@@ -1506,20 +1560,27 @@
         enrageBuff: { atk: 1.45, speed: 1.2 },
         enrageMessage: "Whatever restraints were left finally give — the Caged God strains free of even itself."
       },
-      // Chthon, God of the Breach (double-boss Phase 2 — the fused
-      // Kredex+entity, the TRUE final boss of the game, §5.4c). Fought
-      // immediately after the caged god with NO rest — the fusion happens
-      // between phases, not off-screen. Psionic weakness is deliberate:
-      // hitting it with Psionic reaches whatever's left of Kredex's own mind
-      // still trapped inside — a final callback giving the Mentalist (every
-      // organic faction's designated counter all game) one last, huge
-      // finale moment, the same way Netrunner got the Sun God's Cyber 2.0.
-      // Defeating Chthon is the literal, on-screen cause of the Helios
-      // wormhole finally tearing open for real (see engine.js's ending
-      // sequence + §9.5/§5.4c). Stats are a first-pass guess — sim-tune
-      // before locking, same discipline as every prior boss.
+      // Chthon, God of the Breach (double-boss Phase 2, §5.4c; REWORKED
+      // 2026-07-29, §9.5a) — the SAME entity as the Caged God, now fully
+      // unbound. NOT a fusion with Kredex anymore (he already died at
+      // Dungeon 6's Fleshspring fight, a separate encounter — see the
+      // phthora ENEMIES entry) — Chthon fights as itself, answering to
+      // nothing human. `kredexEcho` (a "something almost human fighting for
+      // control" Disable skill) is RETIRED along with that premise; replaced
+      // by `realityFracture`, same mechanical function (a Disable-applying
+      // AoE-adjacent status hit) but reflavored around the entity's own
+      // wrongness rather than a trapped human mind. `mind: DOUBLE_WEAK` kept
+      // (still a real payoff moment for the Mentalist/Psion, every organic
+      // faction's designated counter all game — the same the Netrunner/
+      // Synth Medic got with the Sun God's Cyber/Shock 2.0), just no longer
+      // justified by "reaching a human mind inside it" — a newly-manifested,
+      // still-forming true form is disrupted by Psionic for its own reason.
+      // Fought immediately after the Caged God with NO rest — same "the
+      // escape happens live, not off-screen" beat as before. Defeating
+      // Chthon is still the literal, on-screen cause of the Helios wormhole
+      // finally tearing open for real (§9.5/§5.4c/§9.5a).
       chthon: {
-        typeName: "Chthon, God of the Breach", role: "the Loom, fully escaped, wearing what's left of Kredex",
+        typeName: "Chthon, God of the Breach", role: "the Loom, fully unbound, answering to nothing human anymore",
         nature: "void", tier: "boss",
         // Base stats corrected down (2026-07-25 baseline sim pass), same
         // class of fix as the Sun God (D5) and Phthora above — the original
@@ -1527,7 +1588,7 @@
         // (~7) almost every time even under smart play. Not a final locked
         // number — deep balance tuning is its own later roadmap phase.
         baseStats: { hp: 115, en: 0, attack: 18, defense: 12, speed: 12 },
-        skills: ["breachLash", "worldUnmaking", "chorusOfBreach", "kredexEcho"],
+        skills: ["breachLash", "worldUnmaking", "chorusOfBreach", "realityFracture"],
         affinities: { mind: DOUBLE_WEAK, thermal: WEAK, physical: RESIST },
         reinforceAt: 0.5,
         reinforceWave: [{ key: "voidHorror", count: 1 }],
@@ -1535,7 +1596,7 @@
           "meant to be here answers the call.",
         enrageAt: 0.5,
         enrageBuff: { atk: 1.45, speed: 1.2 },
-        enrageMessage: "What's left of Kredex stops fighting for control. Only the Breach is driving now."
+        enrageMessage: "There's nothing left holding it back now — not that there ever really was."
       }
     };
 
@@ -4088,12 +4149,33 @@
           // chain (both bosses back to back, no rest — the intended
           // attrition): smart-play 92% win / 47% HP remaining, naive floor
           // ~0-3% (same "mashing dies" doctrine as every other boss).
-          bossSun:  { id: "bossSun", type: "boss", depth: 7, connectsTo: [],
+          // §9.5a (2026-07-29): bossSun no longer connectsTo: [] — Kredex's
+          // own encounter now follows it, same "non-terminal half of a
+          // double boss" trick already proven by bossSoul above (and reused
+          // again at Dungeon 6b). Doesn't touch the Soul Eater/Sun God
+          // fight's own already-sim-tuned pacing at all — this is purely
+          // additive, one more beat appended at the end.
+          bossSun:  { id: "bossSun", type: "boss", depth: 7, connectsTo: ["bossKredex"],
                       bossEncounter: [{ key: "sunGod", level: 1 }],
                       enterText: "The dark clears in one instant, not gradually, the way night breaks " +
                         "over a horizon that shouldn't exist this close to a star. Something wearing " +
                         "the shape of Helios's own regulator core opens eyes that were never built to " +
-                        "see with." }
+                        "see with." },
+          // Kredex's real first appearance (§9.5a, 2026-07-29) — human, not
+          // yet transformed, personally overseeing the harnessing operation
+          // this whole dungeon has been circling. `fleeAt` on ENEMIES.kredex
+          // means this fight ends in his ESCAPE, not his death — he
+          // resurfaces at Dungeon 6. D5's own terminal node now (see the
+          // nextDungeonKey dispatch above), so this is where the Sun-God-era
+          // epilogue text actually fires from.
+          bossKredex: { id: "bossKredex", type: "boss", depth: 8, connectsTo: [],
+                        bossEncounter: [{ key: "kredex", level: 1 }],
+                        enterText: "The Sun God's death throes are still lighting the wreckage when a " +
+                          "shuttle that has no business being this close to a dying star burns in " +
+                          "anyway. Chancellor Kredex au Ra steps out ahead of his own security detail, " +
+                          "which tells you everything about how badly this operation was never " +
+                          "supposed to be improvised. \"That regulator was NOT authorized for " +
+                          "termination,\" he says, like the paperwork is still the problem." }
         }
       },
 
@@ -4269,12 +4351,19 @@
           // first-pass placeholder, sim-tuned once already (2026-07-25
           // baseline pass) but not the final locked number — deep balance
           // tuning is its own later roadmap phase.
+          // §9.5a (2026-07-29): Kredex, not Phthora, now occupies this node
+          // (node id kept as `bossPhthora` — see the ENEMIES.phthora entry's
+          // comment for why the internal name stays stable).
           bossPhthora: { id: "bossPhthora", type: "boss", depth: 13, region: "descent",
                          connectsTo: [],
                          bossEncounter: [{ key: "phthora", level: 4 }],
                          enterText: "The tunnel opens into a cavern lit by something that used to be " +
-                           "bioluminescence and is now just wrong. Phthora is already mid-ritual, and " +
-                           "whatever he's reaching for, he got here first." }
+                           "bioluminescence and is now just wrong — old Talos ritual scaffolding, " +
+                           "still standing, still humming. Kredex is already here, alone except for " +
+                           "the rig he's wired himself into, muttering the same phrase Vossmark's own " +
+                           "intelligence reports always flagged and never explained. Whatever this " +
+                           "was built for, he found it before Talos's own people ever came back to " +
+                           "finish it, and he isn't waiting for permission." }
         }
       },
 
@@ -4318,19 +4407,28 @@
           // dungeon's terminal clear). No rest between phases — the fusion
           // happens live, on-screen, not off-screen exposition. Levels are
           // sim-tuned once already (2026-07-25 baseline pass), not final.
+          // §9.5a (2026-07-29): Kredex already died a dungeon ago (the
+          // Fleshspring fight, bossPhthora) — he isn't present here anymore.
+          // The entity's containment (built at Helios, run out of Kredex's
+          // own rig) is simply failing now that nobody's left minding it.
           bossCagedGod: { id: "bossCagedGod", type: "boss", depth: 3,
                           connectsTo: ["bossChthon"],
                           bossEncounter: [{ key: "cagedGod", level: 6 }],
-                          enterText: "Kredex is already here, and he's not alone. Something is here " +
-                            "WITH him, still mostly bound, straining against a rig that was never " +
-                            "built to hold something that never agreed to be caged. \"You're too " +
-                            "late,\" he says, and he isn't wrong, just not in the way he thinks." },
+                          enterText: "Human territory really did end at the last door. What's down " +
+                            "here has never needed a name a person could pronounce, and whatever " +
+                            "containment Vossmark's rig at Helios was straining to hold is straining " +
+                            "a lot less now that the man running it is dead. It doesn't announce " +
+                            "itself. It doesn't need to. The dark just gets a lot more honest about " +
+                            "what's actually in it." },
           bossChthon: { id: "bossChthon", type: "boss", depth: 4, connectsTo: [],
                         bossEncounter: [{ key: "chthon", level: 7 }],
-                        enterText: "Kredex stops screaming before the shape finishes changing, which " +
-                          "is somehow worse than if he hadn't. Whatever answers to Chthon now was " +
-                          "never a god, and was never really Kredex either. Just the last honest " +
-                          "thing left standing where both of them used to be." }
+                        enterText: "There was never a \"before\" to go back to. Whatever the Caged " +
+                          "God was straining against just finishes failing, all at once, and what's " +
+                          "left doesn't have a shape so much as a direction it's decided to be. " +
+                          "Chthon doesn't wear anyone. It never needed to. It just needed the last " +
+                          "thing trying to control it to stop being able to, and that already " +
+                          "happened, one cavern back, screaming about a ritual that was never his " +
+                          "to take." }
         }
       }
     };

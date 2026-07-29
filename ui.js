@@ -116,6 +116,7 @@
         lastTownMessage: lastTownMessage,
         sector1BriefingShown: sector1BriefingShown,
         lastCheckpointScene: lastCheckpointScene,
+        wormholeOpened: wormholeOpened,
         nextIdCounter: nextIdCounter
       };
     }
@@ -126,6 +127,17 @@
 
     function hasSave() {
       return localStorage.getItem(SAVE_KEY) !== null;
+    }
+
+    // §9.5a (2026-07-29) — the Title screen needs to know whether to show
+    // the "Step into the Wormhole" button BEFORE any real load happens (the
+    // player hasn't clicked Continue yet). A cheap peek at the save blob's
+    // one field, same corrupt/missing-safe treatment as hasSave() — does NOT
+    // mutate any live state, unlike loadGame().
+    function saveHasWormholeOpened() {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return false;
+      try { return !!JSON.parse(raw).wormholeOpened; } catch (e) { return false; }
     }
 
     // Restores globals from localStorage and returns true/false for success,
@@ -160,6 +172,7 @@
       lastTownMessage = data.lastTownMessage;
       sector1BriefingShown = data.sector1BriefingShown;
       lastCheckpointScene = data.lastCheckpointScene;
+      wormholeOpened = !!data.wormholeOpened;   // safe default (false) for saves made before §9.5a
       nextIdCounter = data.nextIdCounter;
       currentNodeId = null;   // we only ever save on Map/Town, never mid-battle — always resume there
       return true;
@@ -180,16 +193,22 @@
     function renderTitleScreen() {
       const el = document.getElementById("title-scene");
       const saveExists = hasSave();
+      // §9.5a (2026-07-29): only ever shows against a save that's actually
+      // beaten the game (Chthon's defeat sets this) — peeked cheaply,
+      // without a full loadGame(), since Title renders before any load.
+      const wormholeReady = saveExists && saveHasWormholeOpened();
       el.innerHTML =
         "<p class='select-help'>A gritty space-core RPG.</p>" +
         "<div id='title-buttons'>" +
           "<button id='start-btn'>Start</button>" +
           "<button id='continue-btn'" + (saveExists ? "" : " disabled") + ">Saved Game</button>" +
+          (wormholeReady ? "<button id='wormhole-btn' class='cancel'>Step into the Wormhole</button>" : "") +
         "</div>" +
         (saveExists ? "" : "<p class='title-flavor'>No saved game yet.</p>");
 
       document.getElementById("start-btn").onclick = onStartClicked;
       document.getElementById("continue-btn").onclick = onContinueClicked;
+      if (wormholeReady) document.getElementById("wormhole-btn").onclick = onStepIntoWormholeFromTitle;
     }
 
     function onStartClicked() {
@@ -211,6 +230,7 @@
       lastTownMessage = "";
       sector1BriefingShown = false;
       lastCheckpointScene = "map";
+      wormholeOpened = false;
       showWorldIntro();
     }
 
@@ -224,6 +244,35 @@
       // Resume onto whichever of Map/Town was actually checkpointed (H4 —
       // was always the Map, back when Town didn't exist yet).
       if (lastCheckpointScene === "town") { showTown(); } else { showMap(); }
+    }
+
+    // §9.5a (2026-07-29) — "Step into the Wormhole." The endless mode this
+    // leads to isn't built yet (deferred per direct user instruction, same
+    // session as the retcon itself); both handlers just show an honest
+    // placeholder rather than pretending it exists. Two thin named
+    // functions (not one parameterized one) matching this file's own
+    // convention of a distinct function per story-beat entry point (e.g.
+    // showPrologueEpilogue vs. showSector1Epilogue) rather than a generic
+    // dispatcher — Title needs a real loadGame() first (nothing's in memory
+    // yet when Title renders); Town already has live state.
+    function onStepIntoWormholeFromTitle() {
+      const ok = loadGame();
+      if (!ok) { alert("No saved game found."); renderTitleScreen(); return; }
+      showStoryScene(
+        ["The Rift is open — has been since Chthon stopped fighting it. Whatever's on the other " +
+          "side hasn't come through yet, and the ship isn't rigged to go looking for it. Not yet."],
+        "Not yet.",
+        function () { if (lastCheckpointScene === "town") { showTown(); } else { showMap(); } }
+      );
+    }
+
+    function onStepIntoWormholeFromTown() {
+      showStoryScene(
+        ["The Rift is open — has been since Chthon stopped fighting it. Whatever's on the other " +
+          "side hasn't come through yet, and the ship isn't rigged to go looking for it. Not yet."],
+        "Not yet.",
+        function () { showTown(); }
+      );
     }
 
 
@@ -1035,6 +1084,16 @@
         missionBtn.onclick = showSelect;
       }
       buttons.appendChild(missionBtn);
+
+      // §9.5a (2026-07-29) — read live (not peeked), since Town only ever
+      // renders mid-session with real state already in memory.
+      if (wormholeOpened) {
+        const wormholeBtn = document.createElement("button");
+        wormholeBtn.className = "cancel";
+        wormholeBtn.textContent = "Step into the Wormhole";
+        wormholeBtn.onclick = onStepIntoWormholeFromTown;
+        buttons.appendChild(wormholeBtn);
+      }
 
       const saveBtn = document.createElement("button");
       saveBtn.className = "cancel";

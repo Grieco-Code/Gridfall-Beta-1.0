@@ -18,6 +18,16 @@ HP threshold. General knobs bumped too (`ENEMY_HP_MULT` 1.5→1.6, `ENEMY_DAMAGE
 `AI_SPECIAL_CHANCE` 0.38→0.45, `AI_HEAL_CHANCE` 0.43→0.5). Also fixed the `.tile-name`/`.tile-sub`
 truncation bug at its actual root cause (`index.html`, wraps instead of clipping now) and locked a story
 retcon as a spec only (design doc §9.5a — nothing built). Full numbers/detail: §11's dated changelog.
+**A later session the same day built that retcon.** New generic engine mechanic: boss FLEE (`fleeAt`/
+`fleeMessage` on ENEMIES, `triggerFlee` in engine.js — zeroes `stats.hp` directly, so `checkBattleEnd`
+needed no changes to read a fled boss as a normal win). New `ENEMIES.kredex` (human form, 3 new skills)
+and a new Dungeon 5 node (`bossKredex`, chained after the existing `bossSun`). Phthora retired as a
+character — `ENEMIES.phthora`'s KEY kept stable, only display content changed (same discipline as the
+Netrunner→Synth Medic rename). Chthon's fusion-with-Kredex premise retired — `kredexEcho` replaced by
+`realityFracture` (same mechanical shape). New persistent flag `wormholeOpened` (state.js, serialized in
+`buildSaveData`/`loadGame`) gates a new "Step into the Wormhole" button (Title + Town, ui.js) that
+currently opens a placeholder scene, not the (still unbuilt) endless mode. Full detail: §12 (schema
+additions) and §11's dated changelog.
 **Prior update (2026-07-23):** the code split from one
 `game.html` into five sibling files loaded in order by `index.html` — `data.js`, `state.js`, `ui.js`,
 `engine.js`, `main.js` (still no build step) — and the game itself became a real git repo
@@ -180,6 +190,17 @@ in `applyToTarget`'s attack branch right after the reinforcement check: the firs
 given (no AI changes needed — `chooseEnemyAction` already reads `enemy.skills` generically). All 9
 current bosses have one (see design doc §12/§13 for the exact per-boss values); no boss uses
 `enrageSkill` yet — a stat-only spike was enough to hit this pass's target band.
+
+**Boss flee hook (2026-07-29, §9.5a — generic, same family as the two hooks above).** An ENEMIES
+template may declare `fleeAt` (fraction of maxHp) and `fleeMessage`; `createEnemy` copies both plus a
+fresh `fled: false` onto the combatant. Checked in `applyToTarget`'s attack branch right after the enrage
+check: the first time an enemy with a `fleeAt` drops to/below it, `fled` flips true and
+`triggerFlee(target)` (§4 F/I) sets `stats.hp = 0` directly and logs a distinct message. Zeroing `hp`
+rather than removing the combatant from `enemies` is deliberate — it's the EXACT representation a
+normally-defeated enemy already ends a fight in (dead enemies stay in the array; `isAlive`/`living()`
+filters are what everything else already reads), so `checkBattleEnd` needed zero changes to treat "the
+last living enemy fled" as an ordinary win. XP/loot still award normally. Only `ENEMIES.kredex` (§9.5a)
+uses this so far.
 
 **ENEMY_POOLS** (Phase G, §5.1) — `{ fodder: [...], standard: [...], elite: [...] }`, each mixing
 both factions' keys at that tier. Replaces the old single hardcoded `ENCOUNTER` array (deleted, along
@@ -371,6 +392,7 @@ Guard already do — see §12 for the full engine-change list.
 | `lastCheckpointScene` (Phase H4) | `"map"` \| `"town"` — which one `loadGame()` should resume onto (both are now checkpoints, not just the Map) |
 | `SHIP_STARTING_ITEMS` (Phase H4) | `["kevlarMesh","tacticalSidearm"]` — the fixed, hand-picked salvage grant, not a loot roll |
 | `charPanelHeroList` / `charPanelReturnTo` (Phase H4) | which hero list the open Character Sheet's tabs iterate, and whether "Done" returns to `"battle"` (the endbar) or `"town"` — set explicitly on first open, reused by internal re-render calls |
+| `wormholeOpened` (§9.5a, 2026-07-29) | flips true in `showDungeon6bEpilogue` (Chthon's defeat); gates the "Step into the Wormhole" button on Title (peeked, `saveHasWormholeOpened`) and Town (read live) |
 
 ---
 
@@ -427,8 +449,11 @@ Guard already do — see §12 for the full engine-change list.
   reload;
   `loadGame()` re-derives `party` by looking `activePartyIds` up in the freshly-parsed `roster`.
   Also serializes `lastSquad`, `partyItems`, `partyOwnedItems`, `currentDungeonKey` (H3), `unlockedNodeIds`,
-  `visitedNodeIds`, `lastMapMessage`, `nextIdCounter`. `loadGame()` returns `true`/`false`
-  (corrupt/missing JSON is treated as "no save," not a thrown error)
+  `visitedNodeIds`, `lastMapMessage`, `nextIdCounter`, and (§9.5a, 2026-07-29) `wormholeOpened`.
+  `loadGame()` returns `true`/`false` (corrupt/missing JSON is treated as "no save," not a thrown error)
+- `saveHasWormholeOpened()` (§9.5a, 2026-07-29) — a cheap peek at the save blob's `wormholeOpened` field
+  WITHOUT a full `loadGame()` (same corrupt/missing-safe treatment as `hasSave()`); used only by
+  `renderTitleScreen`, since Title renders before the player has clicked Continue
 - `renderNamingScreen()` / `onConfirmName()` (H2, destination changed H3) — shown once, right after
   Start, before the prologue. A text input (16-char max, Enter or the Confirm button submits) with a
   `HERO_NAMES[0]` fallback if left blank; creates `createHero("merc", <name>)`, pushes it onto
@@ -598,6 +623,10 @@ Guard already do — see §12 for the full engine-change list.
   `enemy.enrageBuff`'s atk/def/speed multipliers directly onto `stats` (permanent, not a status effect),
   pushes `enrageSkill` onto `skills` if set, logs, `updateScreen()`. Called from `applyToTarget` (§ F)
   the first time an `enrageAt`-bearing enemy crosses that threshold; see §2's new entry for the full hook.
+- `triggerFlee(enemy)` (2026-07-29, §9.5a) — the boss flee hook's payload: sets `stats.hp = 0` directly
+  (same representation a normal defeat already leaves a combatant in, so no other function needed to
+  change), logs `enemy.fleeMessage`, `updateScreen()`. Called from `applyToTarget` (§ F) the first time a
+  `fleeAt`-bearing enemy crosses that threshold; see §2's new entry for the full hook.
 - `resolveNodeVictory()` (H3: dungeon-aware) — reads `DUNGEONS[currentDungeonKey].nodes[currentNodeId]`;
   called from the post-win endbar's "Continue →" for a non-boss node: marks `currentNodeId` visited,
   unlocks `node.connectsTo`, `showMap()` (replaces the old `nextFight`)
@@ -850,6 +879,35 @@ numbers in the code are what they are, not just what they are:**
 ---
 
 ## 11. Changelog
+- **2026-07-29 — The §9.5a Kredex/Fleshspring/Caged God retcon BUILT.** A later session than the
+  difficulty-pass entry below. Full narrative + verification detail in the design doc's §13 changelog
+  entry of the same headline; this is the code-shape pointer.
+  - **New generic engine mechanic, boss flee:** `fleeAt`/`fleeMessage` (ENEMIES template) + `fled` flag
+    (state.js `createEnemy`), checked in `applyToTarget`'s attack branch (engine.js) right after the
+    enrage check. `triggerFlee(enemy)` (engine.js, next to `triggerEnrage`) sets `stats.hp = 0` directly
+    — the same representation a normal defeat already leaves a combatant in — so `checkBattleEnd`/
+    `living()` needed zero changes to treat a fled boss as an ordinary win.
+  - **data.js:** new `ENEMIES.kredex` (human form) + 3 new skills (`directiveStrike`/`droneBarrage`/
+    `chainOfCommand`); new node `DUNGEONS.dungeon5.nodes.bossKredex`, `bossSun.connectsTo` changed from
+    `[]` to `["bossKredex"]`. `ENEMIES.phthora` reworked in place (key unchanged — `typeName`/`role`/
+    `reinforceMessage`/`enrageMessage` updated, kit untouched except `originUnbinding`'s message).
+    `ENEMIES.cagedGod`/`chthon` `enterText`/role text updated to drop the Kredex-fusion premise;
+    `chthon.skills` swapped `kredexEcho` → new `realityFracture` (identical mechanical shape).
+  - **state.js:** new `wormholeOpened` global (default `false`).
+  - **engine.js:** `renderEndbar`'s boss-clear/mid-line dispatch restructured to key off `currentNodeId`
+    (not just `currentDungeonKey`) — Dungeon 5 now has two non-terminal boss beats (`bossSoul`,
+    `bossSun`) instead of one. `showDungeon5Epilogue`/`showDungeon6Epilogue`/`showDungeon6bEpilogue`/
+    `showEndingEpilogue` text updated for the new sequence; `wormholeOpened = true` set at the top of
+    `showDungeon6bEpilogue`.
+  - **ui.js:** `buildSaveData`/`loadGame` serialize `wormholeOpened` (safe `false` default on old saves);
+    new `saveHasWormholeOpened()` peek helper; `onStartClicked` resets the flag; `renderTitleScreen`/
+    `renderTown` conditionally render a new "Step into the Wormhole" button; two new handlers
+    (`onStepIntoWormholeFromTitle`/`onStepIntoWormholeFromTown`) show a placeholder `showStoryScene` —
+    the endless mode itself (Phase P3) isn't built yet.
+  - **Verified headless** (`mini_racer`): full `DUNGEONS` graph reachability + `bossEncounter`/skill/
+    `reinforceWave` reference-integrity sweep; Dungeon 5's radial layout with the new 8th-depth node;
+    Kredex's flee-at-25%-HP behavior end to end (including `checkBattleEnd`); a full ENEMIES-roster
+    crash sweep; save round-trip (fresh + old-save-missing-the-field migration case).
 - **2026-07-29 — Difficulty pass (bosses + general knobs), boss-name CSS fix, story retcon locked as
   spec-only.** Same day as the skill-tree entry below, later in the session. Full prose + sim table in
   the design doc's §13 changelog entry of the same headline; this is the code-shape pointer.
