@@ -44,6 +44,49 @@
     // currently only shows a placeholder scene (ui.js `onStepIntoWormhole*`).
     let wormholeOpened = false;
 
+    // Endless mode ("the Rift," Phase P3 — built 2026-07-29). A deliberately
+    // LIGHTWEIGHT parallel system, not bent into the DUNGEONS/node-graph
+    // machinery — that's built for a branching map you navigate; this is a
+    // straight ladder (fight -> interstitial -> fight, no map, no choices),
+    // a different enough shape that force-fitting it into DUNGEONS would be
+    // more engineering for no benefit. See engine.js's `rollEndlessFloor`/
+    // `startEndlessRun`/`enterEndlessFloor`.
+    let inEndlessRun = false;   // true only while a Rift attempt is in progress
+    let endlessFloor = 0;       // current floor number during a run (0 when not in one)
+    // Every completed attempt (win-until-you-die, so this only ever grows on
+    // a wipe) appends one entry here: { floorReached, heroNames, heroClasses,
+    // date }. Capped to the newest ENDLESS_HISTORY_CAP so a save can't grow
+    // unboundedly over a long play history. The "Wormhole Records" panel
+    // (ui.js) derives BOTH the all-time-best floor and a per-hero view from
+    // this one array, rather than also maintaining separate duplicate
+    // fields that could drift out of sync.
+    let endlessRunHistory = [];
+    const ENDLESS_HISTORY_CAP = 50;
+
+    // Endless-mode tuning knobs — first-draft, same discipline as every
+    // other constant in this project (sim-verify the SHAPE isn't broken,
+    // tune the exact numbers from real play later).
+    // Calibrated via sim (a smart-play, fully-socketed 6-hero roster at a
+    // few reference levels) rather than shipped as a first blind guess —
+    // the original 8/0.5 pair made even a very built level-30 party top out
+    // around floor 21-23, which read as too shallow for "endless" framing.
+    // 6/0.25 lands a level-8 party (a plausible early-post-story roster)
+    // around floor 7-9, a level-20 party around floor 18-22, and a fully-
+    // built level-30 party around floor 41-43 — real scaling with
+    // investment, bigger numbers at the top end. Still first-draft/
+    // sim-only, same as every constant in this project — real play may
+    // move it further.
+    const ENDLESS_BASE_LEVEL = 6;          // floor 1's enemy level — meant to already read as a real fight
+    const ENDLESS_LEVEL_PER_FLOOR = 0.25;  // additional enemy level per floor, unbounded
+    const ENDLESS_BOSS_FLOOR_INTERVAL = 5;     // every Nth floor is a boss floor
+    const ENDLESS_DOUBLE_BOSS_INTERVAL = 20;   // every Nth floor pairs TWO bosses
+    const ENDLESS_EN_RESTORE_FRACTION = 0.25;  // partial EN-only restore on every floor clear
+    // A full HP+EN rest (same 65% REST_HEAL_FRACTION every Rest node already
+    // uses) fires on the floor immediately BEFORE a boss floor — mirrors how
+    // every existing dungeon already places its Rest node right before a
+    // boss, giving the player a breather specifically ahead of the harder
+    // fight rather than an arbitrary interval.
+
     let initiative = [];
     let turnIndex = 0;
     let activeCombatant = null;
@@ -54,6 +97,11 @@
 
     let selectedHeroIds = [];    // roster hero ids picked on the squad-builder screen
     let lastSquad = [];          // hero ids from the most recent deploy (pre-selects next time)
+    // §9.5a Phase P3 (2026-07-29) — set right before showSelect() when the
+    // squad-builder is being reused for a Rift entry rather than a normal
+    // dungeon deploy; deploy() (ui.js) reads and clears it. The screen
+    // itself needs zero changes either way — only its DESTINATION differs.
+    let selectingForEndless = false;
 
     // Enemy AI difficulty knobs (higher = deadlier). Tuned so the default
     // 6-enemy fight is hard-but-winnable and rewards a balanced squad.

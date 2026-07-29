@@ -27,8 +27,18 @@ Netrunner→Synth Medic rename). Chthon's fusion-with-Kredex premise retired —
 `realityFracture` (same mechanical shape). New persistent flag `wormholeOpened` (state.js, serialized in
 `buildSaveData`/`loadGame`) gates a new "Step into the Wormhole" button (Title + Town, ui.js) that
 currently opens a placeholder scene, not the (still unbuilt) endless mode. Full detail: §12 (schema
-additions) and §11's dated changelog.
-**Prior update (2026-07-23):** the code split from one
+additions) and §11's dated changelog. **A further session the same day built that endless mode** ("the
+Rift," Phase P3) — a deliberately lightweight PARALLEL system, not folded into `DUNGEONS`: new
+`startEndlessRun`/`enterEndlessFloor`/`endEndlessRun`/`rollEndlessFloor` (engine.js) drive a straight floor
+ladder (no map). The floor generator reads every `ENEMIES` key's `tier` live (no hand-maintained pool,
+no `poolBranch` restriction — full cross-faction mixing) and reuses the existing per-level stat scaling;
+boss floor every 5th, two DISTINCT bosses every 20th; Kredex's `fleeAt` is suppressed specifically
+`while inEndlessRun`. New state: `inEndlessRun`/`endlessFloor`/`endlessRunHistory` (capped run-history
+log) + `selectingForEndless` (lets the existing squad-builder screen double as the Rift's own picker,
+`deploy()` branching on it). `renderEndbar` gained an early `inEndlessRun` branch to a new
+`renderEndlessEndbar`; `setBanner` prefixes the floor number. New "Rift Records" Town panel derives both
+an all-time-best and a per-class view from `endlessRunHistory` alone. Full detail: §12/§9 changed
+sections and §11's dated changelog. **Prior update (2026-07-23):** the code split from one
 `game.html` into five sibling files loaded in order by `index.html` — `data.js`, `state.js`, `ui.js`,
 `engine.js`, `main.js` (still no build step) — and the game itself became a real git repo
 (github.com/Grieco-Code/Gridfall-Beta-1.0). Since then: a full sprite-quality pass (zero blob/shared
@@ -393,6 +403,9 @@ Guard already do — see §12 for the full engine-change list.
 | `SHIP_STARTING_ITEMS` (Phase H4) | `["kevlarMesh","tacticalSidearm"]` — the fixed, hand-picked salvage grant, not a loot roll |
 | `charPanelHeroList` / `charPanelReturnTo` (Phase H4) | which hero list the open Character Sheet's tabs iterate, and whether "Done" returns to `"battle"` (the endbar) or `"town"` — set explicitly on first open, reused by internal re-render calls |
 | `wormholeOpened` (§9.5a, 2026-07-29) | flips true in `showDungeon6bEpilogue` (Chthon's defeat); gates the "Step into the Wormhole" button on Title (peeked, `saveHasWormholeOpened`) and Town (read live) |
+| `inEndlessRun` / `endlessFloor` (Phase P3, 2026-07-29) | true + the current floor number while a Rift attempt is live; `endlessFloor` is 0 otherwise. Never saved — a save can only happen from Map/Town, and a Rift attempt always ends (win-until-dead) before either is reachable |
+| `endlessRunHistory` (Phase P3) | every completed attempt, newest first, capped at `ENDLESS_HISTORY_CAP` (50): `{floorReached, heroNames, heroClasses, cause, date}`. Source of truth for the Town "Rift Records" panel — no separate best-floor/per-hero fields, both are derived from this array |
+| `selectingForEndless` (Phase P3) | set by `enterWormhole()` right before `showSelect()`; `deploy()` reads and clears it to decide whether THIS squad pick starts a Rift run or a normal dungeon |
 
 ---
 
@@ -471,10 +484,16 @@ Guard already do — see §12 for the full engine-change list.
   (cap 3) → `refreshCardStates` + `updateDeployRow`
 - `refreshCardStates()` — card highlight + pick-order badge (iterates `roster`, not `CLASSES`)
 - `updateDeployRow()` — Deploy button (needs ≥1) + count
-- `deploy()` (H3: dungeon target added) — sets `lastSquad = selectedHeroIds.slice()`,
-  `startDungeon(lastSquad, currentDungeonKey)` — redeploys into whichever dungeon is already active
-  (set by `showIntroScene` or `showPrologueEpilogue`); this screen is only reached via a
-  retry/retire/abandon WITHIN that dungeon, never a fresh pick between dungeons
+- `deploy()` (H3: dungeon target added; Phase P3: endless branch) — sets `lastSquad =
+  selectedHeroIds.slice()`; if `selectingForEndless` is set, clears it and calls `startEndlessRun
+  (lastSquad)` instead, otherwise `startDungeon(lastSquad, currentDungeonKey)` — redeploys into whichever
+  dungeon is already active (set by `showIntroScene` or `showPrologueEpilogue`); this screen is only
+  reached via a retry/retire/abandon WITHIN that dungeon, never a fresh pick between dungeons
+- `enterWormhole()` (Phase P3, ui.js) — the Rift's real entry point (replaced last session's placeholder
+  scene): one `showStoryScene` paragraph, then sets `selectingForEndless = true` and calls `showSelect()`
+  — the squad-builder screen itself needed zero changes, only its DESTINATION now branches (see `deploy()`
+  above). Called by both `onStepIntoWormholeFromTitle` (which `loadGame()`s first) and
+  `onStepIntoWormholeFromTown` (state's already live).
 
 **D2) MAP** (Phase G, §5.1; extended Phase H3 for multi-dungeon + recruit nodes)
 - `renderMap()` — reads `DUNGEONS[currentDungeonKey]`, uses its `title` for the heading, draws
@@ -504,7 +523,9 @@ Guard already do — see §12 for the full engine-change list.
   Sheet against `roster`, returns to Town — `showCharacterPanel(undefined, roster, "town")`),
   **Party Inventory** (`showInventoryPanel()`), a mission button (**"Head to the Station"** →
   `onHeadToStation` if `currentDungeonKey==="sector1" && !sector1BriefingShown`, else **"Prep
-  Squad"** → `showSelect` directly), and **Save** (`saveGame()` + a confirmation message + re-render)
+  Squad"** → `showSelect` directly), (Phase P3) **"Step into the Wormhole"** (`onStepIntoWormholeFromTown`,
+  only rendered while `wormholeOpened`) + **"Rift Records"** (`showWormholeRecordsPanel()`, only rendered
+  once `endlessRunHistory.length > 0`), and **Save** (`saveGame()` + a confirmation message + re-render)
 - `onHeadToStation()` — the one-time "why we're attacking the station" briefing: sets
   `sector1BriefingShown = true`, `showStoryScene(...)` with Continue → `showSelect()`. Hand-authored
   like the other story beats — only one such briefing exists today
@@ -520,6 +541,10 @@ Guard already do — see §12 for the full engine-change list.
 - `grantShipStartingItems()` — a fixed, hand-picked one-time grant (`SHIP_STARTING_ITEMS`:
   `kevlarMesh`, `tacticalSidearm`) into `partyOwnedItems`, called from `showPrologueEpilogue`'s
   Continue (right before `showTown()`) — deliberately not a loot roll
+- `showWormholeRecordsPanel()` / `removeWormholeRecordsPanel()` (Phase P3, 2026-07-29) — same append-to-
+  `#town-scene` shape as `showInventoryPanel`. Derives the all-time-best floor AND a per-class "best floor
+  reached while deployed" view from `endlessRunHistory` alone (no separate stored fields), plus the 10
+  most recent attempts (floor/classes/cause). Read-only — no actionable buttons, unlike the inventory panel
 
 **E) UI**
 - `panelHtml(c)` — HTML string for one combatant panel (EN bar only if `maxEn>0`)
@@ -527,7 +552,9 @@ Guard already do — see §12 for the full engine-change list.
 - `updateScreen()` — refreshes every panel's HP/EN text+bar and `.down`/`.active` classes
 - `log(text, flag?)` — append a log line. `flag`: `true`→important/green, or a class string
   `"super"` (gold, "Super effective!") / `"resist"` (grey, "Resisted."/"No effect!")
-- `setBanner(text)` / `clearActions()` — turn banner + action-bar helpers
+- `setBanner(text)` (Phase P3: floor prefix) / `clearActions()` — turn banner + action-bar helpers.
+  `setBanner` prefixes `"Floor N — "` while `inEndlessRun` is true — a persistent floor counter that
+  reuses the existing banner instead of new UI markup
 - `renderActions(hero)` — builds skill buttons (disabled if EN too low) + Item + Run. Phase L: also a
   one-time "Jam the Relay" button, rendered only while a live `broodmarshal` enemy is present and
   un-reinforced — see §2's reinforcement-hook entry
@@ -615,6 +642,28 @@ Guard already do — see §12 for the full engine-change list.
   before `enterNode` is ever reached). Opening log line is `node.enterText` if the node has one (the
   prologue's and every Erebus node do — see §2), else the original generic "The Warden activates!"/
   "Hostiles engage!"
+- `startEndlessRun(heroIds)` (Phase P3, 2026-07-29) — `enterNode`'s Rift equivalent, but standalone: full
+  heals, resets `partyItems`, sets `inEndlessRun = true`/`endlessFloor = 0`, calls `enterEndlessFloor()`.
+  Deliberately touches NONE of `DUNGEONS`/`unlockedNodeIds`/`visitedNodeIds`/`currentDungeonKey` — this
+  mode has no map at all.
+- `enterEndlessFloor()` (Phase P3) — increments `endlessFloor`, rolls `rollEndlessFloor(endlessFloor)` →
+  `buildEnemies(...)`, same battle-start boilerplate as `enterNode` (clear effects/overwatchUsed,
+  `showBattle()`/`renderCombatants()`/`updateScreen()`, log the floor + turn order, `startRound()`).
+- `endEndlessRun(cause)` (Phase P3) — `cause` is `"defeat"` or `"withdraw"`. Unshifts one entry onto
+  `endlessRunHistory` (`{floorReached, heroNames, heroClasses, cause, date}`), trims to
+  `ENDLESS_HISTORY_CAP`, resets `inEndlessRun`/`endlessFloor`, fully heals `party` (same "regroup and try
+  again" treatment `startDungeon` gives a fresh dungeon attempt), `showTown()`.
+- `endlessEnemyKeysByTier(tier)` / `pickRandomDistinct(list, n)` (Phase P3) — small helpers
+  `rollEndlessFloor` builds on: the former filters `Object.keys(ENEMIES)` live by `.tier` (no hand-
+  maintained pool); the latter picks N distinct random entries (double-boss floors can't draw the same
+  boss twice).
+- `rollEndlessFloor(floor)` (Phase P3) — the Rift's floor generator; returns the same `[{key, level}, ...]`
+  shape every other encounter roller already produces. `level = ENDLESS_BASE_LEVEL +
+  ENDLESS_LEVEL_PER_FLOOR * floor`. Boss floor (`floor % ENDLESS_BOSS_FLOOR_INTERVAL === 0`): 1 boss (2 if
+  also `floor % ENDLESS_DOUBLE_BOSS_INTERVAL === 0`) + a slowly-growing standard/elite support cast.
+  Otherwise: 2-6 enemies (count grows with floor), tier picked via `pickWeighted` against weights that
+  shift from fodder-heavy toward elite-heavy as floor increases. No `poolBranch`/faction restriction
+  anywhere — pulls from the ENTIRE tier-filtered roster.
 - `spawnReinforcements(boss)` (Phase L, §5.3) — the boss reinforcement hook's payload: pushes
   `boss.reinforceWave` into the live `enemies` array (continuing letter sequence from whatever's
   already in play), logs, `renderCombatants()`/`updateScreen()`. Called from `applyToTarget` (§ F) the
@@ -643,8 +692,11 @@ Guard already do — see §12 for the full engine-change list.
 - `chooseLimitBreak()` — spend a full gauge on `CLASSES[hero.classKey].limitBreak`, via the normal targeting flow
 - `endBattle(outcome)` — sets `lastOutcome`, awards XP once (`"win"` only), calls `renderEndbar(outcome)`
 - `renderEndbar(outcome)` (H3: boss-clear branch generalized; H4: hub routing; Phase L: dispatch by
-  SOURCE dungeon) — **split from `endBattle`** so re-showing it (e.g. from the Character panel's
-  "Done") never re-awards XP. `"win"` on a non-boss node → "Continue →" (`resolveNodeVictory`) /
+  SOURCE dungeon; Phase P3: endless branch) — **split from `endBattle`** so re-showing it (e.g. from the
+  Character panel's "Done") never re-awards XP. First checks `inEndlessRun` and, if true, dispatches
+  entirely to `renderEndlessEndbar(bar, outcome)` and returns — before ANY of the logic below ever touches
+  `DUNGEONS[currentDungeonKey]`, which doesn't exist in that mode. Otherwise: `"win"` on a non-boss node →
+  "Continue →" (`resolveNodeVictory`) /
   **Character** / Retire (→ `returnToHub()`, H4). `"win"` on a **boss-type** node (checked via
   `DUNGEONS[currentDungeonKey].nodes[currentNodeId].type === "boss"` — data-driven, not a hardcoded
   `"boss"` id string, since the prologue's boss node id is `"p4"`) branches on `currentDungeonKey`
@@ -653,6 +705,11 @@ Guard already do — see §12 for the full engine-change list.
   off this rock →" → `showErebusEpilogue` (plays even though `nextDungeonKey` is `null` — nothing's
   built past Erebus yet, but its escape-to-Town beat still needs telling); anything else falls back
   to "Dungeon Clear! ✓" → `returnToHub()`. `"lose"`/`"flee"` → New squad (→ `returnToHub()`, H4)
+- `renderEndlessEndbar(bar, outcome)` (Phase P3, 2026-07-29) — the Rift's own post-battle bar, called by
+  `renderEndbar` above instead of the dungeon logic. `"win"`: `restParty()` if the NEXT floor is a boss
+  floor, else a partial EN-only restore (`ENDLESS_EN_RESTORE_FRACTION`); logs "Floor N cleared"; buttons
+  "Descend further →" (`enterEndlessFloor()`), Character, "Withdraw" (`endEndlessRun("withdraw")`). Any
+  other outcome (a wipe): logs, one "Return to Town" button (`endEndlessRun("defeat")`).
 - `showPrologueEpilogue(nextDungeonKey)` (Phase H3, extended H4) — the prologue → Sector 1 handoff:
   hand-authored like the intro/recruit beats. `showStoryScene(...)` with Continue →
   `currentDungeonKey = nextDungeonKey; lastTownMessage = grantShipStartingItems(); showTown()`
@@ -879,6 +936,32 @@ numbers in the code are what they are, not just what they are:**
 ---
 
 ## 11. Changelog
+- **2026-07-29 — Phase P3, "the Rift" (endless mode) BUILT.** A further session than the retcon entry
+  below. Full narrative/rationale in the design doc's §9.5b (new section) and its §13 changelog entry of
+  the same headline; this is the code-shape pointer.
+  - **engine.js:** new `startEndlessRun(heroIds)` / `enterEndlessFloor()` / `endEndlessRun(cause)` (the
+    run lifecycle — deliberately standalone, touches none of `DUNGEONS`/`unlockedNodeIds`/
+    `visitedNodeIds`); new `rollEndlessFloor(floor)` (the floor generator) + its two small helpers
+    `endlessEnemyKeysByTier(tier)`/`pickRandomDistinct(list, n)`; new `renderEndlessEndbar(bar, outcome)`,
+    dispatched from an early `inEndlessRun` check at the top of `renderEndbar`; the existing boss-flee
+    check (§9.5a) gained a `!inEndlessRun` guard.
+  - **state.js:** new globals `inEndlessRun`/`endlessFloor`/`endlessRunHistory`/`selectingForEndless` +
+    tuning constants `ENDLESS_BASE_LEVEL`(6)/`ENDLESS_LEVEL_PER_FLOOR`(0.25)/`ENDLESS_BOSS_FLOOR_INTERVAL`
+    (5)/`ENDLESS_DOUBLE_BOSS_INTERVAL`(20)/`ENDLESS_EN_RESTORE_FRACTION`(0.25)/`ENDLESS_HISTORY_CAP`(50).
+    The level constants were retuned once via sim before locking (see §12's schema note) — not shipped as
+    the first guess.
+  - **ui.js:** `deploy()` gained a `selectingForEndless` branch; `onStepIntoWormholeFromTitle`/
+    `onStepIntoWormholeFromTown` now call a shared `enterWormhole()` (real squad-builder entry, replacing
+    last session's placeholder); `buildSaveData`/`loadGame` serialize `endlessRunHistory` (safe `[]`
+    default); `onStartClicked` resets it on a true fresh start; new `showWormholeRecordsPanel()`/
+    `removeWormholeRecordsPanel()`; `renderTown()` gained the "Step into the Wormhole"/"Rift Records"
+    buttons; `setBanner` prefixes the floor number while `inEndlessRun`.
+  - **Verified headless** (`mini_racer`): `rollEndlessFloor` across 120 floors (valid keys/levels, exact
+    boss cadence); a full run-lifecycle test (start → both regen variants on floor-clear → scripted wipe
+    → history-entry correctness → flag reset → full heal); Kredex's flee-suppression both inside and
+    outside endless mode; save round-trip (history cap + old-save migration); the full skill-tree/boss-
+    battery/retcon regression suites from every earlier session, all still clean; a fresh full-roster
+    crash sweep at zero crashes.
 - **2026-07-29 — The §9.5a Kredex/Fleshspring/Caged God retcon BUILT.** A later session than the
   difficulty-pass entry below. Full narrative + verification detail in the design doc's §13 changelog
   entry of the same headline; this is the code-shape pointer.

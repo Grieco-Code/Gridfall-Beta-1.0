@@ -3,7 +3,15 @@
 *A living document. We edit and extend this as we build. It supersedes the v1 kickoff
 and v2 plan as the single source of truth for direction; those remain as history.*
 
-**Last updated:** 2026-07-29 · **Since 2026-07-28:** the §4.1a skill-tree overhaul's Content Authoring
+**Last updated:** 2026-07-29 · **Latest, same day as everything below:** Phase P3, "the Rift" (endless
+mode) — the wormhole's actual destination — is BUILT. A floor ladder (fight → interstitial → fight, no
+map) mixing every faction's enemy roster freely for the first time, floor number driving enemy level via
+the same scaling every dungeon already uses, a boss every 5th floor (two, every 20th), EN/HP regen on
+clear (full rest right before every boss floor), character growth persisting between attempts (a wipe
+ends the run, not the roster), and a capped run-history log ("Rift Records," Town) rather than a single
+number. Sim-calibrated floor-depth numbers (a fully-built level-30 roster reaches roughly floor 41-43 now,
+vs. an initial guess that only reached ~21-23). Full detail: §9.5b (new section) and §13. **Since
+2026-07-28:** the §4.1a skill-tree overhaul's Content Authoring
 step (§3.7 step 3) is now complete for the WHOLE roster — Merc, Dread Knight, and Mech Runner (the 3
 classes left as 1-node stubs after the 2026-07-28 Synth Medic/Psion/Saboteur pass) each got their full
 branching tree, built directly off this doc's own already-locked worked examples below with zero
@@ -2240,7 +2248,78 @@ history; a real 3-hero deployed party will read meaningfully harder.
   Unknown-node system could do this) — currently sold narratively only, via `enterText`.
 - Deeper balance tuning on Kredex/Fleshspring/Chthon specifically for the new sequence (numbers are
   largely unchanged from their pre-retcon values, which were themselves first-draft).
-- The endless mode itself (Phase P3) — the button/flag/placeholder exist; the destination doesn't yet.
+- ~~The endless mode itself (Phase P3)~~ — ✅ BUILT 2026-07-29, a later session. See §9.5b.
+
+### 9.5b Phase P3 — "the Rift" (endless mode) BUILT (2026-07-29)
+
+The wormhole's actual destination, following directly from §9.5a's setup. User's own framing going in:
+a repeatable floor ladder ("step into the wormhole and do level 1, 2, 3... until you die"), starting
+difficult and continually escalating, mixing mobs/bosses across every faction freely (never-before-paired
+combinations), a resource-regen answer to the "burn through EN, then it's Kinetic-only" problem the
+original difficulty report also raised, and a recorded score.
+
+**Structure — a deliberately lightweight PARALLEL system, not bent into `DUNGEONS`.** The branching-map
+machinery (fog of war, `connectsTo`, `unlockedNodeIds`/`visitedNodeIds`) is built for a map you navigate;
+the Rift is a straight ladder (fight → interstitial → fight, no map, no choices — a direct user call for
+v1, with light choice/variety explicitly left as a later layer). Forcing that shape into node-graph
+abstractions would have been more engineering for zero benefit, so it's its own small function family
+instead (`startEndlessRun`/`enterEndlessFloor`/`endEndlessRun`/`rollEndlessFloor`, engine.js).
+
+**The floor generator — the "algorithm to throw enemies on the battlefield together."** `rollEndlessFloor
+(floor)` reads every ENEMIES key's `tier` LIVE (`Object.keys(ENEMIES).filter(...)`) rather than a hand-
+maintained duplicate pool — a future enemy added to the game automatically becomes Rift-eligible with zero
+extra wiring, matching this project's "adding content = editing data, not logic" pillar. No `poolBranch`
+restriction at all (unlike every story dungeon) — that cross-faction mixing (a Void Horror next to a
+Vossmark Grunt, Warden-tier hardware beside Talos flesh-work) is the whole point of this mode. Floor
+number drives enemy `level` (reusing the exact same `+10%/level` scaling every dungeon already uses — no
+parallel scaling system) and composition: 2→6 enemies as floors climb, tier mix shifting from mostly
+fodder/standard early toward standard/elite later. Every 5th floor is a boss floor (1 boss + a slowly-
+growing support cast); every 20th pairs TWO distinct bosses. Kredex (human form) is deliberately included
+in the boss pool with his `fleeAt` **suppressed** specifically `while inEndlessRun` — a repeatable "boss
+floor" that always ends in an anticlimactic flee would undercut the mode every single cycle, so he fights
+to the death here instead (a direct user call, weighed against excluding him entirely).
+
+**Resource regen — the difficulty report's own EN-scarcity problem, answered for this mode specifically:**
+25% EN back on every floor clear, plus a FULL rest (`restParty()`, the same 65% HP+EN every story Rest
+node already uses) on the floor immediately before every boss floor — mirroring how every existing dungeon
+already places its Rest node right before a boss, a deliberate breather ahead of the harder fight rather
+than an arbitrary interval. A shop/currency layer was considered and explicitly deferred (real added
+scope — a new currency, a shop screen, item balancing — for a mode still proving its core loop).
+
+**Character growth persists between attempts — a wipe ends the ATTEMPT, not the characters.** `party`
+entries are the same objects as `roster` entries already (§5.2 Phase H2), so any XP/levels/loot earned
+mid-Rift-run was already going to stick around with zero extra plumbing — this is also consistent with
+the Tactic Slots system's own stated design intent ("a reason to keep earning levels past the campaign's
+natural end," §4.1a). A wipe fully heals the party on the way out (same "you regroup and try again" safety
+net every other dungeon-loss boundary already gives, §5.2/H3) and returns to Town. A voluntary "Withdraw"
+option also ends the run (recorded as `cause: "withdraw"` rather than `"defeat"`) — banking a floor count
+without forcing a wipe first.
+
+**Score/history — "Rift Records," not just one number.** A capped run-history log (`endlessRunHistory`,
+newest 50 entries: floor reached, squad classes/names, cause, date) is the single source of truth; the
+Town-side "Rift Records" panel derives BOTH the all-time-best floor AND a per-class "best floor reached
+while deployed" view from that one array, rather than also maintaining separate fields that could drift
+out of sync with it.
+
+**Numbers — calibrated via sim, not shipped as a first blind guess.** `ENDLESS_BASE_LEVEL`/
+`ENDLESS_LEVEL_PER_FLOOR` were tuned against a smart-play, fully-socketed 6-hero roster at several
+reference levels before locking: the original 8/0.5 pair made even a maxed level-30 party top out around
+floor 21-23, reading too shallow for "endless" framing; 6/0.25 lands a plausible early-post-story level-8
+roster around floor 7-9, a level-20 roster around floor 18-22, and a fully-built level-30 roster around
+floor 41-43 — real, meaningful scaling with investment, bigger numbers at the top end. Still first-draft/
+sim-only, same discipline as every other constant in this project.
+
+**Verified headless (`mini_racer`):** `rollEndlessFloor` across 120 floors — every enemy key/level valid,
+boss cadence exactly right (1 boss every 5th floor, 2 distinct bosses every 20th); a full run lifecycle
+(start → floor-clear EN/rest regen → wipe → history recorded with the right floor/cause/classes → flags
+reset → party fully healed); Kredex's flee-suppression (fights to the death in the Rift, still flees
+normally in the one story fight that uses it — a regression check); save round-trip including the
+50-entry cap and old-save migration (field missing entirely → safe `[]`); the full skill-tree/boss-battery/
+retcon regression suites from earlier sessions, all still clean.
+
+**Left open for a future pass:** light floor-to-floor choice/variety (deliberately deferred, per the "pure
+ladder for v1" call); a shop/currency meta-layer; deeper real-play balance tuning now that the shape is
+proven; per-hero equipment/gear considerations specific to endless scaling (not investigated this pass).
 
 ### 9.6 Continuity — what this locks vs. what's already shipped
 This bible **contradicts nothing shipped.** It makes explicit: (a) the Erebus fragment = precursor
@@ -2536,6 +2615,52 @@ pointer):**
 ---
 
 ## 13. Changelog
+- **2026-07-29 — Phase P3, "the Rift" (endless mode) BUILT** (a new session, later than the retcon entry
+  below — the wormhole finally has a real destination). User's own brief: a floor ladder, start difficult
+  and keep escalating, mix mobs/bosses across every faction freely, solve the EN-scarcity problem for this
+  mode specifically, record a score. Full design rationale in §9.5b (new section); this entry is the
+  build/verification pointer.
+  - **New parallel system, not bent into `DUNGEONS`** (engine.js): `startEndlessRun(heroIds)` (full heal,
+    floor 1), `enterEndlessFloor()` (rolls + starts the next fight), `endEndlessRun(cause)` (records the
+    run, resets flags, full heal, back to Town), `rollEndlessFloor(floor)` (the floor generator).
+  - **The floor generator** reads every `ENEMIES` key's `tier` LIVE (no hand-maintained pool — a future
+    enemy automatically becomes Rift-eligible), with zero `poolBranch` restriction so every faction mixes
+    freely for the first time. Floor level reuses the exact `+10%/level` scaling every dungeon already
+    has. Boss floor every 5th (1 boss + a slowly-growing support cast), double-boss every 20th (two
+    DISTINCT bosses, via a new `pickRandomDistinct` helper). Kredex (human form)'s `fleeAt` is suppressed
+    specifically `while inEndlessRun` (engine.js's flee-check gained one guard) — a repeatable "boss floor"
+    that always ends in a flee would read as anticlimactic every cycle.
+  - **Resource regen:** 25% EN back on every floor clear; a full `restParty()` (the same 65% every story
+    Rest node uses) on the floor right before every boss floor, mirroring how every dungeon already places
+    its Rest node right before a boss.
+  - **Character growth persists across attempts** — `party`/`roster` were already the same objects
+    (§5.2), so this needed zero extra plumbing; a wipe only ends the attempt (full-healed on the way out,
+    same safety net every other dungeon-loss boundary already gives).
+  - **`renderEndbar`** gained an early `inEndlessRun` branch (before it ever touches
+    `DUNGEONS[currentDungeonKey]`, which doesn't exist in this mode) dispatching to a new
+    `renderEndlessEndbar` — partial/full regen + "Descend further"/"Withdraw" on a win, run-recording +
+    "Return to Town" on a loss.
+  - **`setBanner`** prefixes "Floor N — " while `inEndlessRun` is true — reuses the existing turn banner
+    for a persistent floor counter instead of adding new UI markup.
+  - **Squad-builder reuse:** a new `selectingForEndless` flag (set by a new shared `enterWormhole()`,
+    replacing last session's placeholder scene) tells `deploy()` to call `startEndlessRun` instead of
+    `startDungeon` — the squad-picker screen itself needed zero changes.
+  - **"Rift Records" panel** (Town, new `showWormholeRecordsPanel`) — derives the all-time-best floor AND
+    a per-class "best floor reached while deployed" view from `endlessRunHistory` alone (capped at 50
+    entries), rather than maintaining separate fields that could drift out of sync.
+  - **New save field** `endlessRunHistory` (safe `[]` default for pre-Phase-P3 saves); reset to `[]` on a
+    true fresh Start, alongside `wormholeOpened`.
+  - **Numbers calibrated via sim before locking**, not shipped as a first guess: `ENDLESS_BASE_LEVEL`/
+    `ENDLESS_LEVEL_PER_FLOOR` started at 8/0.5, which sim showed topped a maxed level-30 roster out around
+    floor 21-23 — too shallow for "endless" framing. Retuned to 6/0.25 after comparing several rate/base
+    pairs against reference hero levels (8/15/20/30): now spreads roughly floor 7-9 (level 8) → 18-22
+    (level 20) → 41-43 (level 30), real scaling with investment instead of a flat ceiling.
+  - **Verified headless** (`mini_racer`): `rollEndlessFloor` sanity-checked across 120 floors (every
+    key/level valid, boss cadence exact); a full run-lifecycle test (start → floor-clear regen variants →
+    scripted wipe → history entry correctness → flag reset → full heal); Kredex's flee-suppression both
+    inside and outside endless mode (a regression check on the §9.5a mechanic); save round-trip including
+    the history cap and old-save migration; and the full skill-tree/boss-battery/retcon regression suites
+    from every earlier session this week, all still clean (zero crashes across a fresh full-roster sweep).
 - **2026-07-29 — The §9.5a Kredex/Fleshspring/Caged God retcon BUILT** (a new session, later than the
   difficulty-pass entry below — the plan was locked and confirmed first, per direct user instruction to
   finish the difficulty/UI work before circling back to it). Full narrative detail in §9.5a (rewritten in

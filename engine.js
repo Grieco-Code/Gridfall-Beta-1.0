@@ -172,9 +172,14 @@
 
         // Boss FLEE hook (NEW 2026-07-29, §9.5a — generic, not Kredex-
         // specific): fires once, the first time an enemy with a fleeAt
-        // threshold drops to/below it.
+        // threshold drops to/below it. Suppressed in endless mode (Phase
+        // P3, 2026-07-29) — a repeatable "boss floor" that always resolves
+        // in a flee instead of a kill would read as anticlimactic every
+        // single cycle, so Kredex fights to the death there instead. Same
+        // treatment for any future flee-capable boss, not a Kredex-only if.
         if (isAlive(target) && target.side === "enemies" && target.fleeAt != null &&
-            !target.fled && target.stats.hp <= target.stats.maxHp * target.fleeAt) {
+            !target.fled && !inEndlessRun &&
+            target.stats.hp <= target.stats.maxHp * target.fleeAt) {
           target.fled = true;
           triggerFlee(target);
         }
@@ -806,6 +811,77 @@
       return rolled;
     }
 
+    // Every ENEMIES key at a given tier, read live off the data table rather
+    // than a hand-maintained duplicate list — a future enemy added to
+    // ENEMIES automatically becomes eligible for the Rift with zero extra
+    // wiring, matching this project's "adding content = editing data, not
+    // logic" discipline (§1 pillars).
+    function endlessEnemyKeysByTier(tier) {
+      return Object.keys(ENEMIES).filter(function (k) { return ENEMIES[k].tier === tier; });
+    }
+
+    // N distinct random picks from a list (order-independent) — used for
+    // double-boss floors so the same boss can't be drawn twice.
+    function pickRandomDistinct(list, n) {
+      const pool = list.slice();
+      const picked = [];
+      for (let i = 0; i < n && pool.length; i++) {
+        const idx = randomBetween(0, pool.length - 1);
+        picked.push(pool[idx]);
+        pool.splice(idx, 1);
+      }
+      return picked;
+    }
+
+    // Endless mode's floor generator (Phase P3, 2026-07-29, §9.5a follow-on)
+    // — the "algorithm to throw enemies on the battlefield together" this
+    // mode is built around. Deliberately mixes every faction's roster (no
+    // `poolBranch` restriction at all, unlike every story dungeon) since
+    // that cross-faction mixing is the whole point of this mode. Returns a
+    // `[{key, level}, ...]` list, same shape `buildEnemies` already expects
+    // from every other encounter roller.
+    function rollEndlessFloor(floor) {
+      const level = Math.round(ENDLESS_BASE_LEVEL + ENDLESS_LEVEL_PER_FLOOR * floor);
+      const isBossFloor = floor % ENDLESS_BOSS_FLOOR_INTERVAL === 0;
+      const isDoubleBossFloor = floor % ENDLESS_DOUBLE_BOSS_INTERVAL === 0;
+
+      if (isBossFloor) {
+        const bossPool = endlessEnemyKeysByTier("boss");
+        const bossCount = isDoubleBossFloor ? 2 : 1;
+        const bosses = pickRandomDistinct(bossPool, bossCount)
+          .map(function (key) { return { key: key, level: level }; });
+        // A light, slowly-growing support cast alongside the boss(es) —
+        // keeps later boss floors from staying exactly as bare as floor 5.
+        const supportCount = clamp(Math.floor(floor / 15), 0, 2);
+        const supportPool = endlessEnemyKeysByTier("standard").concat(endlessEnemyKeysByTier("elite"));
+        const supports = [];
+        for (let i = 0; i < supportCount; i++) {
+          supports.push({ key: pickRandom(supportPool), level: level });
+        }
+        return bosses.concat(supports);
+      }
+
+      // Regular floor: enemy count ramps 2 -> 6 over the first ~16 floors;
+      // tier mix shifts from mostly fodder/standard early toward
+      // standard/elite later (weights are first-draft, sim-tunable like
+      // every number in this project — see the difficulty pass, §12).
+      const count = clamp(2 + Math.floor(floor / 4), 2, 6);
+      const eliteWeight = clamp(floor * 2, 0, 45);
+      const fodderWeight = clamp(40 - floor * 1.5, 5, 40);
+      const standardWeight = Math.max(15, 100 - eliteWeight - fodderWeight);
+      const tierWeights = [
+        { key: "fodder", weight: fodderWeight },
+        { key: "standard", weight: standardWeight },
+        { key: "elite", weight: eliteWeight }
+      ];
+      const rolled = [];
+      for (let i = 0; i < count; i++) {
+        const tier = pickWeighted(tierWeights).key;
+        rolled.push({ key: pickRandom(endlessEnemyKeysByTier(tier)), level: level });
+      }
+      return rolled;
+    }
+
     // Look up the chosen heroes BY REFERENCE from the roster (Phase H2) — NOT
     // fresh createHero() copies. That's what makes level/xp/equipment/limit
     // persist across dungeons: a party member and its roster entry are the
@@ -1013,6 +1089,15 @@
       const bar = document.createElement("div");
       bar.id = "endbar";
 
+      // §9.5a Phase P3 (2026-07-29) — endless mode has no DUNGEONS entry at
+      // all, so it needs its own branch before ANY of the dungeon-oriented
+      // logic below (which reads DUNGEONS[currentDungeonKey]) ever runs.
+      if (inEndlessRun) {
+        renderEndlessEndbar(bar, outcome);
+        document.getElementById("battle").appendChild(bar);
+        return;
+      }
+
       if (outcome === "win") {
         // Phase H3: a boss node is identified by its TYPE now (data-driven),
         // not a hardcoded "boss" id — the prologue's boss node is "p4".
@@ -1120,6 +1205,51 @@
       }
 
       document.getElementById("battle").appendChild(bar);
+    }
+
+    // §9.5a Phase P3 (2026-07-29) — the Rift's own post-battle bar. On a
+    // win: partial EN back every floor, a FULL rest (restParty(), the same
+    // 65% every Rest node already uses) specifically on the floor right
+    // before a boss floor — mirrors how every story dungeon already places
+    // its Rest node right before a boss, rather than an arbitrary interval.
+    // On a loss: the run ends here, same as a voluntary withdrawal.
+    function renderEndlessEndbar(bar, outcome) {
+      if (outcome === "win") {
+        const nextIsBossFloor = (endlessFloor + 1) % ENDLESS_BOSS_FLOOR_INTERVAL === 0;
+        if (nextIsBossFloor) {
+          restParty();
+          log("The Rift itself seems to ease, just for a moment. The squad rests before whatever's next.", true);
+        } else {
+          party.forEach(function (h) {
+            h.stats.en = clamp(h.stats.en + Math.round(h.stats.maxEn * ENDLESS_EN_RESTORE_FRACTION), 0, h.stats.maxEn);
+          });
+        }
+        updateScreen();
+        log("Floor " + endlessFloor + " cleared.", true);
+
+        const next = document.createElement("button");
+        next.textContent = "Descend further →";
+        next.onclick = function () { removeEndbar(); enterEndlessFloor(); };
+        bar.appendChild(next);
+
+        const charBtn = document.createElement("button");
+        charBtn.className = "cancel";
+        charBtn.textContent = "Character";
+        charBtn.onclick = function () { showCharacterPanel(undefined, party, "battle"); };
+        bar.appendChild(charBtn);
+
+        const withdraw = document.createElement("button");
+        withdraw.className = "cancel";
+        withdraw.textContent = "Withdraw (bank this run)";
+        withdraw.onclick = function () { removeEndbar(); endEndlessRun("withdraw"); };
+        bar.appendChild(withdraw);
+      } else {
+        log("The squad is down. The Rift spits you back out.", true);
+        const again = document.createElement("button");
+        again.textContent = "Return to Town";
+        again.onclick = function () { removeEndbar(); endEndlessRun("defeat"); };
+        bar.appendChild(again);
+      }
     }
 
     function removeEndbar() {
@@ -1775,6 +1905,59 @@
       if (p) p.remove();
     }
 
+    // §9.5a Phase P3 (2026-07-29) — "Rift Records": derives BOTH the all-
+    // time best floor and a per-class view from endlessRunHistory alone,
+    // rather than also maintaining separate fields that could drift out of
+    // sync with it. Same append-to-Town-panel shape as showInventoryPanel.
+    function showWormholeRecordsPanel() {
+      removeWormholeRecordsPanel();
+      const wrap = document.createElement("div");
+      wrap.id = "wormhole-records-panel";
+
+      let html = "<div class='inv-section'><h4>Rift Records</h4>";
+      if (endlessRunHistory.length === 0) {
+        html += "<p class='char-empty'>No attempts yet.</p></div>";
+      } else {
+        const best = endlessRunHistory.reduce(function (m, r) { return Math.max(m, r.floorReached); }, 0);
+        html += "<p>Deepest floor reached: <strong>" + best + "</strong></p></div>";
+
+        html += "<div class='inv-section'><h4>Recent attempts</h4>";
+        endlessRunHistory.slice(0, 10).forEach(function (r) {
+          html += "<div class='inv-row'><span>Floor " + r.floorReached + " · " +
+            r.heroClasses.join(", ") + "</span><span>" +
+            (r.cause === "withdraw" ? "withdrew" : "defeated") + "</span></div>";
+        });
+        html += "</div>";
+
+        const byClass = {};
+        endlessRunHistory.forEach(function (r) {
+          r.heroClasses.forEach(function (cls) {
+            byClass[cls] = Math.max(byClass[cls] || 0, r.floorReached);
+          });
+        });
+        html += "<div class='inv-section'><h4>Best floor by class</h4>";
+        Object.keys(byClass)
+          .sort(function (a, b) { return byClass[b] - byClass[a]; })
+          .forEach(function (cls) {
+            html += "<div class='inv-row'><span>" + cls + "</span><span>Floor " + byClass[cls] + "</span></div>";
+          });
+        html += "</div>";
+      }
+      wrap.innerHTML = html;
+
+      const doneBtn = document.createElement("button");
+      doneBtn.textContent = "Done";
+      doneBtn.onclick = function () { removeWormholeRecordsPanel(); };
+      wrap.appendChild(doneBtn);
+
+      document.getElementById("town-scene").appendChild(wrap);
+    }
+
+    function removeWormholeRecordsPanel() {
+      const p = document.getElementById("wormhole-records-panel");
+      if (p) p.remove();
+    }
+
     // Enter a dungeon with the chosen squad and reset dungeon-map progress —
     // NOT the roster or its persistent stuff (Phase H2: heroes/equipment now
     // persist across dungeons, only map position resets per attempt).
@@ -1843,6 +2026,77 @@
           order.map(function (c) { return c.name; }).join(" → "));
 
       startRound();
+    }
+
+    // §9.5a Phase P3 (2026-07-29) — starts a fresh Rift attempt: full heal,
+    // clean state, floor 1. Deliberately does NOT touch DUNGEONS/
+    // unlockedNodeIds/visitedNodeIds/currentDungeonKey at all — this mode
+    // has no map, so none of that machinery applies.
+    function startEndlessRun(heroIds) {
+      inEndlessRun = true;
+      endlessFloor = 0;
+      party = buildParty(heroIds);
+      party.forEach(function (h) {
+        h.stats.hp = h.stats.maxHp;
+        h.stats.en = h.stats.maxEn;
+        h.effects = [];
+      });
+      partyItems = { stim: 3 };
+      enterEndlessFloor();
+    }
+
+    // Rolls and starts the NEXT floor's fight — same shape as enterNode
+    // above, just reading from rollEndlessFloor(endlessFloor) instead of a
+    // DUNGEONS node.
+    function enterEndlessFloor() {
+      endlessFloor += 1;
+      const isBossFloor = endlessFloor % ENDLESS_BOSS_FLOOR_INTERVAL === 0;
+      enemies = buildEnemies(rollEndlessFloor(endlessFloor));
+
+      party.forEach(function (h) { h.effects = []; h.overwatchUsed = false; });
+
+      battleOver = false;
+      activeCombatant = null;
+      pendingAction = null;
+      document.getElementById("log").innerHTML = "";
+
+      showBattle();
+      renderCombatants();
+      updateScreen();
+
+      log("Floor " + endlessFloor + ". " + (isBossFloor
+        ? "Something with real weight to it is already moving toward you."
+        : "The Rift doesn't wait to be entered — it's already full."), true);
+      const order = turnOrder(living(allCombatants()));
+      log("Turn order (by Speed): " +
+          order.map(function (c) { return c.name; }).join(" → "));
+
+      startRound();
+    }
+
+    // Ends the current Rift attempt — either a wipe or a voluntary
+    // withdrawal, both recorded the same way (only `cause` differs). Fully
+    // heals the party on the way out, same "you regroup and try again"
+    // safety net every other dungeon-loss boundary already gives (§5.2/H3)
+    // — dying here costs the ATTEMPT, not the characters.
+    function endEndlessRun(cause) {
+      endlessRunHistory.unshift({
+        floorReached: endlessFloor,
+        heroNames: party.map(function (h) { return h.name; }),
+        heroClasses: party.map(function (h) { return h.className; }),
+        cause: cause,
+        date: new Date().toISOString()
+      });
+      if (endlessRunHistory.length > ENDLESS_HISTORY_CAP) endlessRunHistory.length = ENDLESS_HISTORY_CAP;
+
+      inEndlessRun = false;
+      endlessFloor = 0;
+      party.forEach(function (h) {
+        h.stats.hp = h.stats.maxHp;
+        h.stats.en = h.stats.maxEn;
+        h.effects = [];
+      });
+      showTown();
     }
 
     // Called from the post-win endbar for a non-boss node: mark it visited,

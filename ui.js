@@ -117,6 +117,7 @@
         sector1BriefingShown: sector1BriefingShown,
         lastCheckpointScene: lastCheckpointScene,
         wormholeOpened: wormholeOpened,
+        endlessRunHistory: endlessRunHistory,
         nextIdCounter: nextIdCounter
       };
     }
@@ -173,6 +174,7 @@
       sector1BriefingShown = data.sector1BriefingShown;
       lastCheckpointScene = data.lastCheckpointScene;
       wormholeOpened = !!data.wormholeOpened;   // safe default (false) for saves made before §9.5a
+      endlessRunHistory = data.endlessRunHistory || [];   // safe default for saves made before Phase P3
       nextIdCounter = data.nextIdCounter;
       currentNodeId = null;   // we only ever save on Map/Town, never mid-battle — always resume there
       return true;
@@ -231,6 +233,7 @@
       sector1BriefingShown = false;
       lastCheckpointScene = "map";
       wormholeOpened = false;
+      endlessRunHistory = [];
       showWorldIntro();
     }
 
@@ -258,20 +261,25 @@
     function onStepIntoWormholeFromTitle() {
       const ok = loadGame();
       if (!ok) { alert("No saved game found."); renderTitleScreen(); return; }
-      showStoryScene(
-        ["The Rift is open — has been since Chthon stopped fighting it. Whatever's on the other " +
-          "side hasn't come through yet, and the ship isn't rigged to go looking for it. Not yet."],
-        "Not yet.",
-        function () { if (lastCheckpointScene === "town") { showTown(); } else { showMap(); } }
-      );
+      enterWormhole();
     }
 
     function onStepIntoWormholeFromTown() {
+      enterWormhole();
+    }
+
+    // §9.5a Phase P3 (2026-07-29) — the real doorway into endless mode (was
+    // a placeholder scene before this session). One shared entry point for
+    // both Title and Town, now that both just land on the squad-builder;
+    // `selectingForEndless` (state.js) tells deploy() where THIS particular
+    // pick actually goes.
+    function enterWormhole() {
       showStoryScene(
-        ["The Rift is open — has been since Chthon stopped fighting it. Whatever's on the other " +
-          "side hasn't come through yet, and the ship isn't rigged to go looking for it. Not yet."],
-        "Not yet.",
-        function () { showTown(); }
+        ["The Rift doesn't get any less wrong the closer you get to it. Whatever's coming through " +
+          "from the other side isn't waiting for an invitation — the only real choice left is who " +
+          "you send in after it, and how far they're willing to go before it's someone else's turn."],
+        "Choose your squad.",
+        function () { selectingForEndless = true; showSelect(); }
       );
     }
 
@@ -477,6 +485,14 @@
     function deploy() {
       if (selectedHeroIds.length < 1) return;
       lastSquad = selectedHeroIds.slice();
+      // §9.5a Phase P3 (2026-07-29) — this same screen doubles as the Rift's
+      // own squad-builder; selectingForEndless (set by enterWormhole()) is
+      // the only thing that decides where THIS pick actually goes.
+      if (selectingForEndless) {
+        selectingForEndless = false;
+        startEndlessRun(lastSquad);
+        return;
+      }
       // Redeploy into whichever dungeon is currently active (Phase H3) — set
       // once by showIntroScene() (prologue) or a boss-clear epilogue
       // (sector1); this screen is reached after a retry/retire/abandon
@@ -1093,6 +1109,17 @@
         wormholeBtn.textContent = "Step into the Wormhole";
         wormholeBtn.onclick = onStepIntoWormholeFromTown;
         buttons.appendChild(wormholeBtn);
+
+        // Phase P3 (2026-07-29) — only worth showing once there's at least
+        // one attempt on record; an empty "Rift Records" button before the
+        // player has ever gone in reads as clutter, not information.
+        if (endlessRunHistory.length > 0) {
+          const recordsBtn = document.createElement("button");
+          recordsBtn.className = "cancel";
+          recordsBtn.textContent = "Rift Records";
+          recordsBtn.onclick = function () { showWormholeRecordsPanel(); };
+          buttons.appendChild(recordsBtn);
+        }
       }
 
       const saveBtn = document.createElement("button");
@@ -1390,8 +1417,13 @@
       box.scrollTop = box.scrollHeight;
     }
 
+    // §9.5a Phase P3 (2026-07-29): prefixes the floor number while a Rift
+    // attempt is in progress, so it stays visible through every turn
+    // without a new UI element of its own — reuses the banner every other
+    // turn-flow message already writes into.
     function setBanner(text) {
-      document.getElementById("turn-banner").textContent = text;
+      document.getElementById("turn-banner").textContent =
+        inEndlessRun ? ("Floor " + endlessFloor + " — " + text) : text;
     }
     function clearActions() {
       document.getElementById("actions").innerHTML = "";
