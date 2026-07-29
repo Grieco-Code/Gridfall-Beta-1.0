@@ -817,6 +817,25 @@ numbers in the code are what they are, not just what they are:**
 ---
 
 ## 11. Changelog
+- **2026-07-28 — Second command-menu flutter fix, same day/session as the one below.** The first fix
+  (below) genuinely resolved a bug but the user reported the flutter again — this time symptom was Run
+  "randomly" wrapping to a second row while visibly blinking, not Attack specifically. Root cause:
+  `#actions button:hover:not(:disabled)::before { content: "▸ "; }` — this pseudo-element's content only
+  existed while `:hover` was active. Under the OLD `flex: 1 1 auto` that was harmless (buttons were
+  already stretched to fill row space); the first fix today changed buttons to `flex: 0 1 auto`
+  (size-to-content) specifically to fix the Attack bug, which as a side effect means the hover-inserted
+  caret text now visibly grows the button's own box on hover. A cursor near a button's edge can trigger
+  a feedback loop: hover -> button grows -> cursor now outside it -> hover ends -> button shrinks ->
+  cursor now back inside -> hover re-triggers -> repeat. Worst at row wrap boundaries (where Run
+  usually sits), matching the report exactly. Fix (`index.html`): the `::before` content is now ALWAYS
+  present (`#actions button::before { content: "▸ "; color: transparent; }`), with only its `color`
+  toggling to `#6cff9e` on `:hover:not(:disabled)` — reserves the space unconditionally so hovering
+  can never change box size, which is what breaks the feedback loop. **Takeaway for future CSS changes
+  to this bar:** any hover/active pseudo-element needs re-auditing whenever the button sizing rule
+  (flex-grow especially) changes — content that's layout-inert under `flex-grow:1` is not automatically
+  inert under `flex-grow:0`. Not verifiable visually this session (no browser-automation tool) — the
+  user's own confirmation in a real browser is the only real check, and is doubly needed here since the
+  first attempt today did not fully resolve the report.
 - **2026-07-28 — Fixed `#actions button`'s `flex: 1 1 auto` causing Attack to visibly resize/re-wrap
   every turn.** User report: "the button flutters and pops/unpops another row," blocking clicks on
   Attack, within the first two fights — too early for skill trees to be a factor, so unrelated to the

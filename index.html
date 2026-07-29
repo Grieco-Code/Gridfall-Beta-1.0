@@ -691,9 +691,23 @@
        pushed onto a different wrapped row purely because a SIBLING's text
        changed. flex:0 1 auto sizes each button to its own content only, so
        Attack's box is stable turn to turn regardless of what Limit/Item are
-       doing. Still has the small FF cursor caret (▸) on hover. */
+       doing. */
     #actions button { flex: 0 1 auto; min-width: 94px; padding: 8px 10px; font-size: 13px; }
-    #actions button:hover:not(:disabled)::before { content: "\25B8\00a0"; color: #6cff9e; }
+    /* FF cursor caret (▸) on hover — the ::before content is ALWAYS present
+       (transparent when not hovered), only its color toggles. This used to
+       exist only on :hover, which meant hovering a button INSERTED real
+       content into it — harmless back when buttons stretched to fill the
+       row (flex:1 1 auto above), but now that they size to their own
+       content (flex:0 1 auto, right above), inserting content on hover
+       visibly grows the button. If the cursor sits near its edge, that
+       growth can shift the button out from under the cursor, ending the
+       hover, shrinking it back, moving it back under the cursor, and
+       re-triggering hover — a self-sustaining flicker loop, worst right at
+       a row's wrap boundary (reported: the Run button "blinking... pushed
+       under the row"). Reserving the space unconditionally means hovering
+       never changes box size, so it can't feed back into itself. */
+    #actions button::before { content: "\25B8\00a0"; color: transparent; }
+    #actions button:hover:not(:disabled)::before { color: #6cff9e; }
 
     button {
       flex: 1 1 auto;

@@ -2353,6 +2353,23 @@ pointer):**
 ---
 
 ## 13. Changelog
+- **2026-07-28 — Second command-menu flutter fix, same day as the first: the FIRST fix (below) was a
+  real bug but not the only one.** User report this time: the Run button "randomly" got pushed onto a
+  wrapped second row while visibly "blinking or fluttering up and down." Root cause: the hover caret
+  (`#actions button:hover::before { content: "▸ "; }`) only ever existed WHILE hovered — harmless when
+  buttons stretched to fill their row (the old `flex: 1 1 auto`), but the first fix today switched them
+  to size-to-own-content (`flex: 0 1 auto`) to solve the Attack-resizing bug. That combination means
+  hovering a button now visibly GROWS it (to fit the inserted caret text). If the cursor sits near a
+  button's edge, that growth can shift the button out from under the cursor, ending the hover, shrinking
+  it back, moving it back under the cursor, and re-triggering hover — a self-sustaining flicker loop,
+  worst right at a row's wrap boundary (exactly where Run usually sits). Fixed by reserving the caret's
+  space unconditionally (`color: transparent` when not hovered, `color: #6cff9e` when hovered) instead
+  of toggling its existence — hovering now only recolors, never resizes, so the feedback loop can't
+  start. **Lesson for next time a button-sizing rule changes:** re-check every `:hover`/`:active`
+  pseudo-element on it for content that wasn't previously layout-significant — a rule that was safe
+  under `flex-grow:1` is not automatically safe under `flex-grow:0`. Same caveat as always: no
+  browser-automation tool this session, so this needs the user's own confirmation in a real browser —
+  doubly so this time since the first fix alone did not fully resolve the report.
 - **2026-07-28 — Fixed a battle command-menu layout bug: the Attack button visibly resized/re-wrapped
   every turn, sometimes blocking clicks on it entirely.** Reported as "the button flutters and pops/
   unpops another row" within the first two fights of a fresh game — well before any skill tree could be
