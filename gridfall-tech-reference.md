@@ -3,7 +3,20 @@
 *A living map of the code, kept in sync with `game.html` so we don't have to re-read the whole
 file each session. Pair with `gridfall-design.md` (the "why/what") — this doc is the "how/where".*
 
-**Last updated:** 2026-07-23 · **Describes:** `game.html` (v3 — combat core through D½/E plus
+**Last updated:** 2026-07-28 · **Since this was last touched (2026-07-23):** the code split from one
+`game.html` into five sibling files loaded in order by `index.html` — `data.js`, `state.js`, `ui.js`,
+`engine.js`, `main.js` (still no build step) — and the game itself became a real git repo
+(github.com/Grieco-Code/Gridfall-Beta-1.0). Since then: a full sprite-quality pass (zero blob/shared
+fallbacks left in the roster), a battle-mechanics overhaul Slice 1 (4-bucket damage/resistance system,
+merged into `main` 2026-07-28 with zero code conflicts against the sprite work), a sprite idle-bob
+animation fix, a battle command-menu overflow fix (Attack/Skill/Item/Limit/Run + a "Skill" submenu),
+the Netrunner->Synth Medic/Mentalist->Psion/Cyber->Overload rename, the design doc's §4.1a "Unlock Pool
++ Tactic Slots" skill-tree engine actually getting built (5 node types, real branching trees for 3
+classes), and a
+second command-menu bug (Attack's button resizing/re-wrapping every turn from a CSS `flex-grow`
+issue). Full technical detail in the dated changelog (§11) as always — this paragraph is only the
+"what changed" pointer, not a substitute for it.
+**Describes:** the current 5-file split (was `game.html` — v3, combat core through D½/E plus
 Phase F/G: a real scene manager and the first mini-dungeon map — Tiangong Station Sector 1, 9
 hand-authored nodes, Talos Systems as a 2nd faction, a boss ("The Warden"), no-heal-between-fights
 run persistence — plus Phase H1: a Title scene and a real `localStorage` save/load engine, Phase H2:
@@ -804,6 +817,24 @@ numbers in the code are what they are, not just what they are:**
 ---
 
 ## 11. Changelog
+- **2026-07-28 — Fixed `#actions button`'s `flex: 1 1 auto` causing Attack to visibly resize/re-wrap
+  every turn.** User report: "the button flutters and pops/unpops another row," blocking clicks on
+  Attack, within the first two fights — too early for skill trees to be a factor, so unrelated to the
+  Tactic Slots work below despite landing the same day. `flex-grow: 1` (inherited from the base `button`
+  rule) stretches every button on a flex row to fill leftover space, redistributed across the whole row.
+  The Limit Break button's `textContent` changes every turn (`renderActions`, `ui.js` — a growing `N%`
+  suffix, then a wholly different `"LIMIT BREAK: " + name` string once `hero.limit >= 100`) and the Item
+  button's stim count changes too — so their length changes reflow every sibling on the row, including
+  Attack, whose label is static. Fix: `#actions button { flex: 0 1 auto; ... }` (was `1 1 auto`),
+  `index.html` — buttons now size to their own content, never stretched by a sibling. CSS-only, zero JS
+  changes.
+  **Debug method, worth reusing**: before touching CSS, ruled out a JS render-loop/logic bug by driving
+  the REAL turn-flow (`enterNode`/`startRound`/`chooseSkill`/`onTargetClicked`, not a bypass sim like
+  Slice F's) through two full fights headless — once solo (level-1 Merc only), once with a full 3-hero
+  party deliberately opening the Skill submenu every turn — with `renderActions` monkey-patched to log
+  every call (hero/mode/turn). Exactly one call per hero turn in both runs, zero exceptions, zero
+  renders for an already-dead hero — this is what pointed at CSS instead of JS. No browser-automation
+  tool was available this session to visually confirm the fix itself; flagged for the user to verify.
 - **2026-07-28 — Unlock Pool + Tactic Slots (§4.1a) engine built, plus the Cyber->Overload/
   Netrunner->Synth Medic/Mentalist->Psion rename that preceded it.** Planned via EnterPlanMode (2 Explore
   passes over `state.js`/`engine.js`/`ui.js`, 1 Plan pass), plan saved at

@@ -3,7 +3,22 @@
 *A living document. We edit and extend this as we build. It supersedes the v1 kickoff
 and v2 plan as the single source of truth for direction; those remain as history.*
 
-**Last updated:** 2026-07-25 · **Current build:** v4 — a post-beta difficulty & content pass (§12,
+**Last updated:** 2026-07-28 · **Since the v4 snapshot below (2026-07-25):** the sprite-quality pass
+reached full completion (every mob + a full hero rebuild pass, zero blob/shared-shape fallbacks left,
+2026-07-27, shipped on `main`); a parallel `battle-mechanics-overhaul` branch shipped its Slice 1
+Foundation (7-flavor damage types consolidated into 4 resistance buckets, 2 new statuses — see §3.2a/
+§3.7) and was merged back into `main` (2026-07-28, no code conflicts — the two branches never touched
+the same regions); a real cross-branch bug (the battle idle-bob animation periodically clipping hero
+heads) and a battle command-menu overflow bug (too many skill buttons crowding out Attack) were both
+fixed, the latter by splitting the action bar into a fixed Attack/Skill/Item/Limit/Run row + a "Skill"
+submenu; Netrunner was renamed **Synth Medic** and Mentalist renamed **Psion** (the Cyber damage
+flavor renamed to **Overload** alongside it — same numbers, just doesn't read as "hacking" against
+non-machine enemies), with Synth Medic finally getting a real heal; the §4.1a "Unlock Pool + Tactic
+Slots" skill-tree system below was actually **built** (not just designed) with real branching trees
+authored for Synth Medic/Psion/Saboteur; and a second command-menu bug (the Attack button visibly
+resizing/re-wrapping every turn because a sibling button's text length changed) was fixed. Full detail,
+as always, in the dated changelog (§13) — this paragraph is just the "what changed since last time"
+pointer. **Current build:** v4 — a post-beta difficulty & content pass (§12,
 2026-07-24): smart enemy targeting/statuses/boss adds (Phase 1a/1b/1d), global difficulty knobs (1c),
 **Dungeon 4 "Talos Bio-Foundry" shipped** (§5.4/§5.4a — fog of war, Unknown nodes, dead-end spurs,
 weighted loot, the Regen status, two faction-differentiated wings, boss Proteus; see the changelog for
@@ -2338,6 +2353,24 @@ pointer):**
 ---
 
 ## 13. Changelog
+- **2026-07-28 — Fixed a battle command-menu layout bug: the Attack button visibly resized/re-wrapped
+  every turn, sometimes blocking clicks on it entirely.** Reported as "the button flutters and pops/
+  unpops another row" within the first two fights of a fresh game — well before any skill tree could be
+  a factor, so this was unrelated to the Tactic Slots work above. Root cause: `#actions button` used the
+  base button style's `flex: 1 1 auto`, which stretches every button on a row to fill leftover space.
+  The Limit Break button's label changes on **every turn** (a growing charge-% number, then a completely
+  different "LIMIT BREAK: X" string once ready) and the Item button's stim count changes too — under
+  flex-grow, those length changes redistribute space across every OTHER button sharing that row,
+  including Attack, whose own label never changes. So Attack's box would resize and could get pushed
+  onto a different wrapped row purely because a sibling's text changed, not from anything the player did.
+  Fixed with one property (`flex: 0 1 auto` — size to own content only, don't stretch to fill the row),
+  `index.html`. Verified two ways: (1) no JS logic/render-loop bug exists — drove the real turn-flow
+  (not a shortcut sim) through two full fights, solo and with a 3-hero party browsing the Skill submenu
+  every turn, with `renderActions` instrumented to catch double-renders; exactly one render per turn,
+  zero anomalies, confirming this was purely a CSS layout-stability issue. (2) the CSS-only change
+  doesn't touch the JS bundle at all (confirmed it still loads headless unchanged). No browser-automation
+  tool was available this session to visually confirm the fix directly — same limitation as the earlier
+  sprite-animation fix — so this needs the user's own confirmation in a real browser.
 - **2026-07-28 — Slice 2/3 (skill-tree engine + content authoring) SHIPPED: the "Unlock Pool + Tactic
   Slots" system from §4.1a is real, not just a doc.** Same day as the rename below, later in the
   session. Also renamed the Cyber flavor to **Overload** (still the same "shock" resistance bucket —

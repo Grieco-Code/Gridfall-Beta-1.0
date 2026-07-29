@@ -682,9 +682,17 @@
       padding: 7px 8px; margin-bottom: 8px;
       min-height: 40px;
     }
-    /* Command-menu buttons: more compact than the base button, with a small
-       FF cursor caret (▸) on hover. */
-    #actions button { flex: 1 1 auto; min-width: 94px; padding: 8px 10px; font-size: 13px; }
+    /* Command-menu buttons. flex-grow is deliberately 0 (not the base
+       button's 1 1 auto) — Limit Break's label changes EVERY turn (charge %,
+       then a completely different "LIMIT BREAK: X" string once ready) and
+       Item's stim count changes too. With flex-grow:1 those length changes
+       redistribute leftover row space across every button on the row, so
+       Attack — whose own label never changes — visibly resizes and can get
+       pushed onto a different wrapped row purely because a SIBLING's text
+       changed. flex:0 1 auto sizes each button to its own content only, so
+       Attack's box is stable turn to turn regardless of what Limit/Item are
+       doing. Still has the small FF cursor caret (▸) on hover. */
+    #actions button { flex: 0 1 auto; min-width: 94px; padding: 8px 10px; font-size: 13px; }
     #actions button:hover:not(:disabled)::before { content: "\25B8\00a0"; color: #6cff9e; }
 
     button {
