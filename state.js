@@ -227,6 +227,19 @@
       });
     }
 
+    // Same lookup as hasKeystoneRule, for a bespoke ruleOverride that also
+    // carries a numeric `amount` (Unbreaking's Guard-reflect %, Meltdown's
+    // Burn-target damage bonus, Overcharged Rail's Rail Shot boost — §4.1a,
+    // 2026-07-29). Not keystone-exclusive despite the sibling function's name
+    // above — effect.kind:"ruleOverride" isn't restricted to type:"keystone"
+    // nodes, Overcharged Rail is a "passive". Returns 0 (falsy) if unsocketed.
+    function socketedRuleAmount(hero, ruleName) {
+      const node = socketedEffects(hero).find(function (n) {
+        return n.effect.kind === "ruleOverride" && n.effect.rule === ruleName;
+      });
+      return node ? node.effect.amount : 0;
+    }
+
     // A skill's EN cost after any socketed "enCost" statMod scoped to it
     // (an economy node, e.g. "Firewall Breach costs 20% less EN").
     function effectiveEnCost(hero, skillKey) {
@@ -353,6 +366,7 @@
                                   // budget itself isn't stored, see tacticSlotsForLevel below)
         equipment: { head: null, body: null, legs: null, arms: null, weapon: null, ring: null },
         limit: 0,                // Limit Break gauge, 0-100, persists across the run
+        overwatchUsed: false,    // Overwatch keystone (§4.1a): per-COMBAT flag, reset in enterNode
         subtitle: t.className + " · Lv " + level,   // "Merc · Lv 1"
         side: "heroes",
         stats: {

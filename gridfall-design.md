@@ -3,7 +3,24 @@
 *A living document. We edit and extend this as we build. It supersedes the v1 kickoff
 and v2 plan as the single source of truth for direction; those remain as history.*
 
-**Last updated:** 2026-07-28 · **Since the v4 snapshot below (2026-07-25):** the sprite-quality pass
+**Last updated:** 2026-07-29 · **Since 2026-07-28:** the §4.1a skill-tree overhaul's Content Authoring
+step (§3.7 step 3) is now complete for the WHOLE roster — Merc, Dread Knight, and Mech Runner (the 3
+classes left as 1-node stubs after the 2026-07-28 Synth Medic/Psion/Saboteur pass) each got their full
+branching tree, built directly off this doc's own already-locked worked examples below with zero
+redesign needed. This also finally built **Taunt**, the aggro mechanic reserved since §3.3/Phase C and
+never implemented — `pickEnemyTarget` (engine.js) now locks enemy single-target aggro onto a taunting
+hero, real prerequisite work Dread Knight's tree needed. Four new bespoke keystone/passive rules
+(`overwatchCounter`, `guardReflect`, `burnDamageBonus`, `railShotBoost`) extend the existing
+`ruleOverride` mechanism — no generic effect-interpreter added, same one-hook-per-rule discipline as
+Synth Medic's Adaptive Nanites. All 6 classes now have a real branching tree; the skill-tree engine
+itself needs no further construction, only balance tuning and the still-open regression/playtest steps
+(§3.7 steps 5-6, §11 roadmap row M). Verified headless (`mini_racer`, this environment's established V8
+sim tool): 20/20 targeted unit checks (one per new mechanic, plus negative cases — Overwatch doesn't
+re-fire, Unbreaking doesn't reflect without active Guard) and a 135-battle boss regression (9 bosses ×
+15 trials, a 3-hero party of ONLY the newly-treed classes fully socketed at their keystones) at zero
+crashes. **Not yet done, same caveats as the 2026-07-28 pass:** SP costs/node numbers are first-draft
+and untuned (not a balance pass); no real-browser playtest (no browser-automation tool this session
+either). **Since the v4 snapshot below (2026-07-25):** the sprite-quality pass
 reached full completion (every mob + a full hero rebuild pass, zero blob/shared-shape fallbacks left,
 2026-07-27, shipped on `main`); a parallel `battle-mechanics-overhaul` branch shipped its Slice 1
 Foundation (7-flavor damage types consolidated into 4 resistance buckets, 2 new statuses — see §3.2a/
@@ -606,7 +623,7 @@ long-tail hook for the not-yet-built endless portal (§5.4b/§9, Phase P3) — a
 levels past the story campaign's natural end, the same job Hades' mirror upgrades or Slay the Spire's
 relic accumulation do in their own endless/repeat-run modes.
 
-**Worked example — Merc (was: 1 node, `suppressingFire`):**
+**Worked example — Merc (was: 1 node, `suppressingFire`) — ✅ BUILT 2026-07-29, exactly as designed below.**
 ```
                     [Suppressing Fire]  (existing node, kept as the tree's root)
                     /                \
@@ -642,7 +659,9 @@ bucket" clarity the Sun God fix above reinforced) rather than picking up a secon
 The AoE/nuke branch vs. the control branch is a real Netrunner identity fork — today's Netrunner has no
 such choice at all.
 
-**Worked example — Dread Knight (was: 1 node, `cleave`), 2026-07-28, from the user's own skill ideas:**
+**Worked example — Dread Knight (was: 1 node, `cleave`), 2026-07-28, from the user's own skill ideas —
+✅ BUILT 2026-07-29, exactly as designed below (including real Taunt AI support, flagged as extra work
+below when this was still spec-only).**
 ```
                     [Cleave]  (existing node, kept as root)
                    /                \
@@ -660,12 +679,15 @@ such choice at all.
 ```
 **Taunt needs real enemy-AI support**, not just a passive number — `pickEnemyTarget` (engine.js) has to
 actually check for and prioritize a taunting target, which is more engineering than a typical node.
-Flagged here rather than quietly absorbed. **Bloodfeed needs a new `drain` skill field** (heal the actor
-for a fraction of damage dealt) — small, but genuinely new engine surface, added in Slice 1 alongside
-Irradiate/Pin even though the skill itself isn't authored until Content Authoring (§3.7 step 3).
+Flagged here rather than quietly absorbed. **Built 2026-07-29**: `pickEnemyTarget` now filters its
+candidate pool down to any living taunter before threat-score weighing even runs — AoE skills are
+unaffected (they were never routed through `pickEnemyTarget` to begin with). **Bloodfeed needs a new
+`drain` skill field** (heal the actor for a fraction of damage dealt) — small, but genuinely new engine
+surface, added in Slice 1 alongside Irradiate/Pin even though the skill itself isn't authored until
+Content Authoring (§3.7 step 3). **Built 2026-07-29** as the tree's own Bloodfeed skill.
 
 **Worked example — Mech Runner (was: 1 node, `overclock`), 2026-07-28, renamed to match the user's own
-idea:**
+idea — ✅ BUILT 2026-07-29, exactly as designed below.**
 ```
                    [Overclock]  (existing node, kept as root)
                   /                \
@@ -679,9 +701,10 @@ idea:**
       "+1 turn Burn duration"
 ```
 
-The remaining 2 classes (Mentalist, Saboteur) follow the same shape — 1 kept root node + 2 branches of 2
-nodes each + a keystone-capped branch — authored during the Content Authoring build step (§3.7 step 3),
-not fully specified here; the four worked examples above are the template every class's tree follows.
+Mentalist/Saboteur (now Psion/Saboteur) followed the same shape and were built 2026-07-28, ahead of the
+3 classes worked out above — see that date's changelog entry (§13) for their exact node content, since
+they were authored fresh rather than off a worked example written in this section. **As of 2026-07-29,
+all 6 classes have a real branching tree — the §4.1a Content Authoring step (§3.7 step 3) is complete.**
 
 **Proposed personal affinities for the 3 previously-empty classes, 2026-07-28 (first draft, tunable via
 sim like every number here):** `merc: { physical: MILD_WEAK }` (an augmented human, no special armor),
@@ -2160,7 +2183,7 @@ then graphics, then story. Graphics can slot in partially earlier as a coat of p
 | **I. Graphics pass** ✅ | ✅ combat sprites (all 6 heroes + all mob/boss enemies, idle bob + hit flash, tier-scaled), ✅ hex-node map + per-region backdrops, ✅ combat backdrops (mining/station/hive). Also this phase: the single `game.html` was split into 5 classic `<script>` files (data/state/ui/engine/main). **Sprite-quality pass (resumed 2026-07-25, ran through 2026-07-27) is now essentially COMPLETE**, via the repo tooling `tools/sprite-review/` (live pixel-accurate status page straight from the game data, regenerate via `python3 tools/sprite-review/build.py`): ✅ **all 9 bosses bespoke**; ✅ **entire mob roster (Vossmark/Erebus/Talos/Void, all phases) bespoke — zero blob fallbacks, zero recolor-only shares left anywhere**; ✅ **all 6 heroes redrawn/rebuilt, uniformly 24×32** — Mech Runner (agile digitigrade battle-mech, BattleTech/Titanfall-anchored), Netrunner (real face + hourglass torso, female android), Mentalist (wizened-sage refinement — beard, real eyes, wooden staff w/ gripping hand), Saboteur ("corroded deserter" anti-hero — respirator mask w/ glowing lenses, mismatched armor), and **Merc rebuilt twice** — first into a space-suit rifleman, then a **from-scratch tactical-operator rebuild** (Starship Troopers/The Expanse-anchored) shipped as a **sealed tactical helmet w/ a green-glow visor + a hinted blue eye-pair seen through the glass**; Dread Knight left untouched by explicit user call ("your best work"). Unshipped alternates/legacies (unchosen Merc face-exposed variant, superseded pre-rebuild shapes for Merc/Mech Runner/Netrunner/Saboteur) kept staged in `tools/sprite-review/candidates.json` for reference. Only remaining open item from this phase: UI/menu theming polish (status not reverified recently) |
 | **J. Story arc → finished game** *(canon locked 2026-07-23, §9; map-system spec locked 2026-07-24, §5.4; Dungeon 6 fully speced + Talos retconned 2026-07-25, §5.4c)* | The 3-act Sol arc to a finite ending. Act I shipped (Kharon's Reach → Vossmark Station Sector 1); Act II = Erebus (shipped) + **Dungeon 4 ✅ SHIPPED 2026-07-24** (Talos bio-foundry, §5.4a — 14 nodes, two pool-differentiated wings, Six the Psionic Mentalist recruit, boss Proteus, sim-verified end-to-end) — debuted the §5.4 map upgrade (fog of war, Unknown nodes, loot variance, dead-end spurs) as reusable systemic mechanics, not one-off content; Act III = **Dungeon 5 "Helios Station" ✅ SHIPPED 2026-07-24/25** (§5.4b — a new radial/circular map shape, the double boss, a narrow Void/Entropy preview roster; **balance-tuned 2026-07-25** — a full-chain sim caught the bosses' encounter levels were hardcoded 7/8 against a party that actually arrives around level 2, fixed and re-verified) + **Dungeon 6 "the Cradle" ✅ SHIPPED 2026-07-25 (finale, §5.4c — designed AND built same day)**: Vossmark's Chancellor merges with the Loom into the true final boss (Chthon, God of the Breach) in a two-phase double-boss finale that directly causes the Helios wormhole to finally open; Talos's own leader (Phthora, the Fleshspring) fails a mirrored merge attempt earlier in the dungeon; two new recruits (Vincent/Dread Knight, Sexias/new Corrosive class) close real content/system gaps; 22 nodes, biggest map yet; the game's first branching ending (all 3 §9.5 choices) implemented. **The Sol arc is now content-complete, start to finish.** Sim-verified as a first-pass baseline (structurally clean, zero crashes, one squad clears the full chain at 36% win rate) — NOT yet balance-tuned to the game's usual target band, that's its own later roadmap phase. Sprite art for Dungeon 4/5/6's new rosters still outstanding (generic-blob fallback). See §9.4 for story beats, §5.4/§5.4a/§5.4b/§5.4c for the map-system + Dungeon 4/5/6 specs |
 | ~~**K. Town/hub layer**~~ *(retired 2026-07-23 — absorbed into Phase H, §5.2)* | superseded: towns/roster/save could not wait for a "future" phase once story-mode start was decided |
-| **M. Battle mechanics overhaul** *(locked 2026-07-26; Slice 1 SHIPPED 2026-07-28 on the `battle-mechanics-overhaul` branch, not yet merged to main)* | 7→4 damage-type resistance buckets (Physical/Thermal/Shock/Mind, +Exotic — §3.2a, corrected 2026-07-28) decoupling flavor from math, with zero flavor-text/skill rewrites; 2 new statuses (Irradiate, Pin — §3.3) + a new `drain` mechanic; two-layer Hollow-Knight-style skill trees (permanent branching Unlock Pool + a swappable Tactic Slot budget — §4.1a, Slices 2-3, NOT yet built). Slice 1 (Foundation: buckets + all 42 tables migrated + new statuses) sim-verified — see §3.7's results writeup. Slices 2-6 (skill-tree engine, content authoring, flavor seeding, full regression, real playtest) still ahead. |
+| **M. Battle mechanics overhaul** *(locked 2026-07-26; Slices 1-3 SHIPPED and merged to `main` — Foundation 2026-07-28, skill-tree engine + first 3 trees 2026-07-28, remaining 3 trees + Taunt AI 2026-07-29)* | 7→4 damage-type resistance buckets (Physical/Thermal/Shock/Mind, +Exotic — §3.2a, corrected 2026-07-28) decoupling flavor from math, with zero flavor-text/skill rewrites; 2 new statuses (Irradiate, Pin — §3.3) + a new `drain` mechanic; two-layer Hollow-Knight-style skill trees (permanent branching Unlock Pool + a swappable Tactic Slot budget — §4.1a). **All 6 classes now have a real branching tree** (Synth Medic/Psion/Saboteur 2026-07-28; Merc/Dread Knight/Mech Runner 2026-07-29, off this doc's own worked examples, §4.1a) — Content Authoring (§3.7 step 3) is done. Taunt (§3.3's long-reserved aggro mechanic) finally built as part of Dread Knight's tree — real `pickEnemyTarget` AI support, not just a status flag. Sim-verified headless each pass (Slice 1: 800 boss battles; Slices 2-3 first half: a 270-battle regression; Slices 2-3 second half: 20 targeted unit checks + a 135-battle boss regression) — see §3.7/§13 for results. **Still ahead:** flavor seeding (optional polish), a full node-graph chain regression across all 7 dungeons, SP-cost/node-number balance tuning (every number shipped so far is first-draft), and a real browser playtest (§3.7 steps 4-6). |
 
 *(B and C are close cousins and may be built together; I is flexible and can start once F lands.)*
 
@@ -2353,6 +2376,57 @@ pointer):**
 ---
 
 ## 13. Changelog
+- **2026-07-29 — Skill-tree Content Authoring finished for the last 3 classes (Merc, Dread Knight, Mech
+  Runner), plus Taunt's real AI support.** Follow-on to 2026-07-28's Synth Medic/Psion/Saboteur trees —
+  built directly off this doc's own already-locked §4.1a worked examples, no redesign needed. **All 6
+  classes now have a real branching tree.** Content, exactly as designed:
+  - **Merc** — root `suppressingFire` kept; branch A: `armorPiercingRounds` (new active, Physical,
+    pierce 0.65 — a real armor-melter, distinct from Aimed Shot's raw power) → `exploitWeakspot`
+    (weaknessPayoff passive: a Physical-bucket weakness hit also force-applies Weaken — first live use
+    of the `forceStatus` weaknessPayoff bonus shape, unexercised by the first 3 trees); branch B:
+    `adrenalineRush` (passive, +1 Limit gauge every turn — a new `limitPerTurn` statMod stat, read in
+    `beginTurn`) → `overwatch` (keystone: the first free hit each combat triggers a counter-Attack — a
+    genuinely new bespoke `ruleOverride` rule, `overwatchCounter`, plus a new per-hero `overwatchUsed`
+    flag reset every `enterNode`). 9 SP to fully clear.
+  - **Dread Knight** — root `cleave` kept; branch A: `taunt` (new active — see the Taunt AI paragraph
+    below) → `bloodfeed` (new active, the `drain` field's first real skill — 30% of damage dealt heals
+    the actor); branch B: `crackArmor` (new active, Physical + guaranteed Sunder, mirrors Saboteur's
+    `acidCharge` pattern) → `unbreaking` (keystone: Guard now reflects 20% of whatever it just blocked
+    back at the attacker — bespoke rule `guardReflect`, computed from the pre-/post-Guard damage delta
+    already sitting in `applyToTarget`). 8 SP to fully clear.
+  - **Mech Runner** — root `overclock` kept; branch A: `mechRocketBarrage` (new active, named "Rocket
+    Barrage" per the design doc but keyed `mechRocketBarrage` in data.js — the plain `rocketBarrage` key
+    already belongs to Security Mech's own AoE special; Thermal AoE + guaranteed Burn) → `accelerant`
+    (passive, +1 turn Burn duration — reuses the existing `statusDuration` statMod shape verbatim, zero
+    new engine code); branch B: `overchargedRail` (passive, +20% damage on Rail Shot specifically —
+    bespoke rule `railShotBoost`, matched by `skill === SKILLS.railShot` object identity, the same
+    matching convention `applySkillEffects` already uses for `bonusApplies`) → `meltdown` (keystone,
+    +25% damage vs. a target already Burning — bespoke rule `burnDamageBonus`). 8 SP to fully clear.
+  - **Taunt built** (§3.3's aggro mechanic, reserved since Phase C and never implemented until now):
+    `pickEnemyTarget` (engine.js) now filters its candidate pool down to any living taunter before
+    threat-score weighing ever runs; AoE enemy skills are unaffected (`chooseEnemyAction` never routed
+    those through `pickEnemyTarget` to begin with, so Taunt only ever locks single-target aggro, matching
+    every other tank-taunt convention). `STATUSES.taunt` is a `buff:true` self-effect (so a heal's
+    `cleanse` doesn't strip it off the tank mid-fight).
+  - A new doc-comment correction in data.js's SKILL_TREES header: `type:"passive"` nodes are USUALLY
+    `effect.kind:"statMod"` but aren't required to be — Overcharged Rail is a passive with a bespoke
+    `ruleOverride` instead (scoped to one specific skill by object identity, not a general stat). `type`
+    governs the socket-budget/SP economy; `effect.kind` is chosen per-node for whatever mechanism
+    actually fits, same principle the keystone convention already established.
+  - **Verified headless** (`mini_racer`, this environment's established V8 sim tool, same as every prior
+    session's sim work): 20/20 targeted unit checks, one per new mechanic plus deliberate negative cases
+    (Overwatch does NOT re-fire on a second hit the same combat; Unbreaking does NOT reflect when Guard
+    isn't active) — every check isolates the exact new code path (e.g. Overcharged Rail's boost verified
+    by diffing Rail Shot damage between an otherwise-identical boosted vs. unboosted hero, jitter
+    neutralized via a fixed `Math.random`). Then a 135-battle boss regression (all 9 named bosses × 15
+    trials, a 3-hero party built from ONLY the 3 newly-treed classes, each fully socketed at their
+    keystone) — **zero crashes**; HP-remaining ranged 48-92% across bosses, expected to run leaner than
+    the game's usual "55-70%" target band since this specific test party has zero healing between its 3
+    members (a deliberate stress-test composition, not a balance-representative one). **Not a balance
+    pass** — SP costs and node numbers across all 6 trees are still first-draft/untuned, same caveat as
+    2026-07-28's first 3 trees. **Not yet done:** flavor seeding, a true full-chain node-graph regression,
+    and a real browser playtest — no browser-automation tool was available this session either, so the
+    two shipped UI fixes from 2026-07-28 (action-menu resize/flicker) also remain visually unconfirmed.
 - **2026-07-28 — Second command-menu flutter fix, same day as the first: the FIRST fix (below) was a
   real bug but not the only one.** User report this time: the Run button "randomly" got pushed onto a
   wrapped second row while visibly "blinking or fluttering up and down." Root cause: the hover caret

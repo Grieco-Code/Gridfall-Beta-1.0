@@ -3,7 +3,13 @@
 *A living map of the code, kept in sync with `game.html` so we don't have to re-read the whole
 file each session. Pair with `gridfall-design.md` (the "why/what") — this doc is the "how/where".*
 
-**Last updated:** 2026-07-28 · **Since this was last touched (2026-07-23):** the code split from one
+**Last updated:** 2026-07-29 · **Since 2026-07-28:** the skill-tree engine's remaining 3 classes (Merc,
+Dread Knight, Mech Runner — Synth Medic/Psion/Saboteur already had trees) got their own real branching
+trees, built off the design doc's own already-locked worked examples; Taunt (reserved since Phase C) was
+finally implemented as real `pickEnemyTarget` AI support, not just an inert status; 4 new bespoke
+`ruleOverride` rules and one new `limitPerTurn` statMod stat extend the existing socketed-passive
+machinery with zero new generic infrastructure. Full detail in §12 (now-current schema reference) and
+§11's dated changelog. **Prior update (2026-07-23):** the code split from one
 `game.html` into five sibling files loaded in order by `index.html` — `data.js`, `state.js`, `ui.js`,
 `engine.js`, `main.js` (still no build step) — and the game itself became a real git repo
 (github.com/Grieco-Code/Gridfall-Beta-1.0). Since then: a full sprite-quality pass (zero blob/shared
@@ -817,6 +823,25 @@ numbers in the code are what they are, not just what they are:**
 ---
 
 ## 11. Changelog
+- **2026-07-29 — Skill trees finished for Merc, Dread Knight, Mech Runner; Taunt AI built.** Full prose
+  in the design doc's §13 changelog entry of the same date; this is the code-shape pointer. New
+  data.js content: 3 new active skills (`armorPiercingRounds`, `crackArmor`, `bloodfeed`, `taunt`,
+  `mechRocketBarrage` — 5 total) and 6 new non-active `SKILL_TREES` nodes across the 3 classes
+  (`exploitWeakspot`/`adrenalineRush`/`overwatch` for Merc, `unbreaking` for Dread Knight,
+  `accelerant`/`overchargedRail`/`meltdown` for Mech Runner), plus `STATUSES.taunt`. New engine surface
+  (all small, explicit hooks — no generic effect-interpreter, matching this project's established
+  convention): `socketedRuleAmount` (state.js, new helper, numeric sibling of `hasKeystoneRule`),
+  `hero.overwatchUsed` (state.js, `createHero` + reset in `enterNode`), a `limitPerTurn` statMod read in
+  `beginTurn` (engine.js), and `pickEnemyTarget`'s new taunt-pool filter (engine.js, one line before its
+  existing threat-score weighting). `applyToTarget`'s attack branch grew 3 new small, guarded blocks
+  (Overcharged Rail's Rail-Shot-scoped boost, Meltdown's Burn-target bonus, Unbreaking's Guard-reflect)
+  plus an Overwatch counter-attack check at the branch's end — see §12 for the exact insertion points.
+  Full schema/engine-change detail: §12 (updated in place, not a separate section, since it's the single
+  "accurate code reference now" source for this whole overhaul). **Verified headless** (`mini_racer`):
+  20 targeted unit checks (one per new mechanic + negative cases) all passing, then a 135-battle boss
+  regression (9 bosses × 15 trials, a 3-hero party of only the 3 newly-treed classes fully socketed) at
+  zero crashes. No browser-automation tool this session — same standing caveat as every recent UI-facing
+  change, though this pass was combat-logic only, no CSS/rendering touched.
 - **2026-07-28 — Second command-menu flutter fix, same day/session as the one below.** The first fix
   (below) genuinely resolved a bug but the user reported the flutter again — this time symptom was Run
   "randomly" wrapping to a second row while visibly blinking, not Attack specifically. Root cause:
@@ -1258,13 +1283,27 @@ numbers in the code are what they are, not just what they are:**
     mentions "EN Cell" as a future item; still not authored. Worth adding if EN-starvation attrition
     resurfaces once more content (skill trees, equipment) changes the numbers again.
 
-## 12. Battle mechanics overhaul — migration & schema reference (2026-07-26; Slice 1 SHIPPED 2026-07-28
-on `battle-mechanics-overhaul`, not yet merged to main; Slices 2-3 skill trees NOT yet built)
+## 12. Battle mechanics overhaul — migration & schema reference (2026-07-26; Slice 1 SHIPPED 2026-07-28,
+merged to `main` same day; Slices 2-3 skill trees SHIPPED — Synth Medic/Psion/Saboteur 2026-07-28,
+Merc/Dread Knight/Mech Runner 2026-07-29 — all on `main`, all 6 classes now have a real tree)
 
 Design rationale and locked decisions live in `gridfall-design.md` §3.2a (damage buckets), §3.3 (new
 statuses), §3.7 (full plan + Slice 1 results this section elaborates), §4.1a (skill trees). Everything
-below this line describes what was actually implemented for Slice 1 (Foundation) — treat it as accurate
-code reference now, not a forward-looking plan. Skill-tree engine code (Slices 2-3) is still pending.
+below this line describes what's actually implemented (Slice 1 Foundation, PLUS the skill-tree engine +
+all 6 classes' content from Slices 2-3) — treat it as accurate code reference, not a forward-looking
+plan. **2026-07-29 additions**, layered onto the schema below rather than restated in full: a new
+`socketedRuleAmount(hero, ruleName)` helper (state.js, sits next to `hasKeystoneRule`/
+`keystoneLimitBreakSkillKey` — same socketed-`ruleOverride` lookup, but returns the node's `effect.amount`
+instead of a boolean/skillKey, for a bespoke rule that needs a number: Unbreaking's Guard-reflect
+fraction, Meltdown's Burn-target damage bonus, Overcharged Rail's Rail-Shot-only boost); a new
+`hero.overwatchUsed` field (createHero, state.js — per-COMBAT flag, reset alongside `effects=[]` in
+`enterNode`, engine.js); a new `limitPerTurn` statMod stat, read in `beginTurn` (engine.js) rather than
+anywhere in `applyToTarget`, since it fires once per turn-start rather than off any specific
+damage/heal/status event; and `pickEnemyTarget` (engine.js) now filters its candidate `foes` pool down
+to any living `taunt`-afflicted combatant before threat-score weighing runs at all — the first real
+implementation of the Taunt mechanic reserved since Phase C (`STATUSES.taunt`, data.js, `buff:true` so a
+`cleanse` heal doesn't strip it). Full prose account of all 3 new trees' content: design doc §13's
+2026-07-29 changelog entry.
 
 **Verification tooling note (2026-07-28):** this environment had no `jsc` (every prior sim session's
 tool). `py-mini-racer` (old PyPI name) installed but shipped a Linux-only `.dylib`/`.so` and failed at

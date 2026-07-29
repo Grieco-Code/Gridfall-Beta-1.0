@@ -72,13 +72,42 @@
         const base = effectiveAttack(actor) + skill.power - def;
         let damage = Math.max(1, base + randomBetween(-2, 2));
 
+        // Overcharged Rail passive (Mech Runner, §4.1a bespoke rule): a flat
+        // damage% bonus scoped to Rail Shot specifically, matched by object
+        // identity (same pattern applySkillEffects already uses for bonusApplies).
+        if (actor.side === "heroes" && skill === SKILLS.railShot) {
+          const railBoost = socketedRuleAmount(actor, "railShotBoost");
+          if (railBoost) damage = Math.max(1, Math.round(damage * (1 + railBoost)));
+        }
+
         // Affinity multiplier — always ≥1, so a hard-resisted hit still chips.
         const mult = affinityMultiplier(target, skill.damageType);
         damage = Math.max(1, Math.round(damage * mult));
         if (mult >= WEAK && actor.side === "heroes") applyWeaknessPayoff(actor, target, skill);
 
-        // Guard on the target reduces incoming damage.
+        // Meltdown keystone (Mech Runner, §4.1a bespoke rule): bonus damage
+        // vs. a target already Burning.
+        if (actor.side === "heroes" && hasStatus(target, "burn")) {
+          const burnBonus = socketedRuleAmount(actor, "burnDamageBonus");
+          if (burnBonus) damage = Math.max(1, Math.round(damage * (1 + burnBonus)));
+        }
+
+        // Guard on the target reduces incoming damage. Unbreaking keystone
+        // (Dread Knight, §4.1a bespoke rule): reflects a fraction of whatever
+        // Guard just blocked back at the attacker.
+        const preGuardDamage = damage;
         damage = Math.max(1, Math.round(damage * guardMultiplier(target)));
+        const blocked = preGuardDamage - damage;
+        if (target.side === "heroes" && blocked > 0) {
+          const reflectFrac = socketedRuleAmount(target, "guardReflect");
+          if (reflectFrac > 0) {
+            const reflected = Math.max(0, Math.round(blocked * reflectFrac));
+            if (reflected > 0) {
+              actor.stats.hp = clamp(actor.stats.hp - reflected, 0, actor.stats.maxHp);
+              log(target.name + "'s Guard reflects " + reflected + " damage back at " + actor.name + "!");
+            }
+          }
+        }
 
         // Global enemy-damage difficulty knob (Phase 1c) — only enemy hits, and
         // not set-piece bosses (they're individually tuned; see createEnemy).
@@ -129,6 +158,17 @@
             !target.reinforced && target.stats.hp <= target.stats.maxHp * target.reinforceAt) {
           target.reinforced = true;
           spawnReinforcements(target);
+        }
+
+        // Overwatch keystone (Merc, §4.1a bespoke rule): the first time this
+        // hero is targeted each combat, fire back a free basic Attack.
+        // Bounded recursion — the counter's own target.side is never "heroes"
+        // in practice, so this branch can't re-trigger itself.
+        if (target.side === "heroes" && isAlive(target) && !target.overwatchUsed &&
+            hasKeystoneRule(target, "overwatchCounter")) {
+          target.overwatchUsed = true;
+          log(target.name + "'s Overwatch triggers a free counter-attack!");
+          applyToTarget(SKILLS.attack, target, actor);
         }
 
       } else if (skill.kind === "heal") {
@@ -357,6 +397,14 @@
         return;
       }
 
+      // Adrenaline Rush passive (Merc, §4.1a): a flat Limit-gauge trickle at
+      // the start of every turn this hero takes — passive upkeep, unrelated
+      // to any action, so it still fires even on a turn Disabled skips below.
+      if (combatant.side === "heroes") {
+        const perTurn = socketedStatMods(combatant, "limitPerTurn").flat;
+        if (perTurn > 0) gainLimit(combatant, perTurn);
+      }
+
       // Disabled — skip the turn entirely.
       if (disabled) {
         clearActions();
@@ -411,15 +459,21 @@
     // stays loose (semi-random, not oppressive) while elites/bosses focus hard —
     // this is the difficulty dial the design doc asked for (§3.5).
     function pickEnemyTarget(actor, foes, skill) {
+      // Taunt (Dread Knight, §3.3/§4.1a): a taunting foe locks single-target
+      // aggro — restrict the candidate pool before any threat-score weighing.
+      // AoE skills bypass this entirely (chooseEnemyAction never routes an
+      // allEnemies skill through this function — it hits everyone regardless).
+      const taunters = foes.filter(function (f) { return hasStatus(f, "taunt"); });
+      const pool = taunters.length > 0 ? taunters : foes;
       const sharp = (actor.tier === "elite" || actor.tier === "boss") ? 3.5
                   : actor.tier === "standard" ? 2.2 : 1.2;
-      const weights = foes.map(function (f) {
+      const weights = pool.map(function (f) {
         return Math.pow(enemyThreatScore(actor, f, skill), sharp);
       });
       let sum = weights.reduce(function (a, b) { return a + b; }, 0);
       let r = Math.random() * sum;
-      for (let i = 0; i < foes.length; i++) { r -= weights[i]; if (r <= 0) return foes[i]; }
-      return foes[foes.length - 1];
+      for (let i = 0; i < pool.length; i++) { r -= weights[i]; if (r <= 0) return pool[i]; }
+      return pool[pool.length - 1];
     }
 
     // Decide what an enemy does this turn.
@@ -1685,7 +1739,7 @@
         : rollEncounterForNode(node);
       enemies = buildEnemies(rolled);
 
-      party.forEach(function (h) { h.effects = []; });
+      party.forEach(function (h) { h.effects = []; h.overwatchUsed = false; });
 
       battleOver = false;
       activeCombatant = null;

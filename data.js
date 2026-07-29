@@ -67,6 +67,10 @@
     //   pin       — magnitude = flat Speed reduction, read by effectiveSpeed()
     //               (state.js) instead of raw stats.speed for turn order.
     //               Gravity flavor exclusively.
+    //   taunt     — magnitude unused; a self-buff that locks enemy AI
+    //               single-target aggro onto the taunter (pickEnemyTarget,
+    //               engine.js). Dread Knight's tank tool, §3.3/§4.1a — the
+    //               long-reserved mechanic finally built.
     const STATUSES = {
       burn:      { name: "Burn",      pip: "BURN"  },
       weaken:    { name: "Weaken",    pip: "ATK↓" },
@@ -80,7 +84,8 @@
       // more than you can burst" tension is the Bio-Tank's whole design.
       regen:     { name: "Regen",     pip: "REGEN", buff: true },
       irradiate: { name: "Irradiate", pip: "RAD"   },
-      pin:       { name: "Pinned",    pip: "PIN"   }
+      pin:       { name: "Pinned",    pip: "PIN"   },
+      taunt:     { name: "Taunt",     pip: "TAUNT", buff: true }
     };
 
     // SKILLS are data. Each says its ENERGY cost, KIND, TARGET, and (for
@@ -104,6 +109,13 @@
         name: "Frag Grenade", enCost: 10, kind: "attack", target: "allEnemies",
         damageType: "kinetic", power: 10, message: "lobs a Frag Grenade at"
       },
+      // Merc skill-tree branch (§4.1a, 2026-07-29): the Physical-bucket
+      // armor-melter — trades Aimed Shot's raw power for a much bigger
+      // pierce, a real answer to a heavy-DEF target (Mech, boss armor).
+      armorPiercingRounds: {   // tree, tier 2 (needs Suppressing Fire)
+        name: "Armor-Piercing Rounds", enCost: 11, kind: "attack", target: "enemy",
+        damageType: "kinetic", power: 12, pierce: 0.65, message: "puts an armor-piercing round through"
+      },
 
       // --- Dread Knight ---
       crushingBlow: {   // signature: heavy hit that partly ignores armor
@@ -115,6 +127,23 @@
         message: "raises a defensive bulwark",
         applies: [{ type: "guard", magnitude: 0.5, duration: 1 }]
       },
+      // Dread Knight skill-tree branch (§4.1a, 2026-07-29): Taunt is the
+      // long-reserved aggro mechanic (§3.3) — see pickEnemyTarget, engine.js
+      // — finally built as this tree's first branch root.
+      taunt: {   // tree, tier 2 (needs Cleave): self-buff, locks enemy aggro
+        name: "Taunt", enCost: 6, kind: "status", target: "self",
+        message: "plants their feet and taunts the enemy",
+        applies: [{ type: "taunt", magnitude: 0, duration: 2 }]
+      },
+      bloodfeed: {   // tree, tier 3 (needs Taunt): Physical + self-heal drain
+        name: "Bloodfeed", enCost: 12, kind: "attack", target: "enemy",
+        damageType: "kinetic", power: 14, drain: 0.3, message: "tears into"
+      },
+      crackArmor: {   // tree, tier 2 (needs Cleave): Physical + guaranteed Sunder
+        name: "Crack Armor", enCost: 10, kind: "attack", target: "enemy",
+        damageType: "kinetic", power: 10, message: "cracks the armor of",
+        applies: [{ type: "sunder", magnitude: 6, duration: 2 }]
+      },
 
       // --- Mech Runner ---
       railShot: {   // signature: huge single-target, ignores half of armor
@@ -125,6 +154,16 @@
         name: "Incendiary Rounds", enCost: 10, kind: "attack", target: "enemy",
         damageType: "thermal", power: 4, message: "lights up",
         applies: [{ type: "burn", magnitude: 6, duration: 3 }]
+      },
+      // Mech Runner skill-tree branch (§4.1a, 2026-07-29): named
+      // "mechRocketBarrage" (not "rocketBarrage") since that key already
+      // belongs to Security Mech's AoE special — same flavor name, distinct
+      // skill, different owner; display `name` matches the design doc's
+      // worked example verbatim, only the code key differs.
+      mechRocketBarrage: {   // tree, tier 2 (needs Overclock): Thermal AoE + guaranteed Burn
+        name: "Rocket Barrage", enCost: 14, kind: "attack", target: "allEnemies",
+        damageType: "thermal", power: 6, message: "rains rocket fire on",
+        applies: [{ type: "burn", magnitude: 5, duration: 2 }]
       },
 
       // --- Synth Medic (Nyx) — 2026-07-28 rework: was Netrunner/"Hacker,"
@@ -804,7 +843,13 @@
     //   "active"         — learning pushes `skillKey` onto hero.skills
     //                       forever, exactly as before. No `effect`/`slotCost`.
     //   "passive"        — a combat-modifier, always-on once SOCKETED
-    //                       (Layer 2). `effect.kind: "statMod"`.
+    //                       (Layer 2). Usually `effect.kind: "statMod"`; a
+    //                       passive scoped to ONE specific skill (e.g.
+    //                       Overcharged Rail, 2026-07-29 — a Rail-Shot-only
+    //                       damage bonus) uses `ruleOverride` instead, same
+    //                       as a keystone's bespoke rule below — `type`
+    //                       governs the socket-budget/SP economy, not which
+    //                       `effect.kind` a node is allowed to carry.
     //   "weaknessPayoff" — while socketed, a hero's own hit that lands on the
     //                       target's bucket-weakness (affinity mult >= WEAK)
     //                       grants a bonus. `effect.kind: "weaknessPayoff"`.
@@ -825,14 +870,63 @@
     //   weaknessPayoff: { kind:"weaknessPayoff", bucket, bonus:"enRefund"|"limitGauge"|"forceStatus", amount, forceStatus?:{...} }
     //   ruleOverride:   { kind:"ruleOverride", rule:"limitBreakOverride"|"bonusApplies"|<bespoke>, ... }
     const SKILL_TREES = {
+      // Merc (§4.1a, 2026-07-29): the design doc's own worked example, built
+      // verbatim. Root kept; one branch is a bigger-pierce active capped by a
+      // weakness-payoff passive (Physical hits that land on a weakness also
+      // apply Weaken — reuses the existing "forceStatus" weaknessPayoff bonus
+      // shape, never exercised by the first 3 trees), the other a flat
+      // per-turn Limit trickle capped by the Overwatch keystone (a genuinely
+      // new mechanic — a bespoke "overwatchCounter" rule, see engine.js).
+      // 9 SP to fully clear (1+2+2+1+3); 5 slots if fully socketed (2+1+2) —
+      // deliberately more than the campaign's level-ceiling budget affords,
+      // so picking all 3 branch nodes is a real, not-quite-reachable choice.
       merc: [
-        { key: "suppressingFire", skillKey: "suppressingFire", name: "Suppressing Fire", cost: 1, prereq: null, type: "active" }
+        { key: "suppressingFire", skillKey: "suppressingFire", name: "Suppressing Fire", cost: 1, prereq: null, type: "active" },
+        { key: "armorPiercingRounds", skillKey: "armorPiercingRounds", name: "Armor-Piercing Rounds", cost: 2, prereq: "suppressingFire", type: "active" },
+        { key: "exploitWeakspot", name: "Exploit: Weakspot", cost: 2, prereq: "armorPiercingRounds", type: "weaknessPayoff", slotCost: 2,
+          effect: { kind: "weaknessPayoff", bucket: "physical", bonus: "forceStatus",
+            forceStatus: { type: "weaken", magnitude: 4, duration: 2 } } },
+        { key: "adrenalineRush", name: "Adrenaline Rush", cost: 1, prereq: "suppressingFire", type: "passive", slotCost: 1,
+          effect: { kind: "statMod", stat: "limitPerTurn", amount: 1, mode: "flat" } },
+        { key: "overwatch", name: "Overwatch", cost: 3, prereq: "adrenalineRush", type: "keystone", slotCost: 2,
+          effect: { kind: "ruleOverride", rule: "overwatchCounter" } }
       ],
+      // Dread Knight (§4.1a, 2026-07-29): the design doc's own worked
+      // example. Root kept; one branch finally builds the long-reserved
+      // Taunt mechanic (§3.3) into a real aggro tool + Bloodfeed (the first
+      // skill to use the `drain` field added in Slice 1), the other adds a
+      // Sunder setup active capped by the Unbreaking keystone (bespoke
+      // "guardReflect" rule — Guard now punishes attackers, not just
+      // absorbs). 8 SP to fully clear (1+1+2+1+3); 4 slots if fully
+      // socketed (2 alone from Unbreaking, since Taunt/Crack Armor/Bloodfeed
+      // are all actives with no slot cost).
       dreadKnight: [
-        { key: "cleave", skillKey: "cleave", name: "Cleave", cost: 1, prereq: null, type: "active" }
+        { key: "cleave", skillKey: "cleave", name: "Cleave", cost: 1, prereq: null, type: "active" },
+        { key: "taunt", skillKey: "taunt", name: "Taunt", cost: 1, prereq: "cleave", type: "active" },
+        { key: "bloodfeed", skillKey: "bloodfeed", name: "Bloodfeed", cost: 2, prereq: "taunt", type: "active" },
+        { key: "crackArmor", skillKey: "crackArmor", name: "Crack Armor", cost: 1, prereq: "cleave", type: "active" },
+        { key: "unbreaking", name: "Unbreaking", cost: 3, prereq: "crackArmor", type: "keystone", slotCost: 2,
+          effect: { kind: "ruleOverride", rule: "guardReflect", amount: 0.2 } }
       ],
+      // Mech Runner (§4.1a, 2026-07-29): the design doc's own worked
+      // example, renamed per the user's own idea. Root kept; one branch adds
+      // a Thermal AoE (named "Rocket Barrage" like the design doc — coded as
+      // `mechRocketBarrage` to avoid colliding with Security Mech's existing
+      // `rocketBarrage` key, see the SKILLS comment above) capped by a Burn-
+      // duration passive (reuses the existing "statusDuration" statMod shape
+      // verbatim — zero new engine code for this one node), the other a
+      // Rail Shot damage passive capped by the Meltdown keystone (bespoke
+      // "burnDamageBonus" rule). 8 SP to fully clear (1+2+1+1+3); 4 slots if
+      // fully socketed (1+1+2).
       mechRunner: [
-        { key: "overclock", skillKey: "overclock", name: "Overclock", cost: 1, prereq: null, type: "active" }
+        { key: "overclock", skillKey: "overclock", name: "Overclock", cost: 1, prereq: null, type: "active" },
+        { key: "mechRocketBarrage", skillKey: "mechRocketBarrage", name: "Rocket Barrage", cost: 2, prereq: "overclock", type: "active" },
+        { key: "accelerant", name: "Accelerant", cost: 1, prereq: "mechRocketBarrage", type: "passive", slotCost: 1,
+          effect: { kind: "statMod", stat: "statusDuration", scope: { statusType: "burn" }, amount: 1, mode: "flat" } },
+        { key: "overchargedRail", name: "Overcharged Rail", cost: 1, prereq: "overclock", type: "passive", slotCost: 1,
+          effect: { kind: "ruleOverride", rule: "railShotBoost", amount: 0.2 } },
+        { key: "meltdown", name: "Meltdown", cost: 3, prereq: "overchargedRail", type: "keystone", slotCost: 2,
+          effect: { kind: "ruleOverride", rule: "burnDamageBonus", amount: 0.25 } }
       ],
       // Synth Medic (§4.1a, 2026-07-28): root kept, 2 branches — the
       // existing Overload Surge branch gains a weakness-payoff leaf; a new
