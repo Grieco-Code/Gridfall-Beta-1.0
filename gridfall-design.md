@@ -20,7 +20,37 @@ re-fire, Unbreaking doesn't reflect without active Guard) and a 135-battle boss 
 15 trials, a 3-hero party of ONLY the newly-treed classes fully socketed at their keystones) at zero
 crashes. **Not yet done, same caveats as the 2026-07-28 pass:** SP costs/node numbers are first-draft
 and untuned (not a balance pass); no real-browser playtest (no browser-automation tool this session
-either). **Since the v4 snapshot below (2026-07-25):** the sprite-quality pass
+either). **Later the same day (2026-07-29), a full-playthrough report drove a real difficulty pass and a
+story retcon.** User feedback: the game reads too easy outside early Elite nodes, and bosses specifically
+aren't hard enough — traced to bosses being fully EXEMPT from the global enemy-difficulty knobs since
+Phase 1c, so every time trash/elite got harder, bosses quietly fell behind instead of staying ahead.
+Fixed: new `BOSS_HP_MULT`(1.45)/`BOSS_DAMAGE_MULT`(1.35) knobs layered on top of each boss's own
+hand-tuned stats (mirrors how the trash knob already layers on ENEMIES templates), plus a new generic
+**enrage** engine hook (same family as the existing reinforceAt/reinforceWave hook, §5.3) — all 9 bosses
+now get a one-time permanent stat spike at a HP threshold (usually 50%, coinciding with reinforceAt where
+a boss has one, for one clear "phase 2 begins" moment rather than two staggered beats). General
+`ENEMY_HP_MULT`(1.5→1.6)/`ENEMY_DAMAGE_MULT`(1.2→1.3)/`AI_SPECIAL_CHANCE`(0.38→0.45)/`AI_HEAL_CHANCE`
+(0.43→0.5) also bumped. Sim-verified (`mini_racer`) against the boss roster at each one's own historical
+arrival level (§3.7's table): smart-play HP-remaining dropped substantially on every single boss from
+its Slice-1 baseline (e.g. cagedGod 94%→88%, sunGod 95%→74%), and two bosses (Warden, Chthon) now carry
+real loss risk even under smart play (Warden 77% smart win, Chthon 83%) — the "wall" fights the report
+was missing. **A real near-miss caught before it shipped:** the general knob bump was first sim-tested
+against an artificially-harsh 2-full-elite worst case and looked like it had broken Elite nodes (win
+rate collapsed to ~2%) — re-tested against the ACTUAL elite-node composition (1 elite + 1 fodder/standard
+support, per `rollEncounterForNode`) and landed at 100% win / ~44% HP, statistically unchanged from
+before the bump (46%) — the alarm was a flawed test, not a real regression, caught by re-deriving the
+real encounter shape instead of trusting the first number. Also fixed the boss-name truncation bug
+(`.tile-name`/`.tile-sub` in `index.html`) at its ROOT CAUSE for the first time — a fixed-width
+`nowrap`+ellipsis was clipping any long name ("Phthora, the Fleshspring," etc.); the exact same bug
+previously got patched by shortening the Warden's name instead of fixing the CSS, which is why it kept
+resurfacing. Now wraps instead of truncating, so no future long name can clip again. **Also this
+session, SPEC ONLY, nothing built:** a story retcon (§9.5a) — Kredex and Phthora collapse into one
+character (human Kredex introduced early at Dungeon 5, escapes a fight via a new to-be-built "boss flee"
+mechanic, later becomes "Kredex, the Fleshspring" as the apparent finale), with a surprise TRUE final
+fight after that — the Caged God breaks free of the wormhole on its own once its jailer is dead, feeding
+directly into the not-yet-built endless-mode unlock (a new "Step into the Wormhole" button). Locked as a
+plan per direct user instruction to build it out later, after this difficulty/UI work. **Since the v4
+snapshot below (2026-07-25):** the sprite-quality pass
 reached full completion (every mob + a full hero rebuild pass, zero blob/shared-shape fallbacks left,
 2026-07-27, shipped on `main`); a parallel `battle-mechanics-overhaul` branch shipped its Slice 1
 Foundation (7-flavor damage types consolidated into 4 resistance buckets, 2 new statuses — see §3.2a/
@@ -2120,6 +2150,73 @@ Earth's engine" in a vacuum; it's "what do we do with it, knowing we already cau
 before we ever got to choose this one." All three epilogues should acknowledge the freshly-cracked
 Breach in their own way (§5.4c has the framing for each).
 
+### 9.5a Retcon — Kredex/Fleshspring/Caged God, a surprise second finale (locked 2026-07-29, SPEC ONLY —
+not yet built; §5.4c's Phthora content and §9.4's "named human antagonists" section above are both
+SUPERSEDED by this entry where they conflict, kept as history rather than rewritten in place)
+
+A dedicated planning session (user played through the shipped content and reported the game reads too
+easy outside early Elite nodes, §11 roadmap/§12 Decisions has the difficulty side of that finding)
+also produced a real story change: **Kredex and Phthora collapse into one character**, and the ending
+gains a surprise second climax that gives the already-locked endless-portal concept (§5.4b, Phase P3) a
+concrete, dramatic unlock trigger instead of a bare post-game menu option.
+
+**The new beat sequence:**
+1. **Dungeon 5 "Helios Station"** — human Kredex is introduced here, not at the finale. Helios is
+   already the established site where "the crew cracks the endless-mode wormhole open... sealed until
+   after D6" (§5.4b) — Kredex personally overseeing the harnessing operation at the wormhole's own
+   origin point makes his first appearance load-bearing, not a cameo. He fights with his own kit and
+   **flees at a low-HP threshold instead of dying** — a new, generic "boss escape" engine mechanic
+   (see below), not a Kredex-only hack.
+2. **Dungeon 6 "the Cradle," the apparent finale** — Kredex's own failed-transcendence attempt, in the
+   node slot currently written for Phthora (§5.4c's `bossPhthora`). He becomes **"Kredex, the
+   Fleshspring"** (combo-naming his own identity with her epithet — exact final wording still open).
+   Played straight as THE final boss: full climax framing, no narrative wink that it isn't really over.
+3. **The twist — the Caged God, the real final fight.** Kredex's death breaks whatever containment he
+   and Vossmark built around the wormhole at Helios; **the entity no longer needs his body at all** and
+   tears free on its own. This replaces the current Chthon *fusion* concept (entity wearing Kredex's
+   identity) with something cleaner: the Caged God fights as itself, no fusion-flavored kit needed.
+   Mechanically this repurposes the existing chained `cagedGod` → `bossChthon` two-node pattern (already
+   built for exactly this "no rest between boss nodes" shape, §5.4b) into `bossFleshspring` →
+   `bossCagedGod`, with the Caged God's stats/kit escalated for its new role as the actual hardest fight
+   in the game (a natural home for the phase/enrage mechanic from the difficulty pass below).
+4. **After the Caged God falls** — the existing 3-way ending choice (Reseed/Destroy/Deny, §9.5) moves to
+   fire here instead of after Chthon; every epilogue's framing updates from "one door already opened"
+   to "the door is now all the way open, and we just watched what came through it get put down." The
+   epilogue also flips a new persistent flag (working name `wormholeOpened`, same treatment as other
+   milestone flags like `sector1BriefingShown`) that unlocks a new **"Step into the Wormhole"** button on
+   the Title screen and on Town — the concrete doorway into the not-yet-built endless mode (Phase P3).
+
+**What retires/gets repurposed:** Phthora as a separate character (her `phthoraWreck` sprite and boss
+slot get REASSIGNED to Kredex, not rebuilt from scratch); Chthon as a fusion identity, and its
+`kredexEcho` skill (no longer needed — the entity isn't wearing him anymore); the `bossPhthora` /
+`cagedGod` / `bossChthon` node graph in §5.4c's Dungeon 6 spec, restructured per the sequence above.
+
+**A real, named tradeoff, not a silent one.** §9.4's "named human antagonists" locked Kredex (cage
+doctrine, fails, becomes vessel) and Phthora (merge doctrine, fails, dies transforming) as a deliberate
+mirror-and-invert pair — two philosophies, each getting an earned final word. Collapsing them into one
+character trades that specific symmetry away. Confirmed directly by the user (twice, across two rounds
+of questions) as the wanted direction — recorded here so it reads as a decision, not an oversight. Talos
+loses its own dedicated on-screen leader as a side effect; left as-is (a more collective/anonymous
+lineage identity reads fine) unless a replacement figure is wanted later.
+
+**Left open for the actual build/content-authoring session** (deliberately not decided here, matching
+this doc's own "not designed in the abstract" discipline for exact numbers/text):
+- Exact rewards on a fled fight (full XP as if won, partial, or none).
+- Whether the Caged God node is fog-of-war-hidden (D4's Unknown-node system, §5.4, could hide it for a
+  real mechanical surprise) or just narratively sold via `enterText`/story-scene framing.
+- Final exact boss name/epithet wording for both "Kredex, the Fleshspring" and the Caged God's
+  post-escape identity (does it keep "the Caged God" now that it's no longer caged, or get a new name?).
+- The generic boss-flee mechanic's exact shape (HP threshold field name, whether it's turn-based or
+  HP-based, what battle-end state it produces) — designed alongside the difficulty pass below, since
+  both need a new generic per-boss-template hook in the same family as the existing `reinforceAt`/
+  `reinforceWave` pattern.
+
+**Sequencing (explicit, per direct user instruction):** this section is locked as a plan, not built.
+Next actual work is the difficulty pass (§11 roadmap/§12 Decisions, this date) and the `.tile-name`
+truncation fix (§8.1) — both already fully confirmed with no open questions. The Kredex content, the
+flee mechanic, the Dungeon 6 restructure, and the endless mode itself all stay untouched until a
+dedicated future build session.
+
 ### 9.6 Continuity — what this locks vs. what's already shipped
 This bible **contradicts nothing shipped.** It makes explicit: (a) the Erebus fragment = precursor
 key; (b) the hive = precursor caretaker; (c) Talos's Psionic-adjacent bio-tech = precursor-triggered
@@ -2190,6 +2287,44 @@ then graphics, then story. Graphics can slot in partially earlier as a coat of p
 ---
 
 ## 12. Decisions
+
+**Locked (2026-07-29, difficulty pass — full detail §11 roadmap's top summary, this is the pointer):**
+- **Root cause of "too easy outside Elite nodes":** bosses were fully EXEMPT from `ENEMY_HP_MULT`/
+  `ENEMY_DAMAGE_MULT` since Phase 1c ("individually tuned already") — every later bump to those knobs
+  made trash/elite harder while bosses stood still, so the gap widened session over session until a
+  fresh 135-battle regression showed 100% win / 48-92% HP on literally every boss.
+- **New boss-specific knobs**, `BOSS_HP_MULT` (1.45) / `BOSS_DAMAGE_MULT` (1.35), layer on top of each
+  boss's own hand-tuned base stats exactly the way the trash knob already layers on ENEMIES templates —
+  not a replacement for hand-tuning, an addition to it.
+- **New generic boss enrage hook** (`enrageAt`/`enrageBuff`/`enrageSkill`/`enrageMessage` on any ENEMIES
+  template, checked in `applyToTarget` — same family/shape as the existing `reinforceAt`/`reinforceWave`
+  hook, §5.3): a ONE-TIME permanent stat spike (not a status effect, so it can't be cleansed/dispelled)
+  the first time the boss drops to/below the threshold. All 9 current bosses now have one, mostly at 50%
+  HP — coinciding with `reinforceAt` on the 6 bosses that already had adds, deliberately, so it reads as
+  one "phase 2 begins" beat rather than two smaller staggered ones.
+- **General knobs also bumped:** `ENEMY_HP_MULT` 1.5→1.6, `ENEMY_DAMAGE_MULT` 1.2→1.3,
+  `AI_SPECIAL_CHANCE` 0.38→0.45, `AI_HEAL_CHANCE` 0.43→0.5.
+- **Verification caught a real near-miss:** first sim-tested the general bump against an artificially
+  brutal 2-full-elite worst case, which read as broken (~2% win). Re-tested against the ACTUAL elite-node
+  encounter shape (1 elite + 1 fodder/standard support, per `rollEncounterForNode`) and landed at 100%
+  win / ~44% HP — essentially unchanged from the pre-bump ~46% baseline. The first alarming number was a
+  bad test, not a real regression; re-deriving the true encounter composition before trusting a scary sim
+  result is the lesson worth keeping from this.
+- **Sim-verified against the historical per-boss arrival-level table (§3.7):** every boss's smart-play
+  HP-remaining dropped from its Slice-1 baseline; Warden and Chthon specifically now carry real loss risk
+  even under smart play (77%/83% win rate respectively) — the "you must actually play well or you can
+  lose" fights the report said were missing. No boss dropped into "unfair" territory (smart play never
+  fell below even odds anywhere), and a full 36-template roster sweep + the existing 6-class skill-tree
+  crash battery both stayed at zero crashes/NaN stats after the change.
+- **`.tile-name`/`.tile-sub` truncation fixed at ROOT CAUSE** (`index.html`) — was a fixed-width
+  `nowrap` + ellipsis silently clipping any long boss name/role; the identical bug was previously "fixed"
+  by shortening the Warden's name instead of touching the CSS, which is exactly why it kept resurfacing
+  on every subsequent long name. Now wraps instead of truncating — can't regress the same way again.
+- **Story retcon locked as a plan, not built** — see §9.5a for the full Kredex/Phthora/Fleshspring/Caged
+  God orchestration. Explicitly deferred: the actual Kredex-early-appearance content, the new "boss
+  flees instead of dying" engine mechanic his escape needs, the Dungeon 6 node restructure, and the
+  endless-mode "Step into the Wormhole" unlock all wait for a dedicated future build session, per direct
+  user instruction to finish the difficulty/UI work first.
 
 **Locked (2026-07-25, Dungeon 6 finale design + Talos retcon — full detail §5.4c, this is the
 pointer):**
@@ -2376,6 +2511,67 @@ pointer):**
 ---
 
 ## 13. Changelog
+- **2026-07-29 — Difficulty pass (bosses + general knobs), boss-name CSS fix, and a locked-but-not-built
+  story retcon.** Same day as the skill-tree entry below, later in the session, triggered by a full-
+  playthrough report ("too easy outside early Elite nodes, bosses aren't hard enough"). Full rationale
+  in §12's new 2026-07-29 Decisions entry (this is the numbers/results pointer).
+  - **Root cause confirmed, then fixed:** bosses were fully exempt from the global `ENEMY_HP_MULT`/
+    `ENEMY_DAMAGE_MULT` knobs since Phase 1c. New `BOSS_HP_MULT` (1.45) / `BOSS_DAMAGE_MULT` (1.35)
+    (state.js) give bosses their own multiplier on top of hand-tuned base stats. General knobs also
+    bumped: `ENEMY_HP_MULT` 1.5→1.6, `ENEMY_DAMAGE_MULT` 1.2→1.3, `AI_SPECIAL_CHANCE` 0.38→0.45,
+    `AI_HEAL_CHANCE` 0.43→0.5.
+  - **New generic enrage hook** (engine.js `triggerEnrage`, called from `applyToTarget` — same shape as
+    the existing reinforcement hook, §5.3): any ENEMIES template can declare `enrageAt` (HP fraction),
+    `enrageBuff` (multiplicative atk/def/speed, one-time and permanent — not a status effect, survives
+    Cleanse), and optional `enrageSkill`/`enrageMessage`. All 9 bosses configured: `enrageBuff: {atk:
+    1.45, speed: 1.2}` uniformly, `enrageAt: 0.5` for all — coinciding with `reinforceAt` on the 6 bosses
+    that have one (Warden, Broodmarshal, Proteus, Sun God, Phthora, Chthon), a deliberate single
+    escalation beat rather than two separate ones; Voraxx/Void Soul Eater/the Caged God (no adds) get it
+    as their only mid-fight turn. No `enrageSkill` authored yet for any boss (a stat-only spike was
+    enough to hit the target band this pass) — flagged as a nice future per-boss flavor enhancement, not
+    required.
+  - **Sim-verified (`mini_racer`) against each boss's own historical arrival level** (§3.7's table),
+    30 trials/policy, full 6-hero roster, a "smart" policy that exploits affinity weaknesses and only
+    diverts to healing under 40% HP (naive = basic Attack only):
+
+    | Boss | Lv | naive win% | naive HP% | smart win% | smart HP% | (was, Slice-1 smart HP%) |
+    |---|---|---|---|---|---|---|
+    | Warden | 4 | 7% | 29% | 77% | 27% | 75% |
+    | Voraxx | 1 | 100% | 36% | 100% | 41% | 85% |
+    | Broodmarshal | 5 | 97% | 30% | 100% | 58% | 93% |
+    | Proteus | 6 | 90% | 30% | 100% | 74% | 85% |
+    | Void Soul Eater | 2 | 97% | 45% | 100% | 80% | 93% |
+    | Sun God | 2 | 100% | 45% | 100% | 74% | 95% |
+    | Phthora | 4 | 77% | 24% | 100% | 75% | 93% |
+    | Caged God | 6 | 100% | 52% | 100% | 88% | 94% |
+    | Chthon | 7 | 0% | 0% | 83% | 56% | 86% |
+
+    Every single boss dropped from its Slice-1 baseline; Warden and Chthon now carry real loss risk even
+    under smart play (naive play against Chthon now loses 100% of the time — a genuine "you must actually
+    use your kit" wall). Numbers aren't byte-comparable to Slice-1's own sim (different autoplay
+    reimplementation, same caveat that session gave itself) but the DIRECTION and MAGNITUDE of the drop
+    is the real signal. A few mid-tier bosses (Void Soul Eater, Caged God) are still fairly comfortable
+    under smart play — flagged as candidates for another turn of the knob in a future pass if real
+    playtesting still finds them soft, not pushed further blind this session.
+  - **A real near-miss, caught and corrected before it shipped:** the general knob bump was first sim-
+    tested against an artificially harsh 2-full-elite worst case (deliberately picked wrong — real Elite
+    nodes roll 1 elite + 1 fodder/standard support, per `rollEncounterForNode`) and appeared to have
+    broken Elite nodes outright (win rate ~2-3%, though a baseline re-run showed that same ~3% existed
+    BEFORE this session's changes too — the test scenario itself was simply harsher than any real node).
+    Re-tested against the actual 1-elite-1-support composition: 100% win / ~44% HP after the bump vs. ~46%
+    before — statistically unchanged. Lesson: an alarming sim number is a prompt to check the test's own
+    construction before touching the knob it was supposed to be validating.
+  - **`.tile-name`/`.tile-sub` truncation fixed at its actual root cause** (`index.html`) — replaced the
+    fixed-width `nowrap` + `text-overflow: ellipsis` (which silently clipped any name over ~20-24
+    characters) with wrapping (`max-width` bumped modestly, `text-align: center`, `word-wrap:
+    break-word`). The identical symptom on "Warden, Prison AI" was previously patched by shortening that
+    one name rather than touching this CSS — this is why it kept recurring on every subsequent long boss
+    name ("Phthora, the Fleshspring," "Chthon, God of the Breach," …); this fix can't regress the same
+    way on a future long name.
+  - **Story retcon locked as a SPEC, deliberately not built** (§9.5a) — full detail there; §12's new
+    entry is the decision-record pointer. Per direct user instruction, the actual Kredex content, the new
+    boss-flee mechanic, the Dungeon 6 restructure, and the endless-mode unlock all wait for a dedicated
+    future session.
 - **2026-07-29 — Skill-tree Content Authoring finished for the last 3 classes (Merc, Dread Knight, Mech
   Runner), plus Taunt's real AI support.** Follow-on to 2026-07-28's Synth Medic/Psion/Saboteur trees —
   built directly off this doc's own already-locked §4.1a worked examples, no redesign needed. **All 6

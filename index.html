@@ -571,13 +571,20 @@
     .sprite-tile.down .sprite-canvas   { opacity: 0.3; filter: grayscale(1); }
     .sprite-tile.targetable { cursor: pointer; outline: 2px solid #ffd166; outline-offset: 2px; }
     .sprite-tile.targetable:hover { background: rgba(255, 209, 102, 0.12); }
+    /* Wraps instead of truncating (fixed 2026-07-29) — a fixed-width nowrap
+       ellipsis was silently clipping long boss names/roles ("Phthora, the
+       Fleshspring", "the Loom, fully escaped, wearing what's left of
+       Kredex", …). The old "Warden, Prison AI" clip got patched by
+       shortening that one name instead of fixing this, which is why the
+       same bug kept resurfacing on every long name since — this fixes the
+       actual root cause so it can't regress again on the next long name. */
     .tile-name {
-      font-size: 10px; color: #c8d6cf; margin-top: 1px; white-space: nowrap;
-      max-width: 120px; overflow: hidden; text-overflow: ellipsis;
+      font-size: 10px; color: #c8d6cf; margin-top: 1px;
+      max-width: 140px; text-align: center; line-height: 1.15; word-wrap: break-word;
     }
     .tile-sub {
       font-size: 8px; color: #7f9488; margin-top: 0; letter-spacing: 0.2px;
-      white-space: nowrap; max-width: 130px; overflow: hidden; text-overflow: ellipsis;
+      max-width: 150px; text-align: center; line-height: 1.2; word-wrap: break-word;
       text-transform: uppercase;
     }
     .tile-hp {

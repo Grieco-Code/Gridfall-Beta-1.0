@@ -9,7 +9,16 @@ trees, built off the design doc's own already-locked worked examples; Taunt (res
 finally implemented as real `pickEnemyTarget` AI support, not just an inert status; 4 new bespoke
 `ruleOverride` rules and one new `limitPerTurn` statMod stat extend the existing socketed-passive
 machinery with zero new generic infrastructure. Full detail in §12 (now-current schema reference) and
-§11's dated changelog. **Prior update (2026-07-23):** the code split from one
+§11's dated changelog. **Later the same day:** a difficulty pass, triggered by a full-playthrough report
+that the game read too easy outside early Elite nodes. Bosses were fully exempt from the global
+`ENEMY_HP_MULT`/`ENEMY_DAMAGE_MULT` knobs since Phase 1c — new `BOSS_HP_MULT`(1.45)/`BOSS_DAMAGE_MULT`
+(1.35) knobs (state.js) close that gap, and a new generic **enrage** hook (`triggerEnrage`, engine.js —
+same family as the existing reinforcement hook) gives every boss a one-time permanent stat spike at an
+HP threshold. General knobs bumped too (`ENEMY_HP_MULT` 1.5→1.6, `ENEMY_DAMAGE_MULT` 1.2→1.3,
+`AI_SPECIAL_CHANCE` 0.38→0.45, `AI_HEAL_CHANCE` 0.43→0.5). Also fixed the `.tile-name`/`.tile-sub`
+truncation bug at its actual root cause (`index.html`, wraps instead of clipping now) and locked a story
+retcon as a spec only (design doc §9.5a — nothing built). Full numbers/detail: §11's dated changelog.
+**Prior update (2026-07-23):** the code split from one
 `game.html` into five sibling files loaded in order by `index.html` — `data.js`, `state.js`, `ui.js`,
 `engine.js`, `main.js` (still no build step) — and the game itself became a real git repo
 (github.com/Grieco-Code/Gridfall-Beta-1.0). Since then: a full sprite-quality pass (zero blob/shared
@@ -159,6 +168,18 @@ round ambush. Any future boss can reuse this by just adding the two template fie
 branch needed. The Broodmarshal fight also renders a one-time "Jam the Relay" action (`renderActions`,
 §4 E) that sets `reinforced = true` directly — jamming early means the HP-threshold check finds
 `reinforced` already true and never fires. No separate flag was needed for this.
+
+**Boss enrage hook (2026-07-29, difficulty pass — generic, same family as the reinforcement hook above).**
+An ENEMIES template may declare `enrageAt` (fraction of maxHp), `enrageBuff` (`{atk?, def?, speed?}`,
+each a multiplier, e.g. `1.3` = +30%), and optionally `enrageSkill` (a skillKey to unlock) /
+`enrageMessage`; `createEnemy` copies all four plus a fresh `enraged: false` onto the combatant. Checked
+in `applyToTarget`'s attack branch right after the reinforcement check: the first time an enemy with an
+`enrageAt` drops to/below it, `enraged` flips true and `triggerEnrage(target)` (§4 F/I) applies the
+`enrageBuff` multipliers directly onto `stats` (a ONE-TIME PERMANENT change, not a status effect in
+`effects` — deliberately can't be stripped by Cleanse/dispel) and pushes `enrageSkill` onto `skills` if
+given (no AI changes needed — `chooseEnemyAction` already reads `enemy.skills` generically). All 9
+current bosses have one (see design doc §12/§13 for the exact per-boss values); no boss uses
+`enrageSkill` yet — a stat-only spike was enough to hit this pass's target band.
 
 **ENEMY_POOLS** (Phase G, §5.1) — `{ fodder: [...], standard: [...], elite: [...] }`, each mixing
 both factions' keys at that tier. Replaces the old single hardcoded `ENCOUNTER` array (deleted, along
@@ -338,6 +359,8 @@ Guard already do — see §12 for the full engine-change list.
 | `selectedHeroIds` (Phase H2, was `selectedClasses`) | roster hero **ids** currently ticked on the squad-builder screen |
 | `lastSquad` | hero ids from the most recently deployed squad (for Rematch / pre-select) |
 | `AI_SPECIAL_CHANCE` `AI_HEAL_CHANCE` `AI_HEAL_THRESHOLD` | enemy-AI difficulty knobs |
+| `ENEMY_HP_MULT` `ENEMY_DAMAGE_MULT` (Phase 1c) | global durability/damage knobs, non-boss enemies only |
+| `BOSS_HP_MULT` `BOSS_DAMAGE_MULT` (2026-07-29) | same idea, bosses only — bosses were fully exempt from the two knobs above until this date |
 | `currentDungeonKey` (Phase H3) | which `DUNGEONS` entry is active (`"prologue"` \| `"sector1"`) |
 | `currentNodeId` | the dungeon node currently being resolved (`null` when on the Map) |
 | `unlockedNodeIds` / `visitedNodeIds` | dungeon-map progress (Phase G); reset by `startDungeon` |
@@ -571,6 +594,10 @@ Guard already do — see §12 for the full engine-change list.
   `boss.reinforceWave` into the live `enemies` array (continuing letter sequence from whatever's
   already in play), logs, `renderCombatants()`/`updateScreen()`. Called from `applyToTarget` (§ F) the
   first time a reinforceWave-bearing enemy crosses `reinforceAt`; see §2's new entry for the full hook.
+- `triggerEnrage(enemy)` (2026-07-29, difficulty pass) — the boss enrage hook's payload: applies
+  `enemy.enrageBuff`'s atk/def/speed multipliers directly onto `stats` (permanent, not a status effect),
+  pushes `enrageSkill` onto `skills` if set, logs, `updateScreen()`. Called from `applyToTarget` (§ F)
+  the first time an `enrageAt`-bearing enemy crosses that threshold; see §2's new entry for the full hook.
 - `resolveNodeVictory()` (H3: dungeon-aware) — reads `DUNGEONS[currentDungeonKey].nodes[currentNodeId]`;
   called from the post-win endbar's "Continue →" for a non-boss node: marks `currentNodeId` visited,
   unlocks `node.connectsTo`, `showMap()` (replaces the old `nextFight`)
@@ -823,6 +850,29 @@ numbers in the code are what they are, not just what they are:**
 ---
 
 ## 11. Changelog
+- **2026-07-29 — Difficulty pass (bosses + general knobs), boss-name CSS fix, story retcon locked as
+  spec-only.** Same day as the skill-tree entry below, later in the session. Full prose + sim table in
+  the design doc's §13 changelog entry of the same headline; this is the code-shape pointer.
+  - **state.js:** new `BOSS_HP_MULT` (1.45) / `BOSS_DAMAGE_MULT` (1.35), applied in `createEnemy` (HP)
+    and `applyToTarget`'s attack branch (damage) wherever `actor.tier === "boss"` — previously bosses were
+    hardcoded to a `1` multiplier (fully exempt). `ENEMY_HP_MULT` 1.5→1.6, `ENEMY_DAMAGE_MULT` 1.2→1.3,
+    `AI_SPECIAL_CHANCE` 0.38→0.45, `AI_HEAL_CHANCE` 0.43→0.5.
+  - **New generic enrage hook** (`enrageAt`/`enrageBuff`/`enrageSkill`/`enrageMessage` on ENEMIES,
+    `enraged` flag + field copies in `createEnemy`, `triggerEnrage` + the threshold check in
+    `applyToTarget`, engine.js) — see §2/§4's new entries for the exact shape. All 9 bosses configured
+    in data.js (mostly `enrageAt: 0.5`, `enrageBuff: {atk: 1.45, speed: 1.2}`).
+  - **index.html:** `.tile-name`/`.tile-sub` truncation fix — removed `white-space: nowrap` +
+    `text-overflow: ellipsis`, added `text-align: center` + `word-wrap: break-word`, bumped `max-width`
+    modestly (120→140 / 130→150).
+  - **Verified** (`mini_racer`): per-boss sim at each boss's own historical arrival level (naive +
+    smart policies), a real near-miss caught and corrected (an artificially-harsh 2-elite test case
+    falsely flagged the general knob bump as breaking Elite nodes — the real 1-elite-1-support
+    composition showed it hadn't), a 36-template full-roster crash/NaN sweep, and the existing 20-check
+    skill-tree unit suite — all clean. Exact numbers: design doc §13.
+  - **gridfall-design.md §9.5a** (new section) — the Kredex/Phthora/Fleshspring/Caged God story retcon,
+    locked as a plan only. Nothing in data.js/engine.js/ENEMIES changed for this part — no `phthora`/
+    `chthon`/`cagedGod` templates were touched, no new dungeon nodes, no flee mechanic. Deliberately
+    deferred per direct user instruction.
 - **2026-07-29 — Skill trees finished for Merc, Dread Knight, Mech Runner; Taunt AI built.** Full prose
   in the design doc's §13 changelog entry of the same date; this is the code-shape pointer. New
   data.js content: 3 new active skills (`armorPiercingRounds`, `crackArmor`, `bloodfeed`, `taunt`,

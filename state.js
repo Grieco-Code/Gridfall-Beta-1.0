@@ -53,15 +53,31 @@
     // Bumped ~20% (Phase H4 tightening pass, 2026-07-23) for a bit more
     // overall bite across every fight in the game — re-verified via sim
     // (§5.2b/§9) that this doesn't tip any existing fight into unfair.
-    let AI_SPECIAL_CHANCE = 0.38;   // chance to use a special attack vs. basic (was 0.35)
-    let AI_HEAL_CHANCE = 0.43;      // when a healer sees a hurt ally, how often it heals (was 0.4)
+    // Bumped again 2026-07-29 (full-playthrough report: too easy outside
+    // early Elite nodes) — enemies now press a special/heal more often.
+    let AI_SPECIAL_CHANCE = 0.45;   // chance to use a special attack vs. basic (was 0.38)
+    let AI_HEAL_CHANCE = 0.5;       // when a healer sees a hurt ally, how often it heals (was 0.43)
     let AI_HEAL_THRESHOLD = 0.4;    // an ally counts as "hurt" below this fraction of max HP
 
-    // Global difficulty knobs (Phase 1c, 2026-07-24). Scale enemy durability and
-    // damage across the whole game in one place so combat can be made harder
-    // without re-authoring every ENEMIES entry. 1.0 = pre-1c behavior. Sim-tuned.
-    let ENEMY_HP_MULT = 1.5;        // multiplies every non-boss enemy's max HP at creation
-    let ENEMY_DAMAGE_MULT = 1.2;    // multiplies damage non-boss enemies deal to heroes
+    // Global difficulty knobs (Phase 1c, 2026-07-24; bumped 2026-07-29 per a
+    // full-playthrough report that the game reads too easy outside early
+    // Elite nodes). Scale enemy durability and damage across the whole game
+    // in one place so combat can be made harder without re-authoring every
+    // ENEMIES entry. 1.0 = pre-1c behavior. Sim-tuned.
+    let ENEMY_HP_MULT = 1.6;        // multiplies every non-boss enemy's max HP at creation (was 1.5)
+    let ENEMY_DAMAGE_MULT = 1.3;    // multiplies damage non-boss enemies deal to heroes (was 1.2)
+    // Boss-specific knobs (NEW 2026-07-29) — bosses were previously fully
+    // EXEMPT from the two knobs above ("individually tuned already"), which
+    // meant every time the trash/elite knobs got bumped, bosses quietly fell
+    // behind the rest of the difficulty curve instead of staying ahead of it
+    // the way a boss should. Confirmed by a fresh 135-battle regression
+    // (9 bosses × 15 trials, a healer-less 3-hero party) landing 100% win /
+    // 48-92% HP remaining on EVERY boss — bosses were the easiest fights in
+    // the game, not the hardest. These apply on top of each boss's own
+    // hand-tuned base stats, same way the trash knobs layer on top of
+    // ENEMIES templates rather than replacing them.
+    let BOSS_HP_MULT = 1.45;        // multiplies boss max HP at creation
+    let BOSS_DAMAGE_MULT = 1.35;    // multiplies damage bosses deal to heroes
 
     // Leveling & enemy scaling (Phase E core; level source is now per-node, §5.1).
     let ENEMY_SCALE_PER_LEVEL = 0.1;        // +10% HP/ATK/DEF per enemy level above 1 (was 0.08)
@@ -385,10 +401,13 @@
       const t = ENEMIES[enemyKey];
       const s = t.baseStats;
       const f = 1 + ENEMY_SCALE_PER_LEVEL * (level - 1);   // stat scaling by level
-      // Set-piece bosses are individually hand-tuned, so they're exempt from the
-      // global difficulty knobs (§1c) — the knobs lift the trash/standard/elite
-      // FLOOR without blowing up a boss that's already balanced.
-      const hpMult = t.tier === "boss" ? 1 : ENEMY_HP_MULT;
+      // Set-piece bosses are individually hand-tuned, so they get their OWN
+      // knob (BOSS_HP_MULT) rather than the trash/elite one — bosses were
+      // fully EXEMPT from any multiplier until 2026-07-29, which let them
+      // quietly fall behind every time the trash knob got bumped. Layers on
+      // top of each boss's own hand-tuned base stats, same as the trash knob
+      // layers on top of ENEMIES templates rather than replacing them.
+      const hpMult = t.tier === "boss" ? BOSS_HP_MULT : ENEMY_HP_MULT;
       const hp = Math.round(s.hp * f * hpMult);
       return {
         id: nextId(),
@@ -415,6 +434,17 @@
         reinforceAt: t.reinforceAt,
         reinforceWave: t.reinforceWave,
         reinforced: false,
+        // Generic boss enrage hook (NEW 2026-07-29, same family as the
+        // reinforceAt/reinforceWave hook above): a template may declare
+        // enrageAt (fraction of maxHp) + enrageBuff (a one-time permanent
+        // stat spike) + optionally enrageSkill (unlocks a new attack) —
+        // undefined/harmless for every enemy that doesn't set them. See
+        // triggerEnrage (engine.js).
+        enrageAt: t.enrageAt,
+        enrageBuff: t.enrageBuff,
+        enrageSkill: t.enrageSkill,
+        enrageMessage: t.enrageMessage,
+        enraged: false,
         xpReward: Math.round((TIER_XP[t.tier] || 10) * level)
       };
     }

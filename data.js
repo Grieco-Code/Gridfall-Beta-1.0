@@ -1177,7 +1177,14 @@
         // calls a second wave of sentinels + a repair drone at half HP (§1d).
         reinforceAt: 0.5,
         reinforceWave: [{ key: "arcSentinel", count: 1 }, { key: "repairDrone", count: 1 }],
-        reinforceMessage: "The Warden seals the deck. More security units drop in!"
+        reinforceMessage: "The Warden seals the deck. More security units drop in!",
+        // Enrage (NEW 2026-07-29, §11/§12 difficulty pass) — same 50% HP
+        // threshold as reinforceAt, deliberately: adds arrive AND the boss
+        // enrages on the same hit, reading as one clear "phase 2 begins"
+        // moment rather than two smaller staggered beats.
+        enrageAt: 0.5,
+        enrageBuff: { atk: 1.45, speed: 1.2 },
+        enrageMessage: "The Warden's core temperature spikes past every safety limit — it stops holding back."
       },
       // ---------- WARDEN BOSS-SUPPORT ADDS (2026-07-24) ----------
       // Sentry Turret — slow, armored, high-damage kinetic emplacement. Punishes
@@ -1232,9 +1239,14 @@
         nature: "organic", tier: "boss",
         baseStats: { hp: 140, en: 0, attack: 20, defense: 10, speed: 10 },
         skills: ["attack", "ironDiscipline", "overseersLash", "overseersCrackdown"],
-        affinities: { mind: MILD_WEAK }
+        affinities: { mind: MILD_WEAK },
         // Voraxx's "add" is a Riot Enforcer at his side from the start (see the
         // p4 encounter) — no mid-fight wave, keeping the L1 duo opener forgiving.
+        // Enrage (NEW 2026-07-29, §11/§12 difficulty pass) — no reinforceAt
+        // on Voraxx, so this is his only mid-fight escalation beat.
+        enrageAt: 0.5,
+        enrageBuff: { atk: 1.45, speed: 1.2 },
+        enrageMessage: "Voraxx abandons discipline entirely and just starts swinging harder."
       },
 
       // ---------- SITE EREBUS (Dungeon 3, planned §5.3) ----------
@@ -1297,7 +1309,10 @@
         // Trimmed to 2 roaches (was +1 warrior): the global HP/damage knobs made
         // the old wave far deadlier than when it was first tuned pre-knobs.
         reinforceWave: [{ key: "erebusRoach", count: 2 }],
-        reinforceMessage: "The Broodmarshal calls the hive! Reinforcements erupt from the tunnels!"
+        reinforceMessage: "The Broodmarshal calls the hive! Reinforcements erupt from the tunnels!",
+        enrageAt: 0.5,
+        enrageBuff: { atk: 1.45, speed: 1.2 },
+        enrageMessage: "The Broodmarshal's control rig sparks and fails — pure hive instinct takes over."
       },
 
       // ---------- DUNGEON 4 BOSS (§5.4a, 2026-07-24) ----------
@@ -1318,7 +1333,10 @@
         affinities: { mind: DOUBLE_WEAK, physical: RESIST },
         reinforceAt: 0.5,
         reinforceWave: [{ key: "bioTank", count: 1 }],
-        reinforceMessage: "Proteus calls out, and the containment ward's other specimens answer."
+        reinforceMessage: "Proteus calls out, and the containment ward's other specimens answer.",
+        enrageAt: 0.5,
+        enrageBuff: { atk: 1.45, speed: 1.2 },
+        enrageMessage: "Proteus's half-finished transformation lurches forward, mid-fight, without his consent."
       },
 
       // ---------- HELIOS STATION / DUNGEON 5 (§5.4b, 2026-07-24) ----------
@@ -1385,7 +1403,10 @@
         nature: "void", tier: "boss",
         baseStats: { hp: 145, en: 0, attack: 19, defense: 12, speed: 10 },
         skills: ["soulRend", "devouringMaw", "witheringGaze"],
-        affinities: { thermal: WEAK, physical: RESIST }
+        affinities: { thermal: WEAK, physical: RESIST },
+        enrageAt: 0.5,
+        enrageBuff: { atk: 1.45, speed: 1.2 },
+        enrageMessage: "The Void Soul Eater tastes real hunger for the first time and stops toying with you."
       },
       // Sol's Acolyte — the Sun God's reinforceWave add (2026-07-25): a
       // "reskinned Void" in the literal sense the name implies — a station
@@ -1430,7 +1451,10 @@
         affinities: { shock: DOUBLE_WEAK, thermal: HARD_RESIST },
         reinforceAt: 0.5,
         reinforceWave: [{ key: "solAcolyte", count: 1 }],
-        reinforceMessage: "The Sun God's voice splits into a chorus. Sol's Acolytes answer the call."
+        reinforceMessage: "The Sun God's voice splits into a chorus. Sol's Acolytes answer the call.",
+        enrageAt: 0.5,
+        enrageBuff: { atk: 1.45, speed: 1.2 },
+        enrageMessage: "The Sun God's corrupted core overloads past its own limiters."
       },
 
       // ---------- DUNGEON 6 "THE CRADLE" (§5.4c, 2026-07-25) ----------
@@ -1460,7 +1484,10 @@
         reinforceAt: 0.5,
         reinforceWave: [{ key: "chimeraSpecimen", count: 1 }],
         reinforceMessage: "Phthora's ritual falters, and the lineage answers anyway. A Chimera " +
-          "Specimen claws free of the wreckage to finish what he can't."
+          "Specimen claws free of the wreckage to finish what he can't.",
+        enrageAt: 0.5,
+        enrageBuff: { atk: 1.45, speed: 1.2 },
+        enrageMessage: "Phthora's ritual accelerates past the point of any control at all."
       },
       // The caged god (double-boss Phase 1, §5.4c) — the Loom's true
       // occupant, still bound, straining against Kredex's ritual as it
@@ -1474,7 +1501,10 @@
         nature: "void", tier: "boss",
         baseStats: { hp: 140, en: 0, attack: 20, defense: 13, speed: 10 },
         skills: ["boundLash", "fracturingWill"],
-        affinities: { thermal: WEAK, physical: RESIST }
+        affinities: { thermal: WEAK, physical: RESIST },
+        enrageAt: 0.5,
+        enrageBuff: { atk: 1.45, speed: 1.2 },
+        enrageMessage: "Whatever restraints were left finally give — the Caged God strains free of even itself."
       },
       // Chthon, God of the Breach (double-boss Phase 2 — the fused
       // Kredex+entity, the TRUE final boss of the game, §5.4c). Fought
@@ -1502,7 +1532,10 @@
         reinforceAt: 0.5,
         reinforceWave: [{ key: "voidHorror", count: 1 }],
         reinforceMessage: "A piece of the Breach tears through with it. Something that was never " +
-          "meant to be here answers the call."
+          "meant to be here answers the call.",
+        enrageAt: 0.5,
+        enrageBuff: { atk: 1.45, speed: 1.2 },
+        enrageMessage: "What's left of Kredex stops fighting for control. Only the Breach is driving now."
       }
     };
 

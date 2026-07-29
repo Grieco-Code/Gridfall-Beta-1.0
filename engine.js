@@ -109,10 +109,11 @@
           }
         }
 
-        // Global enemy-damage difficulty knob (Phase 1c) — only enemy hits, and
-        // not set-piece bosses (they're individually tuned; see createEnemy).
-        if (actor.side === "enemies" && actor.tier !== "boss") {
-          damage = Math.max(1, Math.round(damage * ENEMY_DAMAGE_MULT));
+        // Global enemy-damage difficulty knobs (Phase 1c; boss knob added
+        // 2026-07-29 — bosses now get their OWN multiplier instead of being
+        // fully exempt, see state.js).
+        if (actor.side === "enemies") {
+          damage = Math.max(1, Math.round(damage * (actor.tier === "boss" ? BOSS_DAMAGE_MULT : ENEMY_DAMAGE_MULT)));
         }
 
         // Feedback text/color: only call out non-neutral affinity results.
@@ -158,6 +159,15 @@
             !target.reinforced && target.stats.hp <= target.stats.maxHp * target.reinforceAt) {
           target.reinforced = true;
           spawnReinforcements(target);
+        }
+
+        // Boss enrage hook (NEW 2026-07-29 — generic, same family as the
+        // reinforcement hook above): fires once, the first time an enemy
+        // with an enrageAt threshold drops to/below it.
+        if (isAlive(target) && target.side === "enemies" && target.enrageAt != null &&
+            !target.enraged && target.stats.hp <= target.stats.maxHp * target.enrageAt) {
+          target.enraged = true;
+          triggerEnrage(target);
         }
 
         // Overwatch keystone (Merc, §4.1a bespoke rule): the first time this
@@ -652,6 +662,27 @@
       });
       log(boss.reinforceMessage || (boss.name + " calls in reinforcements!"), true);
       renderCombatants();
+      updateScreen();
+    }
+
+    // Boss enrage hook (NEW 2026-07-29 — generic, same shape as the
+    // reinforcement hook above): a ONE-TIME permanent stat spike (not a
+    // status effect — survives Cleanse/dispel, matching "the fight itself
+    // just got harder" rather than a strippable buff) once a boss with an
+    // enrageAt threshold drops to/below it. enrageSkill (optional) unlocks a
+    // new attack the boss's AI can now pick from (chooseEnemyAction already
+    // reads `enemy.skills` generically, so pushing onto it here is enough —
+    // no AI changes needed). enrageBuff fields are multiplicative (1.25 =
+    // +25%), each optional.
+    function triggerEnrage(enemy) {
+      const buff = enemy.enrageBuff || {};
+      if (buff.atk) enemy.stats.attack = Math.round(enemy.stats.attack * buff.atk);
+      if (buff.def) enemy.stats.defense = Math.round(enemy.stats.defense * buff.def);
+      if (buff.speed) enemy.stats.speed = Math.round(enemy.stats.speed * buff.speed);
+      if (enemy.enrageSkill && enemy.skills.indexOf(enemy.enrageSkill) < 0) {
+        enemy.skills.push(enemy.enrageSkill);
+      }
+      log(enemy.enrageMessage || (enemy.name + " enrages!"), true);
       updateScreen();
     }
 
